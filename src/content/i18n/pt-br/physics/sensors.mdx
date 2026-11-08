@@ -1,0 +1,22 @@
+---
+title: Sensores digitais
+short: Sensores
+dek: "Como um chip de silício conta a luz, como uma cor por pixel vira uma imagem em cores completas, e por que o ruído é uma lei da física, não um defeito."
+equations: [["Energia do fóton", "E = h c / λ"], ["Ruído de disparo", "ruído ≈ √N, logo SNR ≈ √N  (N = fótons coletados)"], ["Faixa dinâmica (pontos)", "FD ≈ log₂(capacidade do poço / ruído de leitura)"]]
+---
+
+## Contar elétrons
+
+Um fóton com energia suficiente que atinge o silício pode liberar um elétron: é o efeito fotoelétrico, explicado por Einstein em 1905. Num sensor, cada [[g:pixel|pixel]] é uma pequena região de silício que coleta esses elétrons durante a exposição. O número de elétrons é proporcional à luz que chegou, então o pixel é um fotômetro, milhões deles lado a lado. No fim, um amplificador e um conversor analógico-digital transformam a carga de cada pixel num número. O silício responde à maior parte da luz visível e ao infravermelho próximo, e é por isso que as câmeras têm um filtro que bloqueia o infravermelho.
+
+## CCD e CMOS
+
+Os primeiros sensores de imagem liam a carga como uma fila de baldes passados de mão em mão. O [[ccd|dispositivo de carga acoplada (CCD)]] de 1969 move a carga de cada pixel, passo a passo, pelo chip até um único amplificador na borda: muito uniforme e de pouco ruído, mas lento e gastão de energia. Ele sustentou a fotografia digital do [[digital-camera-sasson|protótipo de Sasson]] à era da [[nikon-d1|Nikon D1]]. O [[cmos-sensor|sensor CMOS de pixel ativo]] dá a cada pixel seu próprio amplificador e os lê como memória de computador. É mais barato, mais rápido e consome menos energia, e no fim dos anos 2000 já tinha substituído o CCD quase em toda parte. A iluminação traseira (BSI) passou a fiação para trás do silício, para que chegue mais luz a ele, e os [[stacked-sensor|sensores empilhados]] puseram memória rápida e processamento numa segunda camada, para que o quadro inteiro seja lido rápido o bastante para um obturador eletrônico.
+
+## Uma cor por pixel
+
+Um pixel conta fótons; não sabe dizer a cor deles. O [[bayer-filter|filtro de Bayer]] de 1976 põe um minúsculo filtro vermelho, verde ou azul sobre cada pixel, num padrão 2 × 2 repetido com dois verdes, porque o olho é mais sensível aos detalhes em verde. O sensor registra um mosaico em que cada pixel conhece uma só cor. Depois, um software estima as duas cores que faltam em cada pixel a partir dos vizinhos: é a [[g:demosaicing|demosaicização]]. Detalhes finos e repetitivos, como um tecido ou uma cerca, podem enganá-la e produzir cores falsas ou moiré.
+
+## Ruído e faixa dinâmica
+
+Os fótons chegam ao acaso, como gotas de chuva. Um pixel que espera 100 fótons recebe 90 num quadro e 110 no seguinte: a variação é de cerca de √N, então a relação sinal-ruído também é de cerca de √N. Esse ruído de disparo é uma propriedade da própria luz. Mais luz sempre significa uma imagem mais limpa, e é por isso que pixels e sensores grandes se saem melhor com pouca luz e que exposições mais longas e o [[p:computational|empilhamento]] ajudam. Por cima disso, a eletrônica acrescenta um pouco de ruído de leitura. Um pixel só comporta certo número de elétrons (sua capacidade de poço); a razão entre isso e o ruído de leitura define a [[g:dynamic-range|faixa dinâmica]], de cerca de 12 a 15 pontos num sensor grande moderno.

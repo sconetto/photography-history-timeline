@@ -1,0 +1,22 @@
+---
+title: Fotografia computacional
+short: Computacional
+dek: "Como os celulares superam os limites de sensores minúsculos juntando muitos quadros, por que isso funciona, e como o software agora molda, e pode falsificar, a fotografia."
+equations: [["Média de N quadros", "SNR ∝ √N"], ["Faixa dinâmica por bracketing", "FD_total ≈ FD_única + log₂(t_mais_longo / t_mais_curto)"]]
+---
+
+## Muitos quadros, uma foto
+
+O sensor de um celular é minúsculo, então cada quadro coleta pouca luz e tem ruído. Mas um celular consegue capturar uma rajada de quadros numa fração de segundo. Fazer a média de N quadros coleta N vezes a luz e, como o ruído de disparo cresce só com √N, a relação sinal-ruído melhora √N vezes: dezesseis quadros são quatro vezes mais limpos que um. O problema é o movimento. As mãos tremem e os assuntos se mexem, então cada quadro precisa antes ser alinhado aos outros, bloco por bloco, e o que se moveu demais fica de fora. Essa fusão de rajadas é o coração da [[computational-photography|fotografia computacional]] e dos modos noturnos desde meados dos anos 2010.
+
+## Alta faixa dinâmica
+
+Uma única exposição só comporta certo número de pontos entre a sombra profunda e o céu claro (veja [[p:sensors|sensores]]). Juntar quadros com exposições diferentes, ou muitos quadros curtos cuja soma tem uma exposição efetiva longa, estende essa faixa. Os fotógrafos faziam isso à mão com filme: Gustave Le Gray copiava marinhas a partir de dois negativos nos anos 1850. Hoje isso acontece automaticamente a cada toque no disparador, seguido de um mapeamento de tons que espreme o resultado de volta numa faixa que uma tela consegue mostrar.
+
+## Profundidade, zoom e mais
+
+Duas câmeras, ou as duas metades de cada pixel (sensores dual pixel feitos para o [[autofocus|foco automático]]), veem a cena de lugares ligeiramente diferentes, e a diferença dá um mapa de profundidade. O software o usa para desfocar o fundo como uma objetiva de sensor grande. Quadros de rajada que diferem por uma fração de pixel, graças ao tremor da mão, podem ser combinados em mais detalhe do que um quadro sozinho contém: é o zoom por super-resolução. A [[image-stabilisation|estabilização de imagem]] por deslocamento do sensor permite que algumas câmeras façam o mesmo de propósito.
+
+## Procedência
+
+Quando toda fotografia é em parte calculada, e [[generative-ai|modelos generativos]] conseguem criar imagens fotorrealistas a partir de texto, a pergunta "isto é real?" precisa de novas respostas. O padrão Content Credentials (C2PA, 2021) permite que uma câmera ou um editor assine um registro de como uma imagem foi feita e alterada, anexado ao arquivo. Ele não prova que uma foto é verdadeira, mas pode mostrar de onde ela veio.

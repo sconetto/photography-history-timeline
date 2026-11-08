@@ -1,0 +1,24 @@
+---
+title: Exposição
+short: Exposição
+dek: "Como abertura, velocidade do obturador e sensibilidade se compensam, o que é um valor de exposição, e por que velhas regras práticas como a do 'sol 16' ainda funcionam."
+equations: [["Valor de exposição", "EV = log₂(N² / t)"], ["Em outras sensibilidades ISO", "EV₁₀₀ = log₂(N² / t) − log₂(ISO / 100)"], ["Sol 16", "f/16 com t = 1 / ISO sob sol forte"]]
+---
+
+## Três controles, um resultado
+
+Uma foto precisa de certa quantidade de luz por unidade de área do filme ou do sensor: a [[g:exposure|exposição]]. Três ajustes a definem. A [[g:aperture|abertura]] define o brilho da imagem; a [[g:shutter-speed|velocidade do obturador]] define por quanto tempo ela cai sobre o filme; a sensibilidade [[g:iso|ISO]] define de quanta luz o filme ou o sensor precisa. Cada um é marcado em [[g:stop|pontos]]. Abrir a objetiva um ponto, dobrar o tempo de exposição ou dobrar o ISO têm o mesmo efeito no brilho, então podem ser trocados entre si: f/8 a 1/125 s dá a mesma exposição que f/5,6 a 1/250 s ou f/11 a 1/60 s.
+
+O que muda entre essas escolhas é todo o resto. Uma abertura grande dá pouca [[g:depth-of-field|profundidade de campo]] (veja [[p:aperture|abertura]]); um obturador lento borra o movimento; um ISO alto acrescenta [[g:grain|grão]] no filme e [[g:noise|ruído]] no sensor.
+
+## Valor de exposição
+
+Os fotógrafos resumem uma combinação de abertura e velocidade num só número, o [[g:ev|valor de exposição]]: EV = log₂(N²/t). f/1 a 1 s é EV 0; cada passo acima corta a luz pela metade. Uma cena pode ser descrita do mesmo jeito: sol forte é cerca de EV 15 com ISO 100, um dia nublado cerca de EV 12, uma sala de estar à noite cerca de EV 6. Iguale o EV da câmera ao da cena e a exposição fica certa. A velha regra do "sol 16" (*sunny 16*) diz a mesma coisa em palavras: sob sol forte, use f/16 e uma velocidade de 1 sobre o ISO.
+
+## Fotômetros e automação
+
+Durante um século, os fotógrafos avaliaram a exposição por tabelas, experiência ou uma chapa de teste. O [[light-meter|fotômetro]] de selênio dos anos 1930 media a luz diretamente; a [[ttl-metering|fotometria através da objetiva]], nos anos 1960, passou a medi-la pela própria objetiva de captura, e a [[auto-exposure|exposição automática]] deixou a câmera ajustar sozinha a velocidade ou a abertura. Um fotômetro supõe que a cena dá, na média, um cinza médio, então neve e gatos pretos o enganam; o [[zone-system|Sistema de Zonas]] de Ansel Adams ensinou os fotógrafos a posicionar os tons de propósito.
+
+## A reciprocidade e sua falha
+
+Na teoria, cortar a luz pela metade e dobrar o tempo sempre dá o mesmo resultado. O filme só obedece a isso numa faixa intermediária. Em exposições muito longas (de segundos a minutos), um grão de prata atingido por poucos fótons perde aos poucos sua imagem latente antes que cheguem outros, então o filme precisa de tempo extra: é a [[g:reciprocity-failure|falha de reciprocidade]]. Os sensores não têm esse problema, mas têm seu próprio limite: um pixel só comporta certo número de elétrons, e o intervalo entre isso e o piso de ruído é a [[g:dynamic-range|faixa dinâmica]] do sensor.
