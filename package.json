@@ -19,6 +19,7 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "links": "node scripts/check-links.ts",
+    "i18n:status": "node scripts/i18n-status.ts",
     "commons": "node scripts/commons.ts"
   },
   "dependencies": {
