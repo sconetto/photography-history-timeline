@@ -1,0 +1,27 @@
+---
+title: Exposure
+short: Exposure
+order: 4
+dek: "How aperture, shutter speed and sensitivity trade against each other, what an exposure value is, and why old rules of thumb like 'sunny 16' still work."
+widget: exposure
+equations: [["Exposure value", "EV = log₂(N² / t)"], ["At other ISO speeds", "EV₁₀₀ = log₂(N² / t) − log₂(ISO / 100)"], ["Sunny 16", "f/16 at t = 1 / ISO in bright sun"]]
+refs: [["Wikipedia: Exposure value", "https://en.wikipedia.org/wiki/Exposure_value"], ["Wikipedia: Sunny 16 rule", "https://en.wikipedia.org/wiki/Sunny_16_rule"]]
+---
+
+## Three controls, one result
+
+A picture needs a certain amount of light per unit area of film or sensor: the [[g:exposure|exposure]]. Three settings decide it. The [[g:aperture|aperture]] sets how bright the image is; the [[g:shutter-speed|shutter speed]] sets for how long it falls on the film; the [[g:iso|ISO]] speed sets how much light the film or sensor needs. Each is marked in [[g:stop|stops]]. Opening the lens one stop, doubling the exposure time or doubling the ISO all have the same effect on brightness, so they can be traded: f/8 at 1/125 s gives the same exposure as f/5.6 at 1/250 s or f/11 at 1/60 s.
+
+What changes between those choices is everything else. A wide aperture gives shallow [[g:depth-of-field|depth of field]] (see [[p:aperture]]); a slow shutter blurs movement; a high ISO adds [[g:grain|grain]] on film and [[g:noise|noise]] on a sensor.
+
+## Exposure value
+
+Photographers sum up a combination of aperture and shutter speed in one number, the [[g:ev|exposure value]]: EV = log₂(N²/t). f/1 at 1 s is EV 0; each step up halves the light. A scene can be described the same way: bright sun is about EV 15 at ISO 100, an overcast day about EV 12, a living room at night about EV 6. Match the camera's EV to the scene's and the exposure is right. The old "sunny 16" rule says the same thing in words: in bright sun, use f/16 and a shutter speed of 1 over the ISO.
+
+## Meters and automation
+
+For a century, photographers judged exposure from tables, experience or a test plate. The selenium [[light-meter]] of the 1930s measured light directly; [[ttl-metering|through-the-lens metering]] in the 1960s measured it through the taking lens, and [[auto-exposure]] let the camera set the shutter or aperture itself. A meter assumes the scene averages to a mid-grey, so snow and black cats fool it; Ansel Adams's [[zone-system]] taught photographers to place tones deliberately instead.
+
+## Reciprocity and its failure
+
+In theory, halving the light and doubling the time always gives the same result. Film obeys this only over a middle range. In very long exposures (seconds to minutes) a silver grain struck by a few photons slowly loses its latent image before more arrive, so the film needs extra time: [[g:reciprocity-failure|reciprocity failure]]. Sensors have no such problem, but they have their own limit: a pixel can hold only so many electrons, and the range between that and the noise floor is the sensor's [[g:dynamic-range|dynamic range]].

@@ -1,0 +1,25 @@
+---
+title: Digital sensors
+short: Sensors
+order: 7
+dek: "How a chip of silicon counts light, how one colour per pixel becomes a full-colour image, and why noise is a law of physics, not a flaw."
+widget: bayer
+equations: [["Photon energy", "E = h c / λ"], ["Shot noise", "noise ≈ √N, so SNR ≈ √N  (N = photons collected)"], ["Dynamic range (stops)", "DR ≈ log₂(full-well capacity / read noise)"]]
+refs: [["Nobel Prize in Physics 2009: summary", "https://www.nobelprize.org/prizes/physics/2009/summary/"]]
+---
+
+## Counting electrons
+
+A photon with enough energy that strikes silicon can free an electron: the photoelectric effect, explained by Einstein in 1905. In a sensor, each [[g:pixel|pixel]] is a small region of silicon that collects those electrons during the exposure. The number of electrons is proportional to the light that arrived, so the pixel is a light meter, millions of them side by side. At the end, an amplifier and an analog-to-digital converter turn each pixel's charge into a number. Silicon responds to most visible light and to near infrared, which is why cameras carry an infrared-blocking filter.
+
+## CCD and CMOS
+
+The first image sensors read out charge in a bucket brigade. The [[ccd|charge-coupled device]] of 1969 moves every pixel's charge, step by step, across the chip to a single amplifier at the edge: very uniform and low in noise, but slow and power-hungry. It ran digital photography from [[digital-camera-sasson|Sasson's prototype]] to the [[nikon-d1]] era. The [[cmos-sensor|CMOS active-pixel sensor]] gives each pixel its own amplifier and reads them like computer memory. It is cheaper, faster and uses less power, and by the late 2000s it had replaced the CCD almost everywhere. Back-side illumination moved the wiring behind the silicon so more light reaches it, and [[stacked-sensor|stacked sensors]] put fast memory and processing on a second layer, so the whole frame reads out quickly enough for an electronic shutter.
+
+## One colour per pixel
+
+A pixel counts photons; it cannot tell their colour. The [[bayer-filter|Bayer filter]] of 1976 puts a tiny red, green or blue filter over each pixel, in a repeating 2 × 2 pattern with two greens, because the eye is most sensitive to green detail. The sensor records a mosaic in which each pixel knows only one colour. Software then estimates the two missing colours at every pixel from its neighbours: [[g:demosaicing|demosaicing]]. Fine repeating detail, such as fabric or a fence, can fool it and produce false colour or moiré.
+
+## Noise and dynamic range
+
+Photons arrive at random, like raindrops. A pixel that expects 100 photons gets 90 in one frame and 110 in the next: the spread is about √N, so the signal-to-noise ratio is about √N too. This shot noise is a property of light itself. More light always means a cleaner picture, which is why big pixels and big sensors do better in dim light and why longer exposures and [[p:computational|stacking]] help. On top of it, the electronics add a little read noise. A pixel can hold only so many electrons (its full-well capacity); the ratio between that and the read noise sets the [[g:dynamic-range|dynamic range]], about 12 to 15 stops for a modern large sensor.

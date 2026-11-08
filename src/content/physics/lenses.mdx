@@ -1,0 +1,25 @@
+---
+title: Refraction and lenses
+short: Lenses
+order: 2
+dek: "How glass bends light to a point, why focal length sets how much of the world a picture takes in, and why lens design took a century of maths."
+widget: lensfov
+equations: [["Snell's law", "n₁ sin θ₁ = n₂ sin θ₂"], ["Thin-lens equation", "1/f = 1/u + 1/v"], ["Angle of view", "α = 2 arctan(d / 2f)"]]
+refs: [["Hecht, Optics (5th ed.), ch. 5–6", "https://www.pearson.com/en-us/subject-catalog/p/optics/P200000006793"]]
+---
+
+## Bending light
+
+Light slows down in glass, and when it crosses a surface at a slant it changes direction. [[snells-law|Snell's law]] of 1621 gives the rule: the sine of the angle times the refractive index stays the same on both sides. A curved surface meets each ray at a different angle, so a convex lens can bend a whole fan of rays from one point back together at another point. That is how a lens forms a bright image through a wide opening, where a pinhole must stay tiny. Lenses were ground for [[spectacle-lenses|spectacles]] in the 1280s and fitted to the [[cardano-barbaro|camera obscura]] by the 1550s.
+
+## Focal length and focusing
+
+A lens has a [[g:focal-length|focal length]] *f*: the distance behind it at which rays from a very distant point meet. For a subject at distance *u*, the image forms at *v*, where 1/f = 1/u + 1/v. Closer subjects focus further back, so a lens moves away from the film to focus close. A 50 mm lens focused at 3 m moves out less than a millimetre; focused at 25 cm it moves out 12.5 mm, which is why close-up work needs extension tubes or macro lenses.
+
+## Angle of view
+
+How much of the scene fits on the frame depends on the focal length and the size of the film or sensor. The [[g:angle-of-view|angle of view]] is 2 arctan(d / 2f), where *d* is the frame's width (or diagonal). On 35mm full frame, a 50 mm lens takes in about 40° across, close to how much a person attends to without moving their eyes; 24 mm is wide (74°), 200 mm is narrow (10°). A smaller sensor sees less through the same lens, so it needs a shorter focal length for the same view: that ratio is the [[g:crop-factor|crop factor]] (see [[p:formats]]). The [[zoom-lens|zoom lens]] changes focal length without changing focus.
+
+## Aberrations and lens design
+
+A single lens is imperfect. Blue light bends more than red, so colours focus at different distances (chromatic [[g:aberration|aberration]]); the [[achromatic-lens]] fixed this by pairing two glasses. Rays through the edge of a lens focus nearer than rays through the centre (spherical aberration), and off-axis points smear into commas and lines. [[petzval-lens|Petzval]] in 1840 was the first to design a lens by calculation; [[scientific-lens-design|Abbe, Zeiss and Schott]] made it a science with new glasses; the [[cooke-triplet]] and [[tessar]] showed that a few well-chosen elements could correct most faults at once. [[lens-coating|Anti-reflection coatings]] later made lenses with many elements practical.

@@ -1,25 +1,31 @@
 ---
-title: How light becomes an image
-short: Silver & silicon
+title: Silver halide chemistry
+short: Silver
 order: 5
-dek: "Two ways of catching photons: silver crystals that change where light lands, and silicon wells that count the electrons light sets free."
+dek: "How a few photons leave an invisible mark in a silver crystal, how a developer multiplies it millions of times, and why fast film is grainy."
 widget: exposurehistory
-equations: [["Photon energy", "E = h c / λ"], ["Shot-noise limit", "SNR ≈ √N  (N = photons collected)"], ["Dynamic range (stops)", "DR ≈ log₂(full-well / read-noise)"]]
-refs: [["Nobel Prize in Physics 2009: summary", "https://www.nobelprize.org/prizes/physics/2009/summary/"]]
+equations: [["Light-sensitive salt", "Ag⁺ + Br⁻ → AgBr (crystal)"], ["Latent image", "AgBr + light → a speck of Ag⁰ (a few atoms)"], ["Fixing", "AgBr + 2 S₂O₃²⁻ → [Ag(S₂O₃)₂]³⁻ + Br⁻"]]
+refs: [["Royal Society of Chemistry: the chemistry of photography", "https://edu.rsc.org/feature/the-chemistry-of-photography/2020250.article"]]
 ---
 
-## Silver: the latent image
+## Silver salts darken
 
-A grain of silver halide, such as silver bromide, is a tiny crystal. When it absorbs a few photons, freed electrons gather at a defect and turn a few silver ions into a speck of metallic silver, too small to see. This [[g:latent-image|latent image]] is the real discovery behind the [[daguerreotype]] and the [[calotype]]: a developer can turn every grain that carries such a speck entirely into silver, amplifying the light's effect up to many millions of times. The [[hypo-fixer|fixer]] then dissolves the untouched grains.
+Silver chloride, bromide and iodide, the silver halides, darken in light. [[silver-salts|Schulze]] showed in the 1710s that light, not heat, caused it; [[scheele|Scheele]] found that violet light worked fastest and that the dark stuff was metallic silver. [[wedgwood-davy|Wedgwood and Davy]] made images this way around 1802 but could not stop them darkening. Printing-out papers such as the [[albumen-print]] still worked by direct darkening, which needs minutes to hours of sun.
 
-Bigger grains catch light more easily, so fast film is grainier. Over 150 years, better emulsions, development and lenses cut exposures from hours with [[heliography]] to small fractions of a second.
+## The latent image
 
-## Silicon: counting electrons
+A grain of silver bromide is a tiny crystal. When it absorbs a few photons, freed electrons gather at a defect and turn a few silver ions into a speck of metallic silver, a handful of atoms, far too small to see. This [[g:latent-image|latent image]] was the real discovery behind the [[daguerreotype]] and the [[calotype]], both of 1839–41: the picture is already there after a short exposure, only invisible.
 
-In a digital sensor, each [[g:pixel|pixel]] is a small region of silicon. A photon with enough energy frees an electron (the photoelectric effect), and the pixel stores it during the exposure. A [[ccd|CCD]] shifts the stored charges across the chip to one amplifier; a [[cmos-sensor|CMOS sensor]] measures them in every pixel. An analog-to-digital converter turns each charge into a number.
+## Development: chemical amplification
 
-Light arrives randomly, like rain, so a pixel that collects *N* photons has natural "shot noise" of about √N. More light means a cleaner image, which is why big pixels and big sensors do better in dim light and why [[computational-photography|phones merge many frames]].
+A [[g:developer|developer]] is a mild reducing agent. It cannot easily turn an untouched grain into silver, but a grain that carries a latent-image speck acts as a catalyst, and the whole grain, billions of atoms, becomes silver. One photon's worth of change can be multiplied up to many millions of times. This is why exposures fell from hours to minutes once development was used, and to seconds with the [[wet-collodion]] process. The [[gelatin-dry-plate]] of the 1870s, with grains ripened in warm gelatin, made exposures short enough to hold the camera in the hand.
 
-## Colour
+## Fixing
 
-Silver and silicon respond only to how much light arrives, not its colour. Colour comes from filters, as in [[maxwell-colour|Maxwell's three-colour photograph]] and the [[bayer-filter|Bayer filter]], or from dye layers, as in [[kodachrome|Kodachrome]].
+The grains that saw no light are still sensitive, so the image would fog as soon as it met daylight. A fixer dissolves them. [[hypo-fixer|Herschel]] found in 1819 that sodium thiosulfate ("hypo") dissolves silver halides, and suggested it for photography in 1839; it is still used. Washing removes the fixer, which would otherwise stain and fade the image.
+
+## Grain and speed
+
+A bigger crystal catches more light, so emulsions with large grains are faster but look [[g:grain|grainier]]. Every film is a compromise between speed and fine detail. Silver halides are naturally sensitive only to blue and violet light; dyes added from the 1870s ([[colour-sensitising]]) extended them to green ([[g:orthochromatic|orthochromatic]]) and then red ([[g:panchromatic|panchromatic]]). Colour films stack three such layers, each turned into a coloured dye during development ([[agfacolor-neu]], [[kodachrome]]).
+
+The chart below shows the result of all these improvements: from about eight hours for [[heliography]] in the 1820s to a few hundredths of a second for a hand camera by the 1880s, and on to the fraction of a millisecond a [[g:pixel|pixel]] needs today (see [[p:sensors]]).

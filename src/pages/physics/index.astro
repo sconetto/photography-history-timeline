@@ -7,7 +7,7 @@ const { physics } = await content();
 <Base title="How photography works" description="Short explainers of the physics and chemistry behind photography: pinholes, lenses, apertures, exposure, silver, colour, sensors and formats.">
   <p class="eyebrow">The physics</p>
   <h1 class="page-title">How photography works</h1>
-  <p class="dek">Short explainers of the science behind the timeline, each linked to the inventions that put it to use. More primers, each with an interactive diagram, are on the way.</p>
+  <p class="dek">Short explainers of the science behind the timeline, each linked to the inventions that put it to use. Each primer has an interactive diagram to try.</p>
   <ol class="primers">
     {physics.map((p) => (
       <li><a href={url(`/physics/${p.id}/`)}><span class="n">{String(p.data.order).padStart(2, '0')}</span><span class="t">{p.data.title}</span><span class="d">{p.data.dek}</span></a></li>

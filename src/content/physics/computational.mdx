@@ -1,0 +1,25 @@
+---
+title: Computational photography
+short: Computational
+order: 9
+dek: "How phones beat the limits of tiny sensors by merging many frames, why that works, and how software now shapes, and can fake, the photograph."
+widget: stacking
+equations: [["Averaging N frames", "SNR ∝ √N"], ["Dynamic range from bracketing", "DR_total ≈ DR_single + log₂(t_longest / t_shortest)"]]
+refs: [["Google Research: HDR+ with Bracketing on Pixel phones", "https://research.google/blog/hdr-with-bracketing-on-pixel-phones/"]]
+---
+
+## Many frames, one picture
+
+A phone sensor is tiny, so each frame collects little light and is noisy. But a phone can capture a burst of frames in a fraction of a second. Averaging N frames collects N times the light, and since shot noise grows only as √N, the signal-to-noise ratio improves by √N: sixteen frames are four times cleaner than one. The catch is movement. Hands shake and subjects move, so each frame must be aligned to the others first, tile by tile, and anything that moved too much is left out. This burst merging is the heart of [[computational-photography]] and of night modes since the mid-2010s.
+
+## High dynamic range
+
+A single exposure can hold only so many stops between deep shadow and bright sky (see [[p:sensors]]). Merging frames with different exposures, or many short frames whose sum has a long effective exposure, extends that range. Photographers did this by hand with film: Gustave Le Gray printed seascapes from two negatives in the 1850s. Today it happens automatically on every press of the shutter, followed by tone mapping that squeezes the result back into a range a screen can show.
+
+## Depth, zoom and more
+
+Two cameras, or the two halves of each pixel (dual-pixel sensors built for [[autofocus]]), see the scene from slightly different places, and the difference gives a depth map. Software uses it to blur the background like a large-sensor lens. Burst frames that differ by a fraction of a pixel, thanks to hand shake, can be combined into more detail than one frame holds: super-resolution zoom. Sensor-shift [[image-stabilisation]] lets some cameras do the same deliberately.
+
+## Provenance
+
+When every photograph is partly computed, and [[generative-ai|generative models]] can make photo-realistic images from text, the question "is this real?" needs new answers. The Content Credentials standard (C2PA, 2021) lets a camera or editor sign a record of how an image was made and changed, attached to the file. It does not prove a picture true, but it can show where it came from.
