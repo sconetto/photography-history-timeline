@@ -35,8 +35,8 @@ night modes.
 ## Status
 
 Work in progress. The timeline, entries, makers, formats, physics primers, landmarks, glossary and
-search are in place, with 103 entries, 35 makers and nine primers. Still to come: public-domain
-historical images and camera illustrations, a fact-check pass, and launch.
+search are in place, with 103 entries, 35 makers and nine primers, public-domain photographs on the
+landmarks and 24 entries, and camera silhouettes. Still to come: a fact-check pass, and launch.
 
 ## Development
 
@@ -77,7 +77,9 @@ a blocklisted domain. Inside text, `[[id]]` links an entry, `[[m:id]]` a maker, 
 Entries cite their sources on each page; general references are on the Sources page. Text is written
 fresh and paraphrased from those sources, never copied. Copyrighted books are used for fact-checking
 and cited paraphrase only, and are kept out of the repository in the git-ignored `references/` folder.
-Images are public domain, each credited with its source.
+Images are public domain (or CC0), each credited with its source. `node scripts/commons.ts` searches
+Wikimedia Commons, refuses any file that is not public domain, and saves a scaled copy with its
+credit. Cameras are drawn as original SVG silhouettes, not photographed.
 
 ## Contributing
 
