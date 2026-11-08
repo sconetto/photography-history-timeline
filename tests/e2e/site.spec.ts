@@ -180,10 +180,46 @@ test.describe('phase 2 views', () => {
     await page.goto('/makers/');
     const rows = page.locator('svg.mk .row');
     expect(await rows.count()).toBeGreaterThan(20);
-    await expect(page.locator('svg.mk .link[data-from="konica"][data-to="konica-minolta"]')).toHaveCount(1);
+    await expect(page.locator('svg.mk .link[data-from~="konica"][data-from~="minolta"][data-to="konica-minolta"]')).toHaveCount(1);
     await expect(page.locator('svg.mk .link[data-from="konica-minolta"][data-to="sony"]')).toHaveCount(1);
+    // no entry dot hides behind another dot or a connector
+    const covered = await page.evaluate(() => [...document.querySelectorAll('svg.mk a.pdot')].filter((a) => {
+      a.scrollIntoView({ block: 'center' });
+      const r = a.querySelector('circle')!.getBoundingClientRect();
+      return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)?.closest('a') !== (a as Element);
+    }).map((a) => a.getAttribute('aria-label')));
+    expect(covered).toEqual([]);
     await page.locator('svg.mk .row[data-id="nikon"] a.pdot').first().click();
     await expect(page).toHaveURL(/\/entries\/.+\/$/);
+  });
+
+  test('hovering a connector explains the change; touch previews first', async ({ page }) => {
+    await page.goto('/makers/');
+    const t = (await page.locator('svg.mk .link[data-to="sony"] .trunk').boundingBox())!;
+    await page.mouse.move(t.x + t.width / 2, t.y + t.height / 2);
+    const tip = page.locator('#mk-tip');
+    await expect(tip).toBeVisible();
+    await expect(tip).toContainText('Konica Minolta sold its business to Sony');
+    await expect(tip).toContainText('2006');
+    await page.mouse.move(5, 5);
+    await expect(tip).toBeHidden();
+    await page.locator('svg.mk .row[data-id="kodak"] a.pdot').first().hover();
+    await expect(tip).toContainText('open the entry');
+  });
+
+  test('on touch, the first tap on a connector previews and the second opens', async ({ browser }) => {
+    const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 430, height: 900 } });
+    const page = await ctx.newPage();
+    await page.goto('/makers/');
+    const link = page.locator('svg.mk .link[data-to="harman"]');
+    await link.scrollIntoViewIfNeeded();
+    const t = (await link.locator('.trunk').boundingBox())!;
+    await page.touchscreen.tap(t.x + t.width / 2, t.y + t.height / 2);
+    await expect(page.locator('#mk-tip')).toContainText('Tap again');
+    expect(new URL(page.url()).pathname).toBe('/makers/');
+    await page.touchscreen.tap(t.x + t.width / 2, t.y + t.height / 2);
+    await expect(page).toHaveURL(/\/makers\/harman\/$/);
+    await ctx.close();
   });
 
   test('maker page shows its lineage in both directions', async ({ page }) => {
