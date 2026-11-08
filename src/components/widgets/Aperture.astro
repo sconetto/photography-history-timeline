@@ -1,0 +1,72 @@
+---
+/** f-number: the opening's size, the light it lets in, depth of field and the diffraction limit. */
+const STOPS = [1.4, 1.6, 1.8, 2, 2.2, 2.5, 2.8, 3.2, 3.5, 4, 4.5, 5, 5.6, 6.3, 7.1, 8, 9, 10, 11, 13, 14, 16, 18, 20, 22];
+---
+<figure class="wg" id="wg-ap" data-stops={JSON.stringify(STOPS)}>
+  <div class="wg-head"><p class="kicker">Try it: aperture, light and depth of field</p></div>
+  <div class="wg-stage side">
+    <svg viewBox="0 0 220 210" role="img" aria-label="The lens opening, seen from the front, drawn to scale for the chosen focal length and f-number.">
+      <circle cx="110" cy="110" r="100" fill="var(--ink)" />
+      <circle cx="110" cy="110" r="92" fill="color-mix(in srgb, var(--ink) 80%, var(--panel))" />
+      <polygon id="ap-iris" fill="color-mix(in srgb, var(--f-optics) 55%, var(--paper))" />
+      
+    </svg>
+    <svg viewBox="0 0 520 220" role="img" aria-labelledby="ap-sum">
+      <g id="ap-dof"></g>
+    </svg>
+  </div>
+  <div class="wg-controls">
+    <div class="wg-ctl"><label for="ap-n">Aperture <output id="ap-n-out" for="ap-n"></output></label><input id="ap-n" type="range" min="0" max={STOPS.length - 1} value="6" /></div>
+    <div class="wg-ctl"><label for="ap-f">Focal length (full frame) <output id="ap-f-out" for="ap-f"></output></label><input id="ap-f" type="range" min="16" max="200" step="1" value="50" /></div>
+    <div class="wg-ctl"><label for="ap-s">Subject distance <output id="ap-s-out" for="ap-s"></output></label><input id="ap-s" type="range" min="0" max="1000" /></div>
+  </div>
+  <dl class="wg-read">
+    <div><dt>Opening (focal length ÷ N)</dt><dd id="ap-d"></dd></div>
+    <div><dt>Light, compared with f/2.8</dt><dd id="ap-light"></dd></div>
+    <div><dt>In focus from … to …</dt><dd id="ap-range"></dd></div>
+    <div><dt>Hyperfocal distance</dt><dd id="ap-h"></dd></div>
+    <div><dt>Diffraction spot (Airy disk)</dt><dd id="ap-airy"></dd></div>
+  </dl>
+  <p class="wg-sum" id="ap-sum" aria-live="polite"></p>
+</figure>
+
+<script>
+  import { pupil, stopsBetween, depthOfField, airyDisk } from '../../lib/optics';
+  import { $, logRange, fmtMm, fmtN, fmtStops } from '../../scripts/widgets/util';
+  const root = document.getElementById('wg-ap')!;
+  const STOPS = JSON.parse(root.dataset.stops!) as number[];
+  const nIn = $<HTMLInputElement>(root, '#ap-n'), fIn = $<HTMLInputElement>(root, '#ap-f'), sIn = $<HTMLInputElement>(root, '#ap-s');
+  const s = logRange(sIn, 300, 30000);
+  const set = (id: string, t: string) => { $<HTMLElement>(root, id).textContent = t; };
+  const PIXEL = 0.006; // a 24-megapixel full-frame sensor has pixels about 6 µm across
+
+  function draw() {
+    const N = STOPS[Number(nIn.value)], fl = Number(fIn.value), sd = s.get();
+    const D = pupil(fl, N), dof = depthOfField(fl, N, sd), airy = airyDisk(N), st = stopsBetween(N, 2.8);
+    set('#ap-n-out', fmtN(N)); set('#ap-f-out', `${fl} mm`); set('#ap-s-out', fmtMm(sd));
+    set('#ap-light', `${fmtStops(st)} (×${(2 ** st).toFixed(st < -3 ? 3 : 2)})`);
+    set('#ap-range', `${fmtMm(dof.near)} – ${fmtMm(dof.far)}`);
+    set('#ap-h', fmtMm(dof.H)); set('#ap-d', `${fmtMm(D)} across`);
+    set('#ap-airy', `${Math.round(airy * 1000)} µm${airy > 2 * PIXEL ? ' · softening' : ''}`);
+    // iris: nine blades; 92 px radius = the widest opening this widget shows (200 mm at f/1.4 ≈ 143 mm)
+    const r = Math.max(1.5, (D / 2) * (92 / 72)), pts: string[] = [];
+    for (let i = 0; i < 9; i++) { const a = (i / 9) * Math.PI * 2 - Math.PI / 2; pts.push(`${(110 + r * Math.cos(a)).toFixed(1)},${(110 + r * Math.sin(a)).toFixed(1)}`); }
+    $<SVGPolygonElement>(root, '#ap-iris').setAttribute('points', pts.join(' '));
+    // depth of field along a log distance axis, 0.3 m … 30 m, then infinity
+    const L = 60, R = 470, Y = 120, lx = (mm: number) => (!Number.isFinite(mm) || mm > 30000 ? R + 30 : L + ((Math.log(mm) - Math.log(300)) / Math.log(100)) * (R - L));
+    const a = lx(dof.near), b = lx(dof.far), xs = lx(sd);
+    const ticks = [500, 1000, 2000, 5000, 10000, 20000].map((m) => `<line class="ln-soft" x1="${lx(m)}" x2="${lx(m)}" y1="${Y + 34}" y2="${Y + 40}"/><text x="${lx(m)}" y="${Y + 54}" text-anchor="middle">${m / 1000} m</text>`).join('');
+    $<SVGGElement>(root, '#ap-dof').innerHTML =
+      `<line class="ln-soft" x1="${L}" x2="${R + 30}" y1="${Y + 34}" y2="${Y + 34}"/>${ticks}<text x="${R + 30}" y="${Y + 54}" text-anchor="middle">∞</text>`
+      + `<rect x="${a}" y="${Y - 50}" width="${Math.max(2, b - a)}" height="84" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-dasharray="3 3"/>`
+      + `<rect x="18" y="${Y - 14}" width="26" height="22" rx="3" fill="var(--ink-2)"/><rect x="44" y="${Y - 9}" width="${Math.min(16, 6 + fl / 20)}" height="12" fill="var(--ink-2)"/>`
+      + `<g transform="translate(${xs},${Y})"><circle cy="-34" r="9" fill="var(--ink)"/><path d="M-14,30 Q-14,-20 0,-22 Q14,-20 14,30Z" fill="var(--ink)"/></g>`
+      + (Math.min(b, R + 30) - a < 70
+        ? `<text x="${(a + Math.min(b, R + 30)) / 2}" y="${Y - 58}" text-anchor="middle">${fmtMm(dof.near)} – ${fmtMm(dof.far)}</text>`
+        : `<text x="${a}" y="${Y - 58}" text-anchor="middle">${fmtMm(dof.near)}</text><text x="${Math.min(b, R + 30)}" y="${Y - 58}" text-anchor="middle">${fmtMm(dof.far)}</text>`)
+      + `<text class="lbl" x="${L}" y="16">Zone of acceptable sharpness</text>`;
+    set('#ap-sum', `At ${fmtN(N)} a ${fl} mm lens opens ${fmtMm(D)} wide. Focused at ${fmtMm(sd)}, everything from ${fmtMm(dof.near)} to ${fmtMm(dof.far)} looks sharp.${airy > 2 * PIXEL ? ' Diffraction now softens fine detail.' : ''}`);
+  }
+  for (const el of [nIn, fIn, sIn]) el.addEventListener('input', draw);
+  s.set(3000); draw();
+</script>

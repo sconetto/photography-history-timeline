@@ -1,0 +1,84 @@
+---
+/** Burst stacking: averaging N short, noisy frames, with and without aligning them first. */
+---
+<figure class="wg" id="wg-stk">
+  <div class="wg-head"><p class="kicker">Try it: stacking a burst of frames at night</p></div>
+  <canvas id="stk-c" width="160" height="100" role="img" aria-labelledby="stk-sum"></canvas>
+  <div class="wg-controls">
+    <div class="wg-ctl"><label for="stk-n">Frames averaged <output id="stk-n-out" for="stk-n"></output></label><input id="stk-n" type="range" min="0" max="6" step="1" value="0" /></div>
+    <div class="wg-ctl"><label for="stk-p">Light per frame (photons, brightest pixel) <output id="stk-p-out" for="stk-p"></output></label><input id="stk-p" type="range" min="0" max="1000" /></div>
+    <div class="wg-ctl"><label class="check"><input type="checkbox" id="stk-align" checked /> Align the frames first (hand shake)</label></div>
+  </div>
+  <dl class="wg-read">
+    <div><dt>Signal-to-noise, one frame</dt><dd id="stk-one"></dd></div>
+    <div><dt>Signal-to-noise, stacked</dt><dd id="stk-all"></dd></div>
+    <div><dt>Improvement (√N)</dt><dd id="stk-gain"></dd></div>
+  </dl>
+  <p class="wg-sum" id="stk-sum" aria-live="polite"></p>
+</figure>
+
+<style>
+  #stk-c { max-width: 760px; margin: 0 auto; aspect-ratio: 16 / 10; image-rendering: auto; }
+</style>
+
+<script>
+  import { stackedSnr } from '../../lib/optics';
+  import { $, logRange, rng, gauss } from '../../scripts/widgets/util';
+  const root = document.getElementById('wg-stk')!;
+  const cv = $<HTMLCanvasElement>(root, '#stk-c'), ctx = cv.getContext('2d')!;
+  const W = 160, H = 100;
+  const nIn = $<HTMLInputElement>(root, '#stk-n'), pIn = $<HTMLInputElement>(root, '#stk-p'), align = $<HTMLInputElement>(root, '#stk-align');
+  const photons = logRange(pIn, 2, 400);
+  const set = (id: string, t: string) => { $<HTMLElement>(root, id).textContent = t; };
+
+  // a night street in linear light (0…1): sky, moon, stars, buildings with lit windows
+  const S = new Float32Array(W * H * 3);
+  {
+    const r = rng(11);
+    const stars = Array.from({ length: 26 }, () => [Math.floor(r() * W), Math.floor(r() * 46), 0.3 + r() * 0.7]);
+    const blocks = [[0, 22, 54], [22, 44, 40], [44, 70, 62], [70, 92, 48], [92, 120, 66], [120, 140, 44], [140, 160, 58]];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 3;
+      let c = [0.02 + 0.03 * (y / H), 0.025 + 0.04 * (y / H), 0.07 + 0.05 * (y / H)];
+      if ((x - 128) ** 2 + (y - 18) ** 2 < 64) c = [0.85, 0.85, 0.75];
+      for (const [a, b, top] of blocks) if (x >= a && x < b && y >= top) {
+        c = [0.035, 0.03, 0.03];
+        const wx = (x - a) % 6, wy = (y - top) % 8;
+        if (wx >= 2 && wx < 4 && wy >= 3 && wy < 6 && ((x * 7 + y * 3 + a) % 5) < 3) c = [0.9, 0.62, 0.25];
+      }
+      if (y >= 92) c = [0.05, 0.045, 0.04];
+      S[i] = c[0]; S[i + 1] = c[1]; S[i + 2] = c[2];
+    }
+    for (const [x, y, b] of stars) { const i = (y * W + x) * 3; if (S[i] < 0.1) S[i] = S[i + 1] = S[i + 2] = b; }
+  }
+  const enc = (v: number) => 255 * Math.min(1, Math.max(0, v)) ** (1 / 2.2);
+
+  function draw() {
+    const n = 2 ** Number(nIn.value), P = photons.get(), r = rng(5);
+    set('#stk-n-out', String(n)); set('#stk-p-out', String(Math.round(P)));
+    const acc = new Float32Array(W * H * 3);
+    for (let f = 0; f < n; f++) {
+      // hand shake: each frame lands a few pixels off; alignment undoes it
+      const dx = f === 0 || align.checked ? 0 : Math.round((r() - 0.5) * 8), dy = f === 0 || align.checked ? 0 : Math.round((r() - 0.5) * 6);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const sx = Math.min(W - 1, Math.max(0, x + dx)), sy = Math.min(H - 1, Math.max(0, y + dy));
+        for (let k = 0; k < 3; k++) {
+          const mean = S[(sy * W + sx) * 3 + k] * P;
+          acc[(y * W + x) * 3 + k] += Math.max(0, mean + gauss(r) * Math.sqrt(mean + 0.6)); // shot noise plus a little read noise
+        }
+      }
+    }
+    const img = ctx.createImageData(W, H), gain = 1 / (n * P);
+    for (let p = 0; p < W * H; p++) for (let k = 0; k < 3; k++) img.data[p * 4 + k] = enc(acc[p * 3 + k] * gain * 1.6);
+    for (let p = 0; p < W * H; p++) img.data[p * 4 + 3] = 255;
+    ctx.putImageData(img, 0, 0);
+    // SNR for a lit window (0.6 of the brightest pixel on average across channels)
+    const one = stackedSnr(P * 0.6, 1), all = stackedSnr(P * 0.6, n);
+    set('#stk-one', `${one.toFixed(1)} : 1`); set('#stk-all', `${all.toFixed(1)} : 1`); set('#stk-gain', `×${Math.sqrt(n).toFixed(n === 1 ? 0 : 1)}`);
+    set('#stk-sum', n === 1
+      ? 'One short frame: little light, so the random arrival of photons shows as heavy noise.'
+      : `Averaging ${n} frames collects ${n} times the light, so noise falls by √${n} ≈ ${Math.sqrt(n).toFixed(1)}×.${align.checked ? '' : ' Without alignment, hand shake smears the frames into a blurred picture.'}`);
+  }
+  for (const el of [nIn, pIn, align]) el.addEventListener('input', draw);
+  photons.set(12); draw();
+</script>

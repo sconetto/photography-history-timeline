@@ -1,0 +1,114 @@
+---
+/** The exposure triangle: aperture, shutter and ISO against the scene's brightness, with a simulated photo. */
+const AP = ['1.4', '1.6', '1.8', '2', '2.2', '2.5', '2.8', '3.2', '3.5', '4', '4.5', '5', '5.6', '6.3', '7.1', '8', '9', '10', '11', '13', '14', '16', '18', '20', '22'];
+const SH = ['30', '25', '20', '15', '13', '10', '8', '6', '5', '4', '3.2', '2.5', '2', '1.6', '1.3', '1', '0.8', '0.6', '0.5', '0.4', '0.3',
+  '1/4', '1/5', '1/6', '1/8', '1/10', '1/13', '1/15', '1/20', '1/25', '1/30', '1/40', '1/50', '1/60', '1/80', '1/100', '1/125', '1/160', '1/200',
+  '1/250', '1/320', '1/400', '1/500', '1/640', '1/800', '1/1000', '1/1250', '1/1600', '1/2000', '1/2500', '1/3200', '1/4000', '1/5000', '1/6400', '1/8000'];
+const ISO = ['50', '64', '80', '100', '125', '160', '200', '250', '320', '400', '500', '640', '800', '1000', '1250', '1600', '2000', '2500', '3200', '4000', '5000', '6400', '8000', '10000', '12800'];
+const SCENES: [string, number][] = [
+  ['Sun on snow or sand', 16], ['Bright sun', 15], ['Hazy sun', 14], ['Overcast', 12], ['Heavy overcast or open shade', 11],
+  ['Bright interior', 8], ['Living room at night', 6], ['Lit street at night', 5], ['Candlelight', 3], ['Full-moon landscape', -2],
+];
+---
+<figure class="wg" id="wg-ex" data-ap={JSON.stringify(AP)} data-sh={JSON.stringify(SH)} data-iso={JSON.stringify(ISO)}>
+  <div class="wg-head"><p class="kicker">Try it: the exposure triangle</p></div>
+  <div class="wg-stage">
+    <svg viewBox="0 0 320 200" role="img" aria-labelledby="ex-sum">
+      <defs>
+        <filter id="ex-bright" color-interpolation-filters="sRGB">
+          <feComponentTransfer><feFuncR id="ex-r" type="linear" slope="1" /><feFuncG id="ex-g" type="linear" slope="1" /><feFuncB id="ex-b" type="linear" slope="1" /></feComponentTransfer>
+        </filter>
+        <filter id="ex-motion" x="-40%" y="-10%" width="180%" height="120%"><feGaussianBlur id="ex-mb" stdDeviation="0 0" /></filter>
+        <filter id="ex-noise" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="4" /><feColorMatrix type="saturate" values="0" /></filter>
+        <clipPath id="ex-clip"><rect width="320" height="200" rx="8" /></clipPath>
+      </defs>
+      <g clip-path="url(#ex-clip)">
+        <g filter="url(#ex-bright)">
+          <rect width="320" height="200" fill="#8fb7d9" />
+          <circle cx="262" cy="40" r="16" fill="#f4e2a0" />
+          <path d="M0,120 L60,96 L130,112 L200,86 L260,104 L320,92 V200 H0Z" fill="#6f8f6a" />
+          <rect y="150" width="320" height="50" fill="#9a9184" />
+          <rect y="168" width="320" height="2" fill="#d8d2c4" />
+          <g transform="translate(40,96)"><rect width="34" height="54" fill="#b0563a" /><path d="M-4,0 L17,-18 L38,0Z" fill="#5a4038" /><rect x="12" y="32" width="10" height="22" fill="#3b2c26" /></g>
+          <g id="ex-rider" filter="url(#ex-motion)">
+            <circle cx="170" cy="168" r="13" fill="none" stroke="#2c2c2c" stroke-width="3" /><circle cx="214" cy="168" r="13" fill="none" stroke="#2c2c2c" stroke-width="3" />
+            <path d="M170,168 L188,148 L214,168 M188,148 L204,148 L192,168Z" fill="none" stroke="#2c2c2c" stroke-width="2.5" />
+            <path d="M190,146 L198,122 L206,146" fill="none" stroke="#c23b3b" stroke-width="7" stroke-linecap="round" /><circle cx="200" cy="112" r="7" fill="#e3b48f" />
+          </g>
+        </g>
+        <rect id="ex-grain" width="320" height="200" filter="url(#ex-noise)" opacity="0" style="mix-blend-mode: overlay" />
+      </g>
+    </svg>
+    <svg viewBox="0 0 320 120" role="img" aria-label="Light meter: how far the chosen settings are from a correct exposure, from three stops under to three stops over.">
+      <g id="ex-meter"></g>
+    </svg>
+  </div>
+  <div class="wg-controls">
+    <div class="wg-ctl"><label for="ex-scene">Scene</label><select id="ex-scene">{SCENES.map(([n, v]) => <option value={v} selected={v === 15}>{n} (EV {v})</option>)}</select></div>
+    <div class="wg-ctl"><label for="ex-n">Aperture <output id="ex-n-out" for="ex-n"></output></label><input id="ex-n" type="range" min="0" max={AP.length - 1} value="21" /></div>
+    <div class="wg-ctl"><label for="ex-t">Shutter speed <output id="ex-t-out" for="ex-t"></output></label><input id="ex-t" type="range" min="0" max={SH.length - 1} value="36" /></div>
+    <div class="wg-ctl"><label for="ex-iso">ISO <output id="ex-iso-out" for="ex-iso"></output></label><input id="ex-iso" type="range" min="0" max={ISO.length - 1} value="3" /></div>
+    <div class="wg-ctl"><label class="check"><input type="checkbox" id="ex-auto" /> Set the shutter for me (aperture priority)</label></div>
+  </div>
+  <dl class="wg-read">
+    <div><dt>Scene brightness</dt><dd id="ex-scene-r"></dd></div>
+    <div><dt>Settings (EV at ISO 100)</dt><dd id="ex-ev"></dd></div>
+    <div><dt>Exposure</dt><dd id="ex-verdict"></dd></div>
+    <div><dt>The moving cyclist</dt><dd id="ex-motion-r"></dd></div>
+  </dl>
+  <p class="wg-sum" id="ex-sum" aria-live="polite"></p>
+</figure>
+
+<script>
+  import { ev100 } from '../../lib/optics';
+  import { $, clamp, fmtStops } from '../../scripts/widgets/util';
+  const root = document.getElementById('wg-ex')!;
+  const AP = JSON.parse(root.dataset.ap!) as string[], SH = JSON.parse(root.dataset.sh!) as string[], ISO = JSON.parse(root.dataset.iso!) as string[];
+  // exact values behind the marked ones: third stops from f/1.4 (2^0.5), "30 s" (really 32 s = 2^5) and ISO 50
+  const nAt = (i: number) => 2 ** ((i + 3) / 6), tAt = (i: number) => 32 * 2 ** (-i / 3), isoAt = (i: number) => 50 * 2 ** (i / 3);
+  const nIn = $<HTMLInputElement>(root, '#ex-n'), tIn = $<HTMLInputElement>(root, '#ex-t'), iIn = $<HTMLInputElement>(root, '#ex-iso');
+  const scene = $<HTMLSelectElement>(root, '#ex-scene'), auto = $<HTMLInputElement>(root, '#ex-auto');
+  const set = (id: string, t: string) => { $<HTMLElement>(root, id).textContent = t; };
+  const shLabel = (i: number) => `${SH[i]} s`;
+
+  function draw() {
+    const sEV = Number(scene.value);
+    let ti = Number(tIn.value);
+    const N = nAt(Number(nIn.value)), iso = isoAt(Number(iIn.value));
+    if (auto.checked) {
+      // EV100(N, t, iso) = sEV  →  t = N² / 2^(sEV + log2(iso/100))
+      const want = (N * N) / 2 ** (sEV + Math.log2(iso / 100));
+      ti = clamp(Math.round(-3 * Math.log2(want / 32)), 0, SH.length - 1);
+      tIn.value = String(ti);
+    }
+    const t = tAt(ti), set100 = ev100(N, t, iso), d = sEV - set100; // > 0: the scene is brighter than the settings allow for → over
+    const dr = Math.round(d * 3) / 3;
+    set('#ex-n-out', `f/${AP[Number(nIn.value)]}`); set('#ex-t-out', shLabel(ti)); set('#ex-iso-out', ISO[Number(iIn.value)]);
+    set('#ex-scene-r', `EV ${sEV}`); set('#ex-ev', `EV ${+set100.toFixed(1)}`);
+    const verdict = Math.abs(dr) < 0.34 ? 'Correct' : `${fmtStops(Math.abs(dr)).replace(/^[+−±]/, '')} ${dr > 0 ? 'over' : 'under'}`;
+    set('#ex-verdict', verdict);
+    const blur = Math.min(26, t * 250);
+    set('#ex-motion-r', blur < 0.8 ? 'Frozen' : blur < 4 ? 'Slightly blurred' : 'Streaked');
+    // simulated photo: exposure scales linear light; on gamma-encoded values that is about 2^(d/2.2)
+    const slope = (2 ** (clamp(d, -6, 6) / 2.2)).toFixed(3);
+    for (const id of ['#ex-r', '#ex-g', '#ex-b']) $<Element>(root, id).setAttribute('slope', slope);
+    $<Element>(root, '#ex-mb').setAttribute('stdDeviation', `${blur.toFixed(2)} 0`);
+    $<Element>(root, '#ex-grain').setAttribute('opacity', clamp(Math.log2(iso / 100) * 0.09, 0, 0.6).toFixed(2));
+    // meter: −3 … +3 stops
+    const L = 30, R = 290, x = (s: number) => L + ((clamp(s, -3.4, 3.4) + 3) / 6) * (R - L);
+    let m = `<line class="ln" x1="${L}" x2="${R}" y1="60" y2="60"/>`;
+    for (let s = -3; s <= 3; s += 1 / 3) {
+      const major = Math.abs(s - Math.round(s)) < 0.01;
+      m += `<line class="${major ? 'ln' : 'ln-soft'}" x1="${x(s)}" x2="${x(s)}" y1="${major ? 50 : 54}" y2="60"/>`;
+      if (major) m += `<text x="${x(s)}" y="80" text-anchor="middle">${Math.round(s) > 0 ? '+' : Math.round(s) < 0 ? '−' : ''}${Math.abs(Math.round(s))}</text>`;
+    }
+    m += `<path d="M${x(dr)},62 l-7,14 h14Z" class="fill-acc"/>`
+      + `<text class="lbl" x="${L}" y="30">under</text><text class="lbl" x="${R}" y="30" text-anchor="end">over</text><text class="lbl" x="160" y="30" text-anchor="middle">correct</text>`
+      + (Math.abs(d) > 3.4 ? `<text x="${d > 0 ? R : L}" y="104" text-anchor="${d > 0 ? 'end' : 'start'}">off the scale</text>` : '');
+    $<SVGGElement>(root, '#ex-meter').innerHTML = m;
+    set('#ex-sum', `${scene.selectedOptions[0].textContent!.replace(/ \(EV.*/, '')} at f/${AP[Number(nIn.value)]}, ${shLabel(ti)}, ISO ${ISO[Number(iIn.value)]}: ${verdict.toLowerCase()}${Math.abs(dr) < 0.34 ? ' exposure' : ''}. The cyclist is ${blur < 0.8 ? 'frozen' : blur < 4 ? 'slightly blurred' : 'streaked'}.`);
+  }
+  for (const el of [nIn, tIn, iIn, scene, auto]) el.addEventListener('input', draw);
+  auto.addEventListener('change', () => { tIn.disabled = auto.checked; draw(); });
+  draw();
+</script>

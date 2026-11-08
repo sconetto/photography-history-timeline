@@ -1,0 +1,107 @@
+---
+/** A tiny sensor: the scene, the Bayer filter, the raw mosaic, demosaicing, and shot noise from counting photons. */
+const STEPS = [
+  ['scene', 'The scene'],
+  ['filter', 'Through the colour filters'],
+  ['raw', 'What the sensor records'],
+  ['demosaic', 'Demosaiced image'],
+];
+---
+<figure class="wg" id="wg-bay">
+  <div class="wg-head"><p class="kicker">Try it: a 64 × 40 pixel sensor</p></div>
+  <canvas id="bay-c" width="64" height="40" role="img" aria-labelledby="bay-sum"></canvas>
+  <div class="wg-controls">
+    <fieldset class="wg-ctl bay-steps"><legend class="lab">Show</legend>
+      {STEPS.map(([v, l], i) => <label class="check"><input type="radio" name="bay-step" value={v} checked={i === 1} /> {i + 1}. {l}</label>)}
+    </fieldset>
+    <div class="wg-ctl"><label for="bay-p">Light: photons per pixel (white) <output id="bay-p-out" for="bay-p"></output></label><input id="bay-p" type="range" min="0" max="1000" /></div>
+    <div class="wg-ctl"><button type="button" class="chip" id="bay-reroll">Take another shot</button></div>
+  </div>
+  <dl class="wg-read">
+    <div><dt>Colour each pixel measures</dt><dd>One of three<small>half green, a quarter each red and blue</small></dd></div>
+    <div><dt>Signal-to-noise, mid-grey</dt><dd id="bay-snr"></dd></div>
+    <div><dt>Noise you can see</dt><dd id="bay-noise"></dd></div>
+  </dl>
+  <p class="wg-sum" id="bay-sum" aria-live="polite"></p>
+</figure>
+
+<style>
+  .bay-steps { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+  .bay-steps legend { padding: 0; margin-bottom: 6px; font-size: 13px; color: var(--ink-2); }
+  #bay-c { max-width: 760px; margin: 0 auto; aspect-ratio: 64 / 40; }
+</style>
+
+<script>
+  import { $, logRange, rng, gauss } from '../../scripts/widgets/util';
+  const root = document.getElementById('wg-bay')!;
+  const cv = $<HTMLCanvasElement>(root, '#bay-c'), ctx = cv.getContext('2d')!;
+  const W = 64, H = 40;
+  const pIn = $<HTMLInputElement>(root, '#bay-p'), photons = logRange(pIn, 3, 20000);
+  const set = (id: string, t: string) => { $<HTMLElement>(root, id).textContent = t; };
+  let seed = 7;
+
+  /** the scene in linear light, 0…1: sky, sun, hills, a red barn, a blue door, a fine fence that tests demosaicing */
+  function scene(x: number, y: number): [number, number, number] {
+    const u = x / W, v = y / H;
+    if ((x - 50) ** 2 + (y - 8) ** 2 < 20) return [1, 0.92, 0.6];
+    const hill = 24 - 6 * Math.sin(u * 5.2) - 3 * Math.cos(u * 11);
+    if (x >= 10 && x < 26 && y >= 17 && y < 34) {
+      if (x >= 16 && x < 20 && y >= 26) return [0.05, 0.12, 0.55];
+      return [0.6, 0.07, 0.04];
+    }
+    if (x >= 9 && x < 27 && y >= 11 && y < 17 && y >= 11 + Math.abs(x - 17.5) * 0.66) return [0.18, 0.1, 0.08];
+    if (y >= 30 && y < 36 && x >= 30 && x < 62) return x % 2 === 0 ? [0.9, 0.88, 0.8] : [0.08, 0.07, 0.06];
+    if (y > hill) return [0.12 * (1.2 - v), 0.32 * (1.2 - v), 0.06];
+    return [0.25 + 0.3 * v, 0.45 + 0.3 * v, 0.9];
+  }
+  const chan = (x: number, y: number) => (y % 2 === 0 ? (x % 2 === 0 ? 0 : 1) : x % 2 === 0 ? 1 : 2); // RGGB
+  const enc = (v: number) => 255 * Math.min(1, Math.max(0, v)) ** (1 / 2.2);
+
+  function draw() {
+    const step = (root.querySelector('input[name="bay-step"]:checked') as HTMLInputElement).value;
+    const P = photons.get(), r = rng(seed);
+    set('#bay-p-out', P < 100 ? P.toFixed(0) : String(Math.round(P / 10) * 10));
+    // the raw mosaic: each pixel counts photons in its own colour, with Poisson (shot) noise ≈ Gaussian, sd √mean
+    const raw = new Float32Array(W * H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const mean = scene(x, y)[chan(x, y)] * P;
+      raw[y * W + x] = Math.max(0, mean + gauss(r) * Math.sqrt(mean)) / P;
+    }
+    const img = ctx.createImageData(W, H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4, c = chan(x, y);
+      let out: number[];
+      if (step === 'scene') out = scene(x, y);
+      else if (step === 'filter') out = [0, 1, 2].map((k) => (k === c ? raw[y * W + x] : 0));
+      else if (step === 'raw') { const g = raw[y * W + x]; out = [g, g, g]; }
+      else {
+        // bilinear demosaic: each missing colour is the average of the nearest pixels that measured it
+        const sum = [0, 0, 0], n = [0, 0, 0];
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const xx = x + dx, yy = y + dy;
+          if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+          const k = chan(xx, yy);
+          if (k === c && (dx || dy)) continue; // a pixel's own colour comes from itself
+          sum[k] += raw[yy * W + xx]; n[k]++;
+        }
+        out = [0, 1, 2].map((k) => (k === c ? raw[y * W + x] : sum[k] / Math.max(1, n[k])));
+      }
+      img.data[i] = enc(out[0]); img.data[i + 1] = enc(out[1]); img.data[i + 2] = enc(out[2]); img.data[i + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    const snr = Math.sqrt(P * 0.18);
+    set('#bay-snr', `${snr.toFixed(snr < 10 ? 1 : 0)} : 1`);
+    set('#bay-noise', snr < 4 ? 'Heavy' : snr < 12 ? 'Visible' : snr < 30 ? 'Slight' : 'Hardly any');
+    const what: Record<string, string> = {
+      scene: 'The scene as it is, before any filter.',
+      filter: 'Each pixel sits under a red, green or blue filter (the RGGB Bayer pattern), so it only measures that colour.',
+      raw: 'The sensor stores one brightness number per pixel: a grey mosaic. The checkerboard texture is the filter pattern.',
+      demosaic: 'Software estimates the two missing colours at each pixel from its neighbours. Look at the fence: fine detail can turn into false colour.',
+    };
+    set('#bay-sum', `${what[step]} With ${Math.round(P)} photons on a white pixel, a mid-grey pixel collects about ${Math.round(P * 0.18)}, and random arrival gives a signal-to-noise ratio near ${snr.toFixed(0)} to 1.`);
+  }
+  root.querySelectorAll('input[name="bay-step"]').forEach((el) => el.addEventListener('change', draw));
+  pIn.addEventListener('input', draw);
+  $<HTMLButtonElement>(root, '#bay-reroll').addEventListener('click', () => { seed++; draw(); });
+  photons.set(2000); draw();
+</script>

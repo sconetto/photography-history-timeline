@@ -1,0 +1,20 @@
+---
+/** Picks the interactive widget for a physics primer (the `widget` field in its frontmatter). */
+import Pinhole from './Pinhole.astro';
+import LensFov from './LensFov.astro';
+import Aperture from './Aperture.astro';
+import Exposure from './Exposure.astro';
+import ExposureHistory from './ExposureHistory.astro';
+import Colour from './Colour.astro';
+import Bayer from './Bayer.astro';
+import FormatCompare from './FormatCompare.astro';
+import Stacking from './Stacking.astro';
+interface Props { kind: string }
+const { kind } = Astro.props;
+const WIDGETS: Record<string, any> = {
+  pinhole: Pinhole, lensfov: LensFov, aperture: Aperture, exposure: Exposure, exposurehistory: ExposureHistory,
+  colour: Colour, bayer: Bayer, formats: FormatCompare, stacking: Stacking,
+};
+const W = WIDGETS[kind];
+---
+{W && <W />}

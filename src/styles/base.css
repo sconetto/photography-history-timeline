@@ -39,3 +39,36 @@ a.gloss:hover { border-bottom-style: solid; border-bottom-color: var(--accent); 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 
 .page-title { font: 400 clamp(36px, 5vw, 56px)/1.05 var(--font-display); margin: 12px 0 10px; letter-spacing: -0.01em; }
+
+/* ---- physics widgets (src/components/widgets) ---- */
+.wg { margin: 18px 0 34px; border: 1px solid var(--rule); border-radius: 16px; background: var(--panel); padding: 16px clamp(12px, 2.4vw, 22px) 14px; display: grid; gap: 14px; }
+.wg-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.wg-head .kicker { margin: 0; }
+.wg-stage { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); align-items: center; }
+.wg svg, .wg canvas { display: block; width: 100%; height: auto; }
+.wg-stage.side { grid-template-columns: minmax(120px, 210px) minmax(0, 1fr); }
+@media (max-width: 560px) { .wg-stage.side { grid-template-columns: 1fr; } .wg-stage.side > :first-child { max-width: 200px; margin: 0 auto; } }
+.wg svg.wide { max-width: 860px; margin: 0 auto; }
+.wg canvas { image-rendering: pixelated; border-radius: 8px; }
+.wg-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px 22px; align-items: end; }
+.wg-ctl { display: grid; gap: 6px; min-width: 0; }
+.wg-ctl > label, .wg-ctl > .lab { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.wg-ctl output { font: 500 12.5px/1.3 var(--font-mono); color: var(--ink); }
+.wg input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; height: 24px; }
+.wg select { height: 32px; border: 1px solid var(--rule); border-radius: 8px; background: var(--raised); color: var(--ink); font: 400 13px/1 var(--font-body); padding: 0 8px; max-width: 100%; }
+.wg-ctl > select { width: 100%; min-width: 0; }
+.wg-ctl > label.check { justify-content: flex-start; }
+.wg .check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.wg .check input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+.wg-read { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 10px 18px; margin: 0; }
+.wg-read > div { border-top: 1px solid var(--rule-soft); padding-top: 7px; min-width: 0; }
+.wg-read dt { font-size: 12px; color: var(--muted); }
+.wg-read dd { margin: 3px 0 0; font: 500 15px/1.3 var(--font-mono); color: var(--ink); }
+.wg-read dd small { font: 400 11.5px/1.3 var(--font-body); color: var(--muted); display: block; }
+.wg-sum { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+.wg :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wg .ink { fill: var(--ink); } .wg .ink-2 { fill: var(--ink-2); } .wg .muted { fill: var(--muted); }
+.wg .ln { stroke: var(--ink-2); fill: none; } .wg .ln-soft { stroke: var(--rule); fill: none; } .wg .acc { stroke: var(--accent); }
+.wg .fill-acc { fill: var(--accent); } .wg .fill-soft { fill: var(--accent-soft); } .wg .fill-panel { fill: var(--panel); } .wg .fill-paper { fill: var(--paper); }
+.wg text { font: 400 11px/1 var(--font-mono); fill: var(--muted); }
+.wg text.lbl { font: 500 12px/1 var(--font-body); fill: var(--ink-2); }

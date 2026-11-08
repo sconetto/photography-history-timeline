@@ -1,0 +1,61 @@
+---
+/** Two formats overlaid to scale, and the lens on one that gives the same picture on the other. */
+import { content } from '../../lib/content';
+import { url } from '../../lib/url';
+const { formats } = await content();
+const list = formats.map((f) => ({ id: f.id, name: f.data.name, w: f.data.w, h: f.data.h }));
+---
+<figure class="wg" id="wg-fmt" data-formats={JSON.stringify(list)}>
+  <div class="wg-head"><p class="kicker">Try it: the same picture on two formats</p><a class="chip" href={url('/formats/')}>All formats to scale</a></div>
+  <div class="wg-stage side">
+    <svg viewBox="0 0 200 200" role="img" aria-labelledby="fc-sum"><g id="fc-draw"></g></svg>
+    <div class="wg-controls">
+      <div class="wg-ctl"><label for="fc-a">Camera A</label><select id="fc-a">{list.map((f) => <option value={f.id} selected={f.id === 'ff'}>{f.name}</option>)}</select></div>
+      <div class="wg-ctl"><label for="fc-b">Camera B</label><select id="fc-b">{list.map((f) => <option value={f.id} selected={f.id === 'four-thirds'}>{f.name}</option>)}</select></div>
+      <div class="wg-ctl"><label for="fc-f">Lens on A <output id="fc-f-out" for="fc-f"></output></label><input id="fc-f" type="range" min="8" max="400" step="1" value="50" /></div>
+      <div class="wg-ctl"><label for="fc-n">Aperture on A <output id="fc-n-out" for="fc-n"></output></label><input id="fc-n" type="range" min="0" max="8" step="1" value="2" /></div>
+    </div>
+  </div>
+  <dl class="wg-read">
+    <div><dt>B's crop factor relative to A</dt><dd id="fc-c"></dd></div>
+    <div><dt>B's area relative to A</dt><dd id="fc-area"></dd></div>
+    <div><dt>Same view on B</dt><dd id="fc-fb"></dd></div>
+    <div><dt>Same depth of field on B</dt><dd id="fc-nb"></dd></div>
+  </dl>
+  <p class="wg-sum" id="fc-sum" aria-live="polite"></p>
+</figure>
+
+<script>
+  import { diagonal, FULL_STOPS } from '../../lib/optics';
+  import { $, fmtN } from '../../scripts/widgets/util';
+  const root = document.getElementById('wg-fmt')!;
+  const F = JSON.parse(root.dataset.formats!) as { id: string; name: string; w: number; h: number }[];
+  const aIn = $<HTMLSelectElement>(root, '#fc-a'), bIn = $<HTMLSelectElement>(root, '#fc-b');
+  const fIn = $<HTMLInputElement>(root, '#fc-f'), nIn = $<HTMLInputElement>(root, '#fc-n');
+  const STOPS = FULL_STOPS.slice(1, 10); // f/1.4 … f/22
+  const set = (id: string, t: string) => { $<HTMLElement>(root, id).textContent = t; };
+
+  function draw() {
+    const A = F.find((x) => x.id === aIn.value)!, B = F.find((x) => x.id === bIn.value)!;
+    const fl = Number(fIn.value), N = STOPS[Number(nIn.value)];
+    const c = diagonal(A.w, A.h) / diagonal(B.w, B.h), area = (B.w * B.h) / (A.w * A.h);
+    const fb = fl / c, nb = N / c;
+    set('#fc-f-out', `${fl} mm`); set('#fc-n-out', fmtN(N));
+    set('#fc-c', `${c.toFixed(2)}×`); set('#fc-area', area >= 1 ? `${area.toFixed(area < 10 ? 1 : 0)}×` : `${Math.round(area * 100)}%`);
+    set('#fc-fb', `${fb < 10 ? fb.toFixed(1) : Math.round(fb)} mm`); set('#fc-nb', fmtN(nb));
+    // both frames centred, scaled so the larger one fills 180 px
+    const s = 180 / Math.max(A.w, A.h, B.w, B.h);
+    const rect = (f: { w: number; h: number }) => `x="${100 - (f.w * s) / 2}" y="${100 - (f.h * s) / 2}" width="${f.w * s}" height="${f.h * s}"`;
+    $<SVGGElement>(root, '#fc-draw').innerHTML =
+      `<rect ${rect(A)} fill="color-mix(in srgb, var(--f-formats) 18%, transparent)" stroke="var(--f-formats)" stroke-width="2"/>`
+      + `<rect ${rect(B)} fill="color-mix(in srgb, var(--f-optics) 22%, transparent)" stroke="var(--f-optics)" stroke-width="2" stroke-dasharray="5 3"/>`
+      + `<text x="${100 - (A.w * s) / 2 + 4}" y="${100 - (A.h * s) / 2 + 13}" class="lbl">A</text>`
+      + `<text x="${100 + (B.w * s) / 2 - 4}" y="${100 + (B.h * s) / 2 - 5}" class="lbl" text-anchor="end">B</text>`;
+    const same = Math.abs(c - 1) < 0.02;
+    set('#fc-sum', same
+      ? `A and B are the same size, so the same lens and aperture give the same picture.`
+      : `${fl} mm at ${fmtN(N)} on ${A.name} gives the same view and depth of field as ${fb < 10 ? fb.toFixed(1) : Math.round(fb)} mm at ${fmtN(nb)} on ${B.name}. Shutter speed and ISO for a correct exposure stay the same; ${c > 1 ? 'the smaller format collects less light in total, so it shows more noise.' : 'the larger format collects more light in total, so it shows less noise.'}`);
+  }
+  for (const el of [aIn, bIn, fIn, nIn]) el.addEventListener('input', draw);
+  draw();
+</script>

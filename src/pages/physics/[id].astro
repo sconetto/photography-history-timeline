@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { content, type Primer } from '../../lib/content';
 import { url } from '../../lib/url';
+import Widget from '../../components/widgets/Widget.astro';
 export async function getStaticPaths() {
   const { physics } = await content();
   return physics.map((primer) => ({ params: { id: primer.id }, props: { primer } }));
@@ -18,6 +19,7 @@ const related = primerEntries.get(primer.id) ?? [];
   <p class="eyebrow"><a href={url('/physics/')}>How it works</a> · {String(d.order).padStart(2, '0')}</p>
   <h1 class="page-title">{d.title}</h1>
   <p class="lead">{d.dek}</p>
+  <Widget kind={d.widget} />
   <div class="cols">
     <div class="prose"><Content /></div>
     <aside>
