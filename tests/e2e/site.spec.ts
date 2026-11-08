@@ -66,10 +66,42 @@ test('views switch and persist via hash', async ({ page }) => {
 
 test('theme persists across reloads', async ({ page }) => {
   await page.goto('/');
+  await page.locator('details.palette summary').click();
   await page.getByRole('button', { name: 'Night' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+});
+
+test('header stays on one row at every width', async ({ page }) => {
+  await page.goto('/entries/');
+  for (const width of [1920, 1440, 1280, 1141, 1140, 1024, 768, 560, 375, 320]) {
+    await page.setViewportSize({ width, height: 800 });
+    const r = await page.evaluate(() => {
+      const kids = [...document.querySelectorAll('.site-head .row > *')].filter((e) => getComputedStyle(e).display !== 'none');
+      const mids = kids.map((e) => { const b = e.getBoundingClientRect(); return b.top + b.height / 2; });
+      return { spread: Math.max(...mids) - Math.min(...mids), scrollW: document.documentElement.scrollWidth };
+    });
+    expect(r.spread, `header rows at ${width}px`).toBeLessThan(6);
+    expect(r.scrollW, `page width at ${width}px`).toBeLessThanOrEqual(width);
+  }
+});
+
+test('menu button opens the nav on narrow screens', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 900 });
+  await page.goto('/');
+  const nav = page.locator('#site-nav');
+  const btn = page.getByRole('button', { name: 'Menu' });
+  await expect(nav).toBeHidden();
+  await btn.click();
+  await expect(btn).toHaveAttribute('aria-expanded', 'true');
+  await expect(nav).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(nav).toBeHidden();
+  await expect(btn).toBeFocused();
+  await btn.click();
+  await nav.getByRole('link', { name: 'Formats' }).click();
+  await expect(page).toHaveURL(/\/formats\/$/);
 });
 
 test('palette defaults to Kodachrome and persists across reloads', async ({ page }) => {
