@@ -36,6 +36,7 @@ const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d:
     <script is:inline>
       // Set the theme before first paint (no flash). Storage may be unavailable.
       (function () {
+        document.documentElement.classList.add('js');
         var t = null, p = null;
         try { t = localStorage.getItem('ptt-theme'); p = localStorage.getItem('ptt-palette'); } catch (e) {}
         document.documentElement.setAttribute('data-palette', /^(kodachrome|print|cyanotype|platinum)$/.test(p || '') ? p : 'kodachrome');

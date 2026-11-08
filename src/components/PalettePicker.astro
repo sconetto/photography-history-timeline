@@ -1,5 +1,6 @@
 ---
-/** Colour palette picker. The palette is set on <html data-palette> before first paint (see Base.astro). */
+import ThemeSwitch from './ThemeSwitch.astro';
+/** Appearance menu: light/dark mode plus the colour palette. The palette is set on <html data-palette> before first paint (see Base.astro). */
 export const PALETTES = [
   { id: 'kodachrome', name: 'Kodachrome', note: 'Film-box yellow and red', day: ['#f6f3ea', '#f6c344', '#b5121b'], night: ['#1a1917', '#3a2f0c', '#ffc233'] },
   { id: 'print', name: 'Print & Darkroom', note: 'Baryta paper, amber safelight', day: ['#f3eee4', '#e9e2d4', '#a5461a'], night: ['#1a1612', '#221c16', '#ff8a3d'] },
@@ -9,11 +10,13 @@ export const PALETTES = [
 ---
 <details class="palette">
   <summary>
-    <span class="visually-hidden">Colour palette: </span>
+    <span class="visually-hidden">Appearance: </span>
     <span class="cur" aria-hidden="true"><i style="background: var(--band)"></i><i style="background: var(--accent)"></i></span>
     <span class="cur-name">Kodachrome</span>
     <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
   </summary>
+  <div class="pop">
+  <div class="mode"><span class="cap" id="mode-cap">Mode</span><ThemeSwitch /></div>
   <fieldset>
     <legend>Palette</legend>
     {PALETTES.map((p) => (
@@ -27,6 +30,7 @@ export const PALETTES = [
       </label>
     ))}
   </fieldset>
+  </div>
 </details>
 <script>
   const root = document.documentElement;
@@ -57,8 +61,11 @@ export const PALETTES = [
   .cur { display: inline-flex; }
   .cur i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--rule); }
   .cur i + i { margin-left: -4px; }
-  fieldset { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; margin: 0; width: 272px; display: grid; gap: 2px; padding: 8px; background: var(--raised); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 12px 32px var(--shadow); }
-  legend { float: left; font: 500 10px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding: 4px 6px 8px; }
+  .pop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; width: 280px; max-width: calc(100vw - 32px); display: grid; gap: 6px; padding: 8px; background: var(--raised); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 12px 32px var(--shadow); }
+  .mode { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 6px 8px; border-bottom: 1px solid var(--rule-soft); }
+  .cap, legend { font: 500 10px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 2px; min-width: 0; }
+  legend { float: left; padding: 4px 6px 8px; }
   label { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; cursor: pointer; position: relative; }
   label:hover { background: var(--rule-soft); }
   label:has(input:checked) { background: var(--accent-soft); }
