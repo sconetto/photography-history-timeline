@@ -277,8 +277,9 @@ test.describe('timeline zoom', () => {
     const win1 = (await page.locator('.ov-win').boundingBox())!;
     await page.locator('.nav-in').click();
     await expect(page.locator('.nav-range')).toContainText('2×');
-    expect(await chartW(page)).toBeGreaterThan(w1 * 1.8);
-    expect((await page.locator('.ov-win').boundingBox())!.width).toBeLessThan(win1.width * 0.6);
+    // the readout changes at once; the width animates, so wait for it to settle
+    await expect.poll(() => chartW(page)).toBeGreaterThan(w1 * 1.8);
+    await expect.poll(async () => (await page.locator('.ov-win').boundingBox())!.width).toBeLessThan(win1.width * 0.6);
     const r2 = await readout(page);
     expect(r2.a).toBeGreaterThan(r1.a);
     expect(r2.b).toBeLessThan(r1.b);
@@ -372,5 +373,61 @@ test.describe('timeline zoom on a phone', () => {
     await page.keyboard.press('End');
     await expect.poll(() => page.locator('#scroller').evaluate((s) => s.scrollLeft)).toBeGreaterThan(sl);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  });
+});
+
+test.describe('physics widgets', () => {
+  const PRIMERS: [string, string, string][] = [
+    // primer, a range input to move, the summary that should change
+    ['pinhole', '#ph-d', '#ph-sum'],
+    ['lenses', '#lf-f', '#lf-sum'],
+    ['aperture', '#ap-n', '#ap-sum'],
+    ['exposure', '#ex-n', '#ex-sum'],
+    ['colour', '#col-k', '#col-wb-sum'],
+    ['sensors', '#bay-p', '#bay-sum'],
+    ['formats', '#fc-f', '#fc-sum'],
+    ['computational', '#stk-n', '#stk-sum'],
+  ];
+  for (const [id, input, sum] of PRIMERS) {
+    test(`${id}: the widget responds and has no axe violations`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on('pageerror', (e) => errors.push(e.message));
+      await page.goto(`/physics/${id}/`);
+      const fig = page.locator('figure.wg');
+      await expect(fig).toBeVisible();
+      const before = await page.locator(sum).textContent();
+      expect(before?.length).toBeGreaterThan(20);
+      const range = page.locator(input);
+      await range.focus();
+      for (let i = 0; i < 4; i++) await range.press('ArrowRight');
+      await expect(page.locator(sum)).not.toHaveText(before!);
+      const { violations } = await new AxeBuilder({ page }).include('figure.wg').analyze();
+      expect(violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+  }
+
+  test('exposure: sunny 16 is a correct exposure, and aperture priority keeps it correct', async ({ page }) => {
+    await page.goto('/physics/exposure/');
+    await expect(page.locator('#ex-verdict')).toHaveText('Correct');
+    await page.locator('#ex-auto').check();
+    const n = page.locator('#ex-n');
+    await n.focus();
+    for (let i = 0; i < 6; i++) await n.press('ArrowLeft');
+    await expect(page.locator('#ex-verdict')).toHaveText('Correct');
+    await expect(page.locator('#ex-t-out')).toHaveText('1/500 s');
+  });
+
+  test('silver: the exposure history lists every entry with an exposure', async ({ page }) => {
+    await page.goto('/physics/silver/');
+    await page.getByText('Show the data as a table').click();
+    await expect(page.locator('.wg-table tbody tr')).toHaveCount(15);
+    await expect(page.locator('.wg-table')).toContainText('Heliography');
+  });
+
+  test('primers link back to their entries', async ({ page }) => {
+    await page.goto('/entries/bayer-filter/');
+    await page.getByRole('link', { name: /Digital sensors/ }).first().click();
+    await expect(page).toHaveURL(/\/physics\/sensors\/$/);
   });
 });
