@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+# copyrighted reference material: never commit
+references/
+# test output
+test-results/
+playwright-report/
