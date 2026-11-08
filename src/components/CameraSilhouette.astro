@@ -1,0 +1,15 @@
+---
+/** The camera-type silhouette for an entry's facts column. */
+import { cameraSvg, CAMERA_NAMES, type CameraType } from '../lib/cameras';
+interface Props { type: CameraType }
+const { type } = Astro.props;
+---
+<figure class="camsil">
+  <Fragment set:html={cameraSvg(type)} />
+  <figcaption>{CAMERA_NAMES[type]}</figcaption>
+</figure>
+<style>
+  .camsil { margin: 0; display: grid; gap: 6px; justify-items: start; }
+  .camsil :global(.cam) { width: 150px; }
+  figcaption { font-size: 13px; color: var(--ink-2); }
+</style>

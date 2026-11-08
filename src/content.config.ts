@@ -1,6 +1,7 @@
 import { defineCollection, reference } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob, file } from 'astro/loaders';
+import { CAMERA_TYPES } from './lib/cameras';
 
 /** Every outbound link must be https. Domain blocklist checks live in src/lib/validate.ts. */
 const https = z.string().refine((s) => s.startsWith('https://'), { message: 'links must start with https://' });
@@ -43,9 +44,7 @@ const entries = defineCollection({
       parents: z.array(z.object({ id: reference('entries'), kind: z.enum(['built', 'enabled', 'replaced']) })).default([]),
       makers: z.array(reference('makers')).default([]),
       primers: z.array(reference('physics')).default([]),
-      cameraType: z
-        .enum(['box', 'folding', 'viewfinder', 'rangefinder', 'tlr', 'slr', 'view', 'instant', 'compact', 'dslr', 'mirrorless', 'phone'])
-        .optional(),
+      cameraType: z.enum(CAMERA_TYPES).optional(),
       people: z.array(z.tuple([z.string(), z.string(), z.string()])).default([]),
       moments: z.array(z.tuple([z.string(), z.string()])).default([]),
       specs: z.array(z.tuple([z.string(), z.string()])).default([]),

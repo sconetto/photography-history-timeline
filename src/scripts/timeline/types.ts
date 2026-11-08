@@ -1,3 +1,4 @@
+import type { CameraType } from '../../lib/cameras';
 export type Side = 'invention' | 'product';
 export type Impact = 'xl' | 'l' | 'm' | 's';
 export type Status = 'inuse' | 'revived' | 'niche' | 'obsolete';
@@ -22,6 +23,8 @@ export interface Item {
   makers: string[];
   thumb?: string;
   thumbAlt?: string;
+  /** camera silhouette for camera entries (src/lib/cameras.ts) */
+  cam?: CameraType;
   href: string;
 }
 export interface Milestone { id: string; year: number; label: string; when: string; note: string; href: string }

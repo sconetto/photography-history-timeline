@@ -15,7 +15,7 @@ const items: Payload['items'] = await Promise.all(
       id: e.id, label: d.label, title: d.title, ds: d.ds, date: d.date, year: d.year, range: d.range, end: d.end,
       fam: d.fam, side: d.side, impact: d.impact, status: d.status, summary: d.summary, today: d.today,
       parents: d.parents.map((p) => ({ id: p.id.id, kind: p.kind })), makers: d.makers.map((m) => m.id),
-      thumb, thumbAlt: d.image?.alt, href: url(`/entries/${e.id}/`),
+      thumb, thumbAlt: d.image?.alt, cam: d.cameraType, href: url(`/entries/${e.id}/`),
     };
   }),
 );
@@ -146,6 +146,7 @@ const famName = new Map(families.map((f) => [f.id, f.data.name]));
   .card { position: absolute; left: 0; top: 0; pointer-events: none; width: max-content; max-width: 300px; z-index: 5;
     background: var(--raised); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 12px 11px;
     box-shadow: 0 10px 30px var(--shadow); font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+  .card :global(.cam-thumb) { width: 132px; margin: 0 0 8px; }
   .card :global(.thumb) { display: block; width: 100%; height: 120px; object-fit: cover; border-radius: 7px; margin-bottom: 8px; filter: saturate(.9); }
   .card :global(.nm) { display: block; font: 600 15px/1.25 var(--font-body); color: var(--ink); }
   .card :global(.when) { display: block; font: 400 11px/1.4 var(--font-mono); color: var(--accent); margin: 2px 0 6px; }
