@@ -23,7 +23,9 @@ medium, with a page for each and primers on the physics behind them.
   sales that link them (Minolta → Konica Minolta → Sony, Pentax → Hoya → Ricoh and more).
 - **Formats.** Film and sensor sizes from 8×10 inch to phone sensors, overlaid to scale, with a crop
   factor and equivalent focal length calculator.
-- **How it works.** Primers on the physics and chemistry of photography.
+- **How it works.** Nine primers on the physics and chemistry of photography, from the pinhole to
+  computational photography, each with an interactive diagram: angle of view, depth of field, the
+  exposure triangle, colour mixing and white balance, a Bayer sensor, burst stacking and more.
 - **Landmarks, glossary and search.** Turning points in photography, a glossary of terms used across
   the site, and full-text search.
 
@@ -32,9 +34,9 @@ night modes.
 
 ## Status
 
-Work in progress. The timeline, entries, makers, formats, landmarks, glossary and search are in place,
-with 103 entries and 35 makers. Still to come: the full set of physics primers with interactive
-widgets, public-domain historical images and camera illustrations, a fact-check pass, and launch.
+Work in progress. The timeline, entries, makers, formats, physics primers, landmarks, glossary and
+search are in place, with 103 entries, 35 makers and nine primers. Still to come: public-domain
+historical images and camera illustrations, a fact-check pass, and launch.
 
 ## Development
 
