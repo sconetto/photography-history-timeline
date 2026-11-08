@@ -30,7 +30,8 @@ medium, with a page for each and primers on the physics behind them.
   the site, and full-text search.
 
 Four colour palettes (Kodachrome, Print & Darkroom, Cyanotype, Platinum & Selenium), each in day and
-night modes.
+night modes. The whole site is in English and Brazilian Portuguese
+([ptt.sconetto.me/pt-br/](https://ptt.sconetto.me/pt-br/)).
 
 ## Status
 
@@ -53,6 +54,7 @@ pnpm check      # type check
 pnpm test       # unit tests (Vitest)
 pnpm e2e        # end-to-end and accessibility tests (Playwright + axe, against pnpm preview)
 pnpm links      # check every external link in the content
+pnpm i18n:status  # list anything not yet translated, per language
 ```
 
 Built with [Astro](https://astro.build), TypeScript, MDX and [Pagefind](https://pagefind.app), with
@@ -62,8 +64,8 @@ no client-side UI framework.
 
 The site is static and hosted on GitHub Pages at the custom domain `ptt.sconetto.me`.
 
-- **`.github/workflows/deploy.yml`** runs on every push to `main`: type check, unit tests and build,
-  then publishes `dist/` to Pages. Pull requests run the same checks without deploying.
+- **`.github/workflows/deploy.yml`** runs on every push to `main`: type check, unit tests, the
+  translation check (`pnpm i18n:status`) and build, then publishes `dist/` to Pages. Pull requests run the same checks without deploying.
 - **`.github/workflows/links.yml`** runs `pnpm links` every Monday, and on demand, so dead source
   links show up as a failed run.
 
@@ -94,6 +96,41 @@ and cited paraphrase only, and are kept out of the repository in the git-ignored
 Images are public domain (or CC0), each credited with its source. `node scripts/commons.ts` searches
 Wikimedia Commons, refuses any file that is not public domain, and saves a scaled copy with its
 credit. Cameras are drawn for this site as SVG, one per camera at its real proportions, not photographed.
+
+## Languages
+
+English is served at the root and every other language under its own prefix: `/pt-br/` for Brazilian
+Portuguese. Paths and ids are the same in every language (`/entries/daguerreotype/` and
+`/pt-br/entries/daguerreotype/`), so the language switcher in the header only swaps the prefix. There
+is no automatic language detection.
+
+Facts live only in the English files: dates, lineage, makers, specs, images and links. A translation
+holds only words, in `src/content/i18n/<lang>/`, with the same file names and YAML keys as the English
+content:
+
+| Path | What it translates |
+|---|---|
+| `entries/*.mdx` | Title, label, dates as text, summary, "Today", people's roles, moments, specs, image alt text and the narrative, with the four section headings in that language |
+| `makers/*.md` | Fate, link notes and the story |
+| `physics/*.mdx` | Title, short description and the primer text |
+| `*.yaml` | The words of each era, family, format, glossary term, landmark and source |
+
+Interface text (menus, buttons, chart labels, widget readouts) lives in `src/i18n/ui/<lang>.ts`. The
+English file is the source of truth, and `pnpm check` fails if another language is missing a key.
+`src/i18n/TERMS.md` records the Portuguese photography terms chosen, so the translation stays
+consistent. In translated text, wikilinks need a label in that language (`[[daguerreotype|daguerreótipo]]`);
+`[[g:term]]` picks up the translated glossary term by itself, and all links stay in the same language.
+
+**To add a language:**
+
+1. Add it to `LANGS` and `LOCALES` in `src/i18n/locales.ts`, and to the sitemap `locales` in
+   `astro.config.mjs`.
+2. Copy `src/i18n/ui/en.ts` to `src/i18n/ui/<lang>.ts`, translate it, and register it in
+   `src/i18n/index.ts`.
+3. Translate the content into `src/content/i18n/<lang>/`. Pages are generated for the new prefix
+   automatically, and Pagefind builds a separate search index for it.
+4. Run `pnpm i18n:status` until it reports the language complete. The build also fails on a
+   translation with no English original, or an entry missing one of its sections.
 
 ## Contributing
 
