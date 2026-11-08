@@ -30,6 +30,14 @@ while (remaining.length) {
   const i = last ? remaining.reduce((best, c, j) => (countryLinks(last, c) > countryLinks(last, remaining[best]) ? j : best), 0) : 0;
   countries.push(remaining.splice(i, 1)[0]);
 }
+// within a country, a chain linked to the country above sits at the top and one linked to the country below at the bottom,
+// so cross-country arrows never cut through unrelated rows (stable sort keeps the order above otherwise)
+const compCountries = new Map<string, Set<string>>();
+for (const m of makers) { const c = find(m.id); (compCountries.get(c) ?? compCountries.set(c, new Set()).get(c)!).add(m.data.country); }
+countries.forEach((c, i) => {
+  const edge = (m: Maker) => { const s = compCountries.get(find(m.id))!; return s.has(countries[i - 1]) ? -1 : s.has(countries[i + 1]) ? 1 : 0; };
+  byCountry.get(c)!.sort((a, b) => edge(a) - edge(b));
+});
 
 // ---- geometry (SVG user units)
 const W = 1120, LABEL = 236, X0 = LABEL + 18, X1 = W - 24, ROW = 30, HEAD = 34, TOP = 34;
