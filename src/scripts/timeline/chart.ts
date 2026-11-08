@@ -3,7 +3,8 @@
  * products below. mode "lanes": one horizontal lane per family.
  * Stars are SVG <a> links to the entry page; hovering is handled by the caller through callbacks.
  */
-import { xOf, fmtYear } from '../../lib/scale';
+import { xOf, fmtYear, SPAN } from '../../lib/scale';
+import { zoomGeometry, ticksFor } from '../../lib/zoom';
 import { place, type Box } from '../../lib/layout';
 import type { Frame, Item, Milestone, Payload, Pos } from './types';
 
@@ -38,10 +39,12 @@ export class Chart {
   frame: Frame | null = null;
   private g: Record<string, SVGGElement>;
   private edgeList: { from: string; to: string; kind: string }[] = [];
+  /** era labels, kept inside the visible part of their band while scrolling */
+  private eraLabels: { el: SVGTextElement; a: number; b: number; w: number }[] = [];
 
   constructor(readonly svg: SVGSVGElement, readonly data: Payload, readonly order: Item[], readonly mode: 'time' | 'lanes', hooks: Hooks) {
     const g = (name: string) => el('g', { class: name }, svg);
-    this.g = { bands: g('bands'), lanebg: g('lanebg'), axis: g('axis'), span: g('span'), ticks: g('ticks'), mil: g('mil'), edges: g('edges'), items: g('items') };
+    this.g = { bands: g('bands'), lanebg: g('lanebg'), lanelab: g('lanelab'), axis: g('axis'), span: g('span'), ticks: g('ticks'), mil: g('mil'), edges: g('edges'), items: g('items') };
     for (const it of order) for (const p of it.parents) this.edgeList.push({ from: p.id, to: it.id, kind: p.kind });
     for (const e of this.edgeList) this.edges.push(el('path', { class: `edge ${e.kind}`, 'data-from': e.from, 'data-to': e.to }, this.g.edges));
     data.milestones.forEach((m, i) => this.buildGem(m, i, hooks));
@@ -86,15 +89,21 @@ export class Chart {
   }
 
   // ---------- layout ----------
-  geometry(width: number, s: number) {
-    const W = Math.max(width, 1080);
-    const x0 = 34, mainW = W - x0 - 70;
-    return { W, x0, mainW, s };
+  geometry(width: number, s: number, k = 1) {
+    return { ...zoomGeometry(width, k), s };
   }
   x(g: { x0: number; mainW: number; s: number }, year: number) { return xOf(year, g.s, g.x0, g.mainW); }
 
-  layout(width: number, s: number, widths: Record<string, number>): Frame {
-    const g = this.geometry(width, s);
+  /** Same rows and label sides, new zoom: used during continuous gestures so labels don't jump between rows. */
+  rescale(f: Frame, width: number, k: number): Frame {
+    const g = this.geometry(width, f.s, k);
+    const pos: Record<string, Pos> = {};
+    for (const it of this.order) { const p = f.pos[it.id]; if (p) pos[it.id] = { ...p, x: this.x(g, it.year) }; }
+    return { ...f, ...g, pos };
+  }
+
+  layout(width: number, s: number, widths: Record<string, number>, k = 1): Frame {
+    const g = this.geometry(width, s, k);
     const pos: Record<string, Pos> = {};
     if (this.mode === 'time') {
       const rows: Record<'up' | 'down', Box[][]> = { up: [], down: [] };
@@ -155,20 +164,26 @@ export class Chart {
   private drawEras(f: Frame, measure: (font: string, text: string) => number) {
     let html = '';
     const tw = (t: string) => measure('500 10px "IBM Plex Mono"', t.toUpperCase()) + t.length * 1.4;
+    const meta: { a: number; b: number; w: number }[] = [];
     this.data.eras.forEach((e, i) => {
       const a = this.x(f, e.a), b = Math.min(this.x(f, e.b), f.x0 + f.mainW + 40);
       if (i % 2 === 1) html += `<rect class="era-band" x="${f1(a)}" y="0" width="${f1(b - a)}" height="${f1(f.H)}"/>`;
       // full name if it fits, else the short name; titles carry the full name and dates either way
       const label = b - a > tw(e.name) + 14 ? e.name : b - a > tw(e.short) + 8 ? e.short : '';
-      if (label) html += `<text class="era-name" x="${f1((a + b) / 2)}" y="20" text-anchor="middle"><title>${e.name}, ${e.a < 0 ? 'antiquity' : e.a}–${e.b > this.data.now ? 'today' : e.b}</title>${label}</text>`;
+      if (label) {
+        html += `<text class="era-name" x="${f1((a + b) / 2)}" y="20" text-anchor="middle"><title>${e.name}, ${e.a < 0 ? 'antiquity' : e.a}–${e.b > this.data.now ? 'today' : e.b}</title>${label}</text>`;
+        meta.push({ a, b, w: tw(label) });
+      }
     });
     this.g.bands.innerHTML = html;
+    const els = this.g.bands.querySelectorAll<SVGTextElement>('text.era-name');
+    this.eraLabels = meta.map((m, i) => ({ ...m, el: els[i] }));
   }
 
   private ticks(f: Frame, y: number, measure: (font: string, text: string) => number, lines?: [number, number]) {
     let html = '';
     const kept: [number, number][] = [];
-    for (const t of TICKS) {
+    for (const t of ticksFor((y) => this.x(f, y), SPAN.y0, SPAN.y1, TICKS)) {
       const x = this.x(f, t), label = t === 1 ? '1 CE' : fmtYear(t);
       const hw = measure('400 10.5px "IBM Plex Mono"', label) / 2 + 8;
       if (kept.some((k) => x + hw > k[0] && x - hw < k[1])) continue;
@@ -200,22 +215,35 @@ export class Chart {
 
   private drawLaneChrome(f: Frame, measure: (font: string, text: string) => number) {
     this.g.ticks.innerHTML = this.ticks(f, 36, measure);
-    let lb = '';
+    let lb = '', ll = '';
     for (const ln of f.lanes!) {
       const fam = this.data.families.find((x) => x.id === ln.fam)!;
       const n = this.order.filter((it) => it.fam === ln.fam).length;
       lb += `<rect class="lane-bg" x="8" y="${ln.top}" width="${f.W - 16}" height="${ln.h}" rx="10" style="fill: color-mix(in srgb, var(--f-${ln.fam}) 9%, transparent)"/>`;
-      lb += `<circle cx="24" cy="${ln.top + 15}" r="4.5" style="fill: var(--f-${ln.fam})"/>`;
-      lb += `<text class="lane-title" x="35" y="${ln.top + 18.5}">${fam.name}</text>`;
       const tw = measure('500 10px "IBM Plex Mono"', fam.name.toUpperCase()) + fam.name.length * 1.3;
-      lb += `<text class="lane-count" x="${f1(42 + tw)}" y="${ln.top + 18.5}">${n}</text>`;
+      ll += `<circle cx="24" cy="${ln.top + 15}" r="4.5" style="fill: var(--f-${ln.fam})"/>`;
+      ll += `<text class="lane-title" x="35" y="${ln.top + 18.5}">${fam.name}</text>`;
+      ll += `<text class="lane-count" x="${f1(42 + tw)}" y="${ln.top + 18.5}">${n}</text>`;
     }
     this.g.lanebg.innerHTML = lb;
+    this.g.lanelab.innerHTML = ll;
     this.data.milestones.forEach((m, i) => {
       const x = this.x(f, m.year), o = this.gems[i];
       if (o.line) { o.line.setAttribute('x1', f1(x)); o.line.setAttribute('x2', f1(x)); o.line.setAttribute('y1', String(LANE_TOP - 2)); o.line.setAttribute('y2', f1(f.H - 8)); }
       this.placeGem(i, x, LANE_TOP - 6);
     });
+  }
+
+  /** Keep labels readable while the chart is scrolled: era names stay inside the visible part of their band,
+   *  lane titles stay at the left edge. */
+  pin(scrollLeft: number, clientWidth: number) {
+    const va = scrollLeft, vb = scrollLeft + clientWidth;
+    for (const e of this.eraLabels) {
+      const lo = Math.max(e.a, va + 26) + e.w / 2 + 8, hi = Math.min(e.b, vb - 26) - e.w / 2 - 8;
+      const x = lo > hi ? (e.a + e.b) / 2 : Math.min(hi, Math.max(lo, (e.a + e.b) / 2));
+      e.el.setAttribute('x', f1(x));
+    }
+    this.g.lanelab.setAttribute('transform', `translate(${f1(scrollLeft)} 0)`);
   }
 
   private placeGem(i: number, x: number, y: number) {

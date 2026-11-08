@@ -30,4 +30,4 @@ export interface Family { id: string; name: string; short: string }
 export interface Payload { items: Item[]; milestones: Milestone[]; eras: Era[]; families: Family[]; now: number }
 
 export interface Pos { x: number; y: number; r: number; anchor: 'start' | 'end'; row: number; side?: 'up' | 'down' }
-export interface Frame { W: number; H: number; x0: number; mainW: number; s: number; pos: Record<string, Pos>; axisY?: number; lanes?: { fam: string; top: number; h: number }[] }
+export interface Frame { W: number; H: number; x0: number; mainW: number; s: number; k: number; pos: Record<string, Pos>; axisY?: number; lanes?: { fam: string; top: number; h: number }[] }
