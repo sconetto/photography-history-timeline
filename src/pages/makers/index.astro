@@ -1,49 +1,178 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { content } from '../../lib/content';
+import { content, LINK_TEXT, type Maker } from '../../lib/content';
 import { url } from '../../lib/url';
-const { makers, makerEntries } = await content();
-const byCountry = new Map<string, typeof makers>();
-for (const m of [...makers].sort((a, b) => a.data.founded - b.data.founded)) (byCountry.get(m.data.country) ?? byCountry.set(m.data.country, []).get(m.data.country)!).push(m);
+const { makers, makerById, makerEntries, families } = await content();
 const now = new Date().getFullYear();
-const Y0 = 1840, Y1 = now + 2;
-const pct = (y: number) => ((Math.max(Y0, y) - Y0) / (Y1 - Y0)) * 100;
-const decades = [1850, 1875, 1900, 1925, 1950, 1975, 2000, 2025];
+
+// ---- order: countries greedily so linked countries sit together; inside a country, merger chains stay adjacent
+const linksOf = (m: Maker) => m.data.links.map((l) => ({ ...l, to: l.to.id }));
+const comp = new Map<string, string>();
+const find = (id: string): string => { const p = comp.get(id) ?? id; if (p === id) return id; const r = find(p); comp.set(id, r); return r; };
+for (const m of makers) for (const l of linksOf(m)) comp.set(find(m.id), find(l.to));
+const compStart = new Map<string, number>();
+for (const m of makers) { const c = find(m.id); compStart.set(c, Math.min(compStart.get(c) ?? Infinity, m.data.founded)); }
+
+const byCountry = new Map<string, Maker[]>();
+for (const m of makers) (byCountry.get(m.data.country) ?? byCountry.set(m.data.country, []).get(m.data.country)!).push(m);
+// a company that something flowed into (merger, takeover, sale) sorts at the year of that link, so arrows point down the chain
+const flowKey = new Map(makers.map((m) => [m.id, m.data.founded]));
+for (const m of makers) for (const l of linksOf(m)) flowKey.set(l.to, Math.max(makerById.get(l.to)!.data.founded, Math.min(flowKey.get(l.to) === makerById.get(l.to)!.data.founded ? Infinity : flowKey.get(l.to)!, l.year)));
+for (const list of byCountry.values()) list.sort((a, b) => (compStart.get(find(a.id))! - compStart.get(find(b.id))!) || find(a.id).localeCompare(find(b.id)) || flowKey.get(a.id)! - flowKey.get(b.id)!);
+const countryLinks = (a: string, b: string) => makers.filter((m) => linksOf(m).some((l) => {
+  const t = makerById.get(l.to)!.data.country; return (m.data.country === a && t === b) || (m.data.country === b && t === a);
+})).length;
+const oldest = (c: string) => Math.min(...byCountry.get(c)!.map((m) => m.data.founded));
+const remaining = [...byCountry.keys()].sort((a, b) => byCountry.get(b)!.length - byCountry.get(a)!.length || oldest(a) - oldest(b));
+const countries: string[] = [];
+while (remaining.length) {
+  const last = countries.at(-1);
+  const i = last ? remaining.reduce((best, c, j) => (countryLinks(last, c) > countryLinks(last, remaining[best]) ? j : best), 0) : 0;
+  countries.push(remaining.splice(i, 1)[0]);
+}
+
+// ---- geometry (SVG user units)
+const W = 1120, LABEL = 236, X0 = LABEL + 18, X1 = W - 24, ROW = 30, HEAD = 34, TOP = 34;
+const Y0 = 1840, Y1 = now + 4;
+// recent decades stretched (most mergers and sales happen after 2000), like the home timeline's default scale
+const KNOTS: [number, number][] = [[Y0, 0], [1880, 0.11], [1920, 0.25], [1960, 0.43], [1990, 0.62], [2010, 0.8], [Y1, 1]];
+const frac = (y: number) => { y = Math.max(Y0, Math.min(Y1, y)); for (let i = 1; i < KNOTS.length; i++) if (y <= KNOTS[i][0]) { const [a, fa] = KNOTS[i - 1], [b, fb] = KNOTS[i]; return fa + ((fb - fa) * (y - a)) / (b - a); } return 1; };
+const X = (y: number) => X0 + frac(y) * (X1 - X0);
+const shortName = (n: string) => n.replace(/\s*\(.*\)\s*$/, '');
+type Row = { m: Maker; y: number };
+const rows: Row[] = [];
+const heads: { name: string; y: number }[] = [];
+let cy = TOP;
+for (const c of countries) {
+  heads.push({ name: c, y: cy + 22 });
+  cy += HEAD;
+  for (const m of byCountry.get(c)!) { rows.push({ m, y: cy + ROW / 2 }); cy += ROW; }
+}
+const H = cy + 14;
+const rowY = new Map(rows.map((r) => [r.m.id, r.y]));
+const ticks: number[] = [];
+for (const t of [1840, 1860, 1880, 1900, 1920, 1940, 1960, 1970, 1980, 1990, 2000, 2010, 2020]) if (X(now) - X(t) > 72 && (!ticks.length || X(t) - X(ticks.at(-1)!) > 40)) ticks.push(t);
+const famName = new Map(families.map((f) => [f.id, f.data.name]));
+const conn = makers.flatMap((m) => linksOf(m).map((l) => ({ from: m, ...l })));
+const f1 = (n: number) => Math.round(n * 10) / 10;
 ---
-<Base title="Makers" description="The companies behind photography, from Voigtländer and Kodak to Canon, Nikon and Sony, by country and lifespan.">
+<Base title="Makers" description="The companies behind photography, from Voigtländer and Kodak to Canon, Nikon, Sony and DJI: lifespans by country, with mergers, takeovers and successors." wide>
   <p class="eyebrow">Companies</p>
   <h1 class="page-title">Makers</h1>
-  <p class="dek">Who built photography's cameras, lenses and film, grouped by country. Each bar runs from founding to today, or to the year the company left photography; dots mark its entries on the timeline. The full chart, with mergers and successors, is coming in the next phase.</p>
-  <div class="chart panel" role="list">
-    <div class="axis" aria-hidden="true">{decades.map((d) => <span style={`left: ${pct(d)}%`}>{d}</span>)}</div>
-    {[...byCountry].map(([country, list]) => (
-      <section class="country" role="listitem">
-        <h2>{country}</h2>
-        {list.map((m) => (
-          <a class="row" href={url(`/makers/${m.id}/`)}>
-            <span class="name">{m.data.name} <span class="y">{m.data.founded}{m.data.ended ? `–${m.data.ended}` : ''}</span></span>
-            <span class="track">
-              <span class="bar" style={`left: ${pct(m.data.founded)}%; width: ${pct(m.data.ended ?? now) - pct(m.data.founded)}%`} />
-              {m.data.founded < Y0 && <span class="before" title={`Founded ${m.data.founded}`}>←</span>}
-              {(makerEntries.get(m.id) ?? []).map((e) => <span class="dot" style={`left: ${pct(e.data.year)}%; background: var(--f-${e.data.fam})`} title={`${e.data.label}, ${e.data.ds}`} />)}
-            </span>
-          </a>
-        ))}
+  <p class="dek">Who built photography's cameras, lenses and film, grouped by country. Each bar runs from a company's founding to today, or to the year it left photography. Dots are its entries on the timeline. Curved lines show where one company merged into, was bought by, or handed its cameras to another.</p>
+
+  <div class="legend" aria-hidden="true">
+    <span><svg width="34" height="10"><line x1="2" y1="5" x2="32" y2="5" class="bar" /></svg>Lifespan</span>
+    <span><svg width="34" height="10"><line x1="2" y1="5" x2="26" y2="5" class="bar" /><line x1="27" y1="1" x2="27" y2="9" class="cap" /></svg>Left photography</span>
+    {Object.entries(LINK_TEXT).filter(([k]) => conn.some((c) => c.kind === k)).map(([k, t]) => (
+      <span><svg width="34" height="10"><line x1="2" y1="5" x2="32" y2="5" class={`lk lk-${k}`} /></svg>{t.out.replace(/ (by|to|into)$/, '').toLowerCase().replace(/^./, (c) => c.toUpperCase())}</span>
+    ))}
+    <span><svg width="14" height="10"><circle cx="7" cy="5" r="4.5" class="dot-key" /></svg>Entry on the timeline, coloured by family</span>
+  </div>
+
+  <div class="panel chart-wrap">
+    <svg class="mk" viewBox={`0 0 ${W} ${H}`} role="group" aria-label="Makers by country and lifespan">
+      <g class="grid" aria-hidden="true">
+        {ticks.map((t) => <><line x1={X(t)} x2={X(t)} y1={TOP - 6} y2={H - 8} /><text x={X(t)} y={TOP - 14} text-anchor="middle">{t}</text></>)}
+        <line class="now" x1={X(now)} x2={X(now)} y1={TOP - 6} y2={H - 8} />
+        <text class="now-t" x={X(now)} y={TOP - 14} text-anchor="end" dx="-4">TODAY</text>
+      </g>
+      {heads.map((h) => <text class="country" x="12" y={h.y}>{h.name}</text>)}
+      {rows.map(({ m, y }) => {
+        const d = m.data, end = d.ended ?? now, list = makerEntries.get(m.id) ?? [];
+        return (
+          <g class="row" data-id={m.id}>
+            <rect class="band" x="4" y={y - ROW / 2 + 1} width={W - 8} height={ROW - 2} rx="6" />
+            <a href={url(`/makers/${m.id}/`)} class="nm">
+              <text x="14" y={y + 4.5}>{shortName(d.name)}</text>
+            </a>
+            <text class="yrs" x={LABEL} y={y + 4} text-anchor="end">{d.founded}–{d.ended ?? ''}</text>
+            <line class="bar" x1={X(d.founded)} x2={X(end)} y1={y} y2={y} />
+            {d.ended ? <line class="cap" x1={X(end)} x2={X(end)} y1={y - 6} y2={y + 6} /> : <path class="tip" d={`M${f1(X(end) + 2)} ${y - 4} l5 4 -5 4`} />}
+            {d.founded < Y0 && <text class="early" x={X0 + 4} y={y - 6}>← {d.founded}</text>}
+            {list.map((e) => (
+              <a href={url(`/entries/${e.id}/`)} class="pdot">
+                <title>{`${e.data.label}, ${e.data.ds} · ${famName.get(e.data.fam)}`}</title>
+                <circle cx={X(e.data.year)} cy={y} r="5.5" style={`fill: var(--f-${e.data.fam})`} />
+              </a>
+            ))}
+          </g>
+        );
+      })}
+      <g class="links">
+        {conn.map((c) => {
+          const x = X(c.year), ya = rowY.get(c.from.id)!, yb = rowY.get(c.to)!;
+          const dir = yb > ya ? 1 : -1, bend = 16 + Math.min(40, Math.abs(yb - ya) / 8);
+          return (
+            <g class={`link lk-${c.kind}`} data-from={c.from.id} data-to={c.to}>
+              <title>{`${shortName(c.from.data.name)}: ${LINK_TEXT[c.kind].out.toLowerCase()} ${shortName(makerById.get(c.to)!.data.name)}, ${c.year}${c.note ? ` (${c.note})` : ''}`}</title>
+              <path class={`lk lk-${c.kind}`} d={`M${f1(x)} ${ya} C${f1(x + bend)} ${ya + dir * 8} ${f1(x + bend)} ${yb - dir * 8} ${f1(x + 3)} ${yb - dir * 4}`} />
+              <circle class="lk-from" cx={x} cy={ya} r="3" />
+              <path class="lk-head" d={`M${f1(x + 3)} ${yb - dir * 4} l-6 ${-dir * 3} M${f1(x + 3)} ${yb - dir * 4} l${2} ${-dir * 7}`} />
+              <path class="lk-hit" d={`M${f1(x)} ${ya} C${f1(x + bend)} ${ya + dir * 8} ${f1(x + bend)} ${yb - dir * 8} ${f1(x + 3)} ${yb - dir * 4}`} />
+            </g>
+          );
+        })}
+      </g>
+    </svg>
+  </div>
+  <p class="hint">Scroll sideways on small screens. Hover a line or a dot for details.</p>
+
+  <h2 class="sec">All makers</h2>
+  <div class="all">
+    {countries.map((c) => (
+      <section>
+        <h3>{c}</h3>
+        <ul>
+          {byCountry.get(c)!.map((m) => (
+            <li><a href={url(`/makers/${m.id}/`)}>{m.data.name}</a> <span class="mono">{m.data.founded}{m.data.ended ? `–${m.data.ended}` : '–'}</span><span class="fate">{m.data.fate}</span></li>
+          ))}
+        </ul>
       </section>
     ))}
   </div>
 </Base>
 <style>
-  .chart { padding: 14px 18px 18px; overflow-x: auto; }
-  .axis { position: relative; height: 18px; margin-left: 240px; font: 400 10.5px/1 var(--font-mono); color: var(--muted); min-width: 520px; }
-  .axis span { position: absolute; transform: translateX(-50%); }
-  .country h2 { font: 500 10.5px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 18px 0 6px; }
-  .row { display: grid; grid-template-columns: 240px minmax(520px, 1fr); align-items: center; gap: 0; padding: 5px 0; border: 0; color: var(--ink); border-radius: 6px; }
-  .row:hover { background: var(--rule-soft); }
-  .name { font-size: 14px; padding-right: 12px; }
-  .y { font: 400 11px/1 var(--font-mono); color: var(--muted); margin-left: 4px; }
-  .track { position: relative; height: 16px; }
-  .bar { position: absolute; top: 6px; height: 4px; border-radius: 2px; background: var(--ink-2); opacity: .55; }
-  .before { position: absolute; left: -2px; top: -1px; font-size: 12px; color: var(--muted); }
-  .dot { position: absolute; top: 3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; box-shadow: 0 0 0 2px var(--panel); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend svg { overflow: visible; }
+  .dot-key { fill: var(--f-cameras); }
+  .chart-wrap { padding: 6px 4px 8px; overflow-x: auto; }
+  .mk { display: block; width: 100%; min-width: 860px; height: auto; font-family: var(--font-body); }
+  .grid line { stroke: var(--rule-soft); stroke-width: 1; }
+  .grid text { font: 400 10.5px/1 var(--font-mono); fill: var(--muted); }
+  .grid .now { stroke: var(--accent); stroke-dasharray: 2 3; opacity: .7; }
+  .grid .now-t { font: 500 9.5px/1 var(--font-mono); letter-spacing: .12em; fill: var(--accent); }
+  .country { font: 500 10.5px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; fill: var(--muted); }
+  .band { fill: transparent; }
+  .row:hover .band, .row:focus-within .band { fill: var(--rule-soft); }
+  .nm text { font-size: 13.5px; fill: var(--ink); }
+  .nm:hover text, .nm:focus-visible text { fill: var(--accent); text-decoration: underline; }
+  .nm:focus-visible { outline: none; }
+  .yrs { font: 400 10.5px/1 var(--font-mono); fill: var(--muted); }
+  .bar, .legend .bar { stroke: var(--ink-2); stroke-opacity: .42; stroke-width: 6; stroke-linecap: round; }
+  .cap, .legend .cap { stroke: var(--ink-2); stroke-width: 1.6; }
+  .tip { fill: none; stroke: var(--ink-2); stroke-opacity: .6; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .early { font: 400 9.5px/1 var(--font-mono); fill: var(--muted); }
+  .pdot circle { stroke: var(--panel); stroke-width: 2; }
+  .pdot:hover circle, .pdot:focus-visible circle { stroke: var(--ink); }
+  .lk { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+  .legend .lk { stroke-width: 1.8; }
+  .lk-sold { stroke-dasharray: 6 3.5; }
+  .lk-stake { stroke-dasharray: 1.5 3; stroke-linecap: round; }
+  .lk-revived { stroke-dasharray: 7 3 1.5 3; }
+  .lk-renamed { stroke: var(--ink-2); }
+  .lk-from { fill: var(--accent); }
+  .lk-head { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; }
+  .lk-hit { fill: none; stroke: transparent; stroke-width: 12; }
+  .link:hover .lk, .link:hover .lk-head { stroke-width: 2.6; }
+  .hint { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
+  .sec { font: 400 30px/1.1 var(--font-display); margin: 44px 0 12px; }
+  .all { columns: 3 300px; column-gap: 32px; }
+  .all section { break-inside: avoid; margin-bottom: 20px; }
+  .all h3 { font: 500 10.5px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+  .all ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .all li { font-size: 14px; color: var(--ink-2); }
+  .all .mono { font: 400 11.5px/1 var(--font-mono); color: var(--muted); }
+  .fate { display: block; font-size: 13px; color: var(--muted); }
 </style>
