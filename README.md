@@ -13,7 +13,10 @@ medium, with a page for each and primers on the physics behind them.
 - **Timeline.** Every entry is a star on one line of time. Stars above the band are discoveries and
   inventions; stars below are cameras, formats and products. Star size shows impact, fill shows
   whether it is still in use, and lines show what built on what. Hover a star for a summary and its
-  lineage; click it to open the full entry. There are also by-family lanes and a list view.
+  lineage; click it to open the full entry. Zoom into any period from the overview strip under the
+  chart (drag across it, or pick an era), with ctrl-scroll or pinch, or with the + and − keys; the
+  overview always shows which part of the timeline is in view. There are also by-family lanes and a
+  list view.
 - **Entries.** Each entry tells how it began, how it works, why it mattered and what replaced it, with
   key dates, people, specs, the frame drawn to scale and sources.
 - **Makers.** A lifespan chart of camera and film companies by country, with the mergers, takeovers and
