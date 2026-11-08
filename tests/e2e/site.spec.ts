@@ -453,7 +453,8 @@ test.describe('images and camera silhouettes', () => {
 
   test('camera entries show their silhouette on the page and in the hover card', async ({ page }) => {
     await page.goto('/entries/rolleiflex/');
-    await expect(page.locator('.camsil figcaption')).toHaveText('Twin-lens reflex (TLR)');
+    await expect(page.locator('.camsil figcaption b')).toHaveText('Twin-lens reflex (TLR)');
+    await expect(page.locator('.camsil figcaption')).toContainText('Front view, about 10 × 15 cm');
     await page.goto('/');
     await page.locator('a[href$="/entries/nikon-f/"]').first().focus();
     await expect(page.locator('.card .cam-thumb svg')).toBeVisible();

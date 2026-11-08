@@ -1,15 +1,22 @@
 ---
-/** The camera-type silhouette for an entry's facts column. */
-import { cameraSvg, CAMERA_NAMES, type CameraType } from '../lib/cameras';
-interface Props { type: CameraType }
-const { type } = Astro.props;
+/** The drawing of an entry's camera, at its real proportions, for the facts column. */
+import { cameraDrawing, CAMERA_NAMES, type CameraType } from '../lib/cameras';
+interface Props { id: string; type: CameraType }
+const { id, type } = Astro.props;
+const d = cameraDrawing(id, type, 1.25, 280);
+const cm = (mm: number) => (mm >= 100 ? Math.round(mm / 10) : +(mm / 10).toFixed(1));
+const view = { front: 'Front view', side: 'Side view', back: 'Back view' }[d.view];
 ---
 <figure class="camsil">
-  <Fragment set:html={cameraSvg(type)} />
-  <figcaption>{CAMERA_NAMES[type]}</figcaption>
+  <div class="art"><Fragment set:html={d.svg} /></div>
+  <figcaption><b>{CAMERA_NAMES[type]}</b><span>{view}, about {cm(d.w)} × {cm(d.h)} cm{d.own ? '' : ' (a typical example)'}</span></figcaption>
 </figure>
 <style>
-  .camsil { margin: 0; display: grid; gap: 6px; justify-items: start; }
-  .camsil :global(.cam) { width: 150px; }
-  figcaption { font-size: 13px; color: var(--ink-2); }
+  .camsil { margin: 0; display: grid; gap: 8px; }
+  /* a neutral backdrop, light enough in night mode for black camera bodies to stand out */
+  .art { display: grid; place-items: center; padding: 14px 8px; border-radius: 10px; background: color-mix(in srgb, var(--ink) 6%, var(--panel)); }
+  :global([data-theme="dark"]) .art { background: color-mix(in srgb, var(--ink) 30%, var(--panel)); }
+  .art :global(svg) { max-width: 100%; height: auto; }
+  figcaption { display: grid; gap: 2px; font-size: 13px; color: var(--ink-2); }
+  figcaption span { font-size: 12px; color: var(--muted); }
 </style>

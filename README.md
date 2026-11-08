@@ -36,7 +36,7 @@ night modes.
 
 Work in progress. The timeline, entries, makers, formats, physics primers, landmarks, glossary and
 search are in place, with 103 entries, 35 makers and nine primers, public-domain photographs on the
-landmarks and 24 entries, and camera silhouettes. Still to come: a fact-check pass, and launch.
+landmarks and 24 entries, and a drawing of every camera. Still to come: a fact-check pass, and launch.
 
 ## Development
 
@@ -79,7 +79,7 @@ fresh and paraphrased from those sources, never copied. Copyrighted books are us
 and cited paraphrase only, and are kept out of the repository in the git-ignored `references/` folder.
 Images are public domain (or CC0), each credited with its source. `node scripts/commons.ts` searches
 Wikimedia Commons, refuses any file that is not public domain, and saves a scaled copy with its
-credit. Cameras are drawn as original SVG silhouettes, not photographed.
+credit. Cameras are drawn for this site as SVG, one per camera at its real proportions, not photographed.
 
 ## Contributing
 

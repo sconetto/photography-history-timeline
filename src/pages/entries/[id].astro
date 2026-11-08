@@ -60,7 +60,7 @@ const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
       </div>
 
       <aside class="side" aria-label="Key facts">
-        {d.cameraType && <section class="box"><p class="kicker">Camera type</p><CameraSilhouette type={d.cameraType} /></section>}
+        {d.cameraType && <section class="box"><p class="kicker">The camera</p><CameraSilhouette id={entry.id} type={d.cameraType} /></section>}
         {d.specs.length > 0 && (
           <section class="box">
             <p class="kicker">Spec card</p>

@@ -8,7 +8,7 @@ import { frac, yearAt } from '../../lib/scale';
 import { clampK, kForRange, scrollFor, visible, ZMAX } from '../../lib/zoom';
 import { Navigator } from './navigator';
 import type { Frame, Item, Payload } from './types';
-import { cameraSvg } from '../../lib/cameras';
+import { cameraDrawing } from '../../lib/cameras';
 
 const data = JSON.parse(document.getElementById('timeline-data')!.textContent!) as Payload;
 const ORDER = [...data.items].sort((a, b) => a.year - b.year || a.label.localeCompare(b.label));
@@ -78,7 +78,7 @@ function showCard(it: Item, anchor: Element) {
   card.innerHTML = '';
   const add = (tag: string, cls: string, text: string) => { const n = document.createElement(tag); n.className = cls; n.textContent = text; card.append(n); return n; };
   if (it.thumb) { const img = document.createElement('img'); img.src = it.thumb; img.alt = it.thumbAlt ?? ''; img.className = 'thumb'; img.width = 280; card.append(img); }
-  else if (it.cam) { const c = document.createElement('div'); c.className = 'cam-thumb'; c.innerHTML = cameraSvg(it.cam); card.append(c); }
+  else if (it.cam) { const c = document.createElement('div'); c.className = 'cam-thumb'; c.innerHTML = cameraDrawing(it.id, it.cam, 0.95, 180).svg; card.append(c); }
   add('strong', 'nm', it.title);
   add('span', 'when', it.date + (it.end ? ` – mainstream until ${it.end}` : ''));
   add('span', 's', it.summary);

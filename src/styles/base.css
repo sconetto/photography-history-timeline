@@ -72,9 +72,3 @@ a.gloss:hover { border-bottom-style: solid; border-bottom-color: var(--accent); 
 .wg .fill-acc { fill: var(--accent); } .wg .fill-soft { fill: var(--accent-soft); } .wg .fill-panel { fill: var(--panel); } .wg .fill-paper { fill: var(--paper); }
 .wg text { font: 400 11px/1 var(--font-mono); fill: var(--muted); }
 .wg text.lbl { font: 500 12px/1 var(--font-body); fill: var(--ink-2); }
-
-/* camera silhouettes (src/lib/cameras.ts): body in currentColor, cut-outs in the panel colour */
-.cam { display: block; width: 100%; height: auto; color: var(--ink-2); }
-.cam .d { fill: var(--panel); }
-.cam .d2 { fill: var(--panel); opacity: .55; }
-.cam .ds { fill: none; stroke: var(--panel); stroke-width: 1.4; }

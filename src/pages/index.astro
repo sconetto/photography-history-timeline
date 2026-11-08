@@ -146,7 +146,9 @@ const famName = new Map(families.map((f) => [f.id, f.data.name]));
   .card { position: absolute; left: 0; top: 0; pointer-events: none; width: max-content; max-width: 300px; z-index: 5;
     background: var(--raised); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 12px 11px;
     box-shadow: 0 10px 30px var(--shadow); font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
-  .card :global(.cam-thumb) { width: 132px; margin: 0 0 8px; }
+  .card :global(.cam-thumb) { display: grid; place-items: center; margin: 0 0 8px; padding: 10px; border-radius: 7px; background: color-mix(in srgb, var(--ink) 6%, var(--panel)); }
+  .card :global(.cam-thumb svg) { max-width: 100%; height: auto; }
+  :global([data-theme="dark"]) .card :global(.cam-thumb) { background: color-mix(in srgb, var(--ink) 30%, var(--panel)); }
   .card :global(.thumb) { display: block; width: 100%; height: 120px; object-fit: cover; border-radius: 7px; margin-bottom: 8px; filter: saturate(.9); }
   .card :global(.nm) { display: block; font: 600 15px/1.25 var(--font-body); color: var(--ink); }
   .card :global(.when) { display: block; font: 400 11px/1.4 var(--font-mono); color: var(--accent); margin: 2px 0 6px; }
