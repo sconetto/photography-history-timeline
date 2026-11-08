@@ -16,6 +16,14 @@ interface Props { title?: string; description?: string; wide?: boolean }
 const { title, description = 'How photography came to be: an interactive timeline of its discoveries, cameras, formats and makers, with the physics of how it works.', wide = false } = Astro.props;
 const fullTitle = title ? `${title} · Photography Through Time` : 'Photography Through Time';
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// search index: detail pages get a result type; list pages (which repeat everything) stay out of the index
+const path = Astro.url.pathname;
+const searchType =
+  /^\/entries\/[^/]+\/$/.test(path) ? 'Entry' :
+  /^\/makers\/[^/]+\/$/.test(path) ? 'Maker' :
+  /^\/physics\/[^/]+\/$/.test(path) ? 'How it works' :
+  path === '/glossary/' ? 'Glossary' :
+  ['/formats/', '/landmarks/', '/sources/', '/about/'].includes(path) ? 'Page' : null;
 const { glossary } = await content();
 const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d: g.data.def }]));
 ---
@@ -48,7 +56,8 @@ const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d:
   <body>
     <a class="visually-hidden skip" href="#main">Skip to content</a>
     <Header />
-    <main id="main" class:list={['wrap', { wide }]} data-pagefind-body>
+    <main id="main" class:list={['wrap', { wide }]} data-pagefind-body={searchType ? '' : undefined}>
+      {searchType && <span hidden data-pagefind-filter={`type:${searchType}`} data-pagefind-meta={`type:${searchType}`}></span>}
       <slot />
     </main>
     <Footer />

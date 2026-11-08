@@ -20,7 +20,7 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
       </ul>
     </nav>
     <div class="tools">
-      <a class="search-link" href="/search/">
+      <a class="search-link" href="/search/" aria-keyshortcuts="/" title="Search (press /)">
         <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="10.8" y1="10.8" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <span class="lbl">Search</span>
       </a>
@@ -39,6 +39,15 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
   btn.addEventListener('click', () => set(!head.classList.contains('open')));
   document.addEventListener('click', (e) => { if (head.classList.contains('open') && !head.querySelector('nav')!.contains(e.target as Node) && !btn.contains(e.target as Node)) set(false); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && head.classList.contains('open')) { set(false); btn.focus(); } });
+  // "/" opens search from anywhere (unless typing in a field)
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target as HTMLElement;
+    if (t.closest('input, textarea, select, [contenteditable]')) return;
+    e.preventDefault();
+    const field = document.querySelector<HTMLInputElement>('#search input');
+    if (field) field.focus(); else location.href = '/search/';
+  });
   // leaving the collapsed layout (rotate, resize) resets the menu
   matchMedia('(min-width: 1141px)').addEventListener('change', (m) => { if (m.matches) set(false); });
 </script>
