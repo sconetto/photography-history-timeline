@@ -15,24 +15,29 @@ import '../styles/base.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { content } from '../lib/content';
+import { useT, pageLang, stripLang, pathIn, LANGS, LOCALES, DEFAULT_LANG } from '../i18n';
 
 interface Props { title?: string; description?: string; wide?: boolean }
-const { title, description = 'How photography came to be: an interactive timeline of its discoveries, cameras, formats and makers, with the physics of how it works.', wide = false } = Astro.props;
-const fullTitle = title ? `${title} · Photography Through Time` : 'Photography Through Time';
+const lang = pageLang(Astro);
+const t = useT(lang);
+const { title, description = t('site.description'), wide = false } = Astro.props;
+const fullTitle = title ? `${title} · ${t('site.name')}` : t('site.name');
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// the same page in every language, for search engines (x-default is the English original)
+const alternates = LANGS.map((l) => ({ l, href: new URL(pathIn(l, Astro.url.pathname), Astro.site).href }));
 // search index: detail pages get a result type; list pages (which repeat everything) stay out of the index
-const path = Astro.url.pathname;
+const path = stripLang(Astro.url.pathname);
 const searchType =
-  /^\/entries\/[^/]+\/$/.test(path) ? 'Entry' :
-  /^\/makers\/[^/]+\/$/.test(path) ? 'Maker' :
-  /^\/physics\/[^/]+\/$/.test(path) ? 'How it works' :
-  path === '/glossary/' ? 'Glossary' :
-  ['/formats/', '/landmarks/', '/sources/', '/about/'].includes(path) ? 'Page' : null;
-const { glossary } = await content();
+  /^\/entries\/[^/]+\/$/.test(path) ? t('search.type.entry') :
+  /^\/makers\/[^/]+\/$/.test(path) ? t('search.type.maker') :
+  /^\/physics\/[^/]+\/$/.test(path) ? t('search.type.primer') :
+  path === '/glossary/' ? t('search.type.glossary') :
+  ['/formats/', '/landmarks/', '/sources/', '/about/'].includes(path) ? t('search.type.page') : null;
+const { glossary } = await content(lang);
 const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d: g.data.def }]));
 ---
 <!doctype html>
-<html lang="en">
+<html lang={LOCALES[lang].htmlLang}>
   <head>
     <meta charset="utf-8" />
     <link rel="preload" href={fontDisplay} as="font" type="font/woff2" crossorigin />
@@ -42,10 +47,14 @@ const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d:
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={LOCALES[a.l].htmlLang} href={a.href} />)}
+    <link rel="alternate" hreflang="x-default" href={alternates.find((a) => a.l === DEFAULT_LANG)!.href} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={LOCALES[lang].og} />
+    {LANGS.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={LOCALES[l].og} />)}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <script is:inline>
@@ -61,7 +70,7 @@ const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d:
     </script>
   </head>
   <body>
-    <a class="visually-hidden skip" href="#main">Skip to content</a>
+    <a class="visually-hidden skip" href="#main">{t('site.skip')}</a>
     <Header />
     <main id="main" class:list={['wrap', { wide }]} data-pagefind-body={searchType ? '' : undefined}>
       {searchType && <span hidden data-pagefind-filter={`type:${searchType}`} data-pagefind-meta={`type:${searchType}`}></span>}

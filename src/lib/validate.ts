@@ -66,3 +66,21 @@ export function validate({ entries, makers, otherUrls }: VInput): string[] {
   for (const { where, url } of otherUrls) { const b = blocked(url); if (b) problems.push(`${where}: link to blocked domain (${b}): ${url}`); }
   return problems;
 }
+
+/** One translation file, reduced to what the checks need. */
+export interface VTranslation { where: string; kind: 'entry' | 'maker' | 'primer' | 'data'; id: string; body?: string }
+
+/**
+ * Translations hold words only, keyed by English ids. Fails on a translation with no English original, and on
+ * a translated entry body missing one of the required sections (headings in that language).
+ */
+export function validateTranslations(items: VTranslation[], known: Record<VTranslation['kind'], Set<string>>, sections: string[]): string[] {
+  const problems: string[] = [];
+  for (const t of items) {
+    if (!known[t.kind].has(t.id)) problems.push(`${t.where}: no English ${t.kind} "${t.id}" to translate`);
+    if (t.kind === 'entry') {
+      for (const s of sections) if (!new RegExp(`^##\\s+${s}\\s*$`, 'm').test(t.body ?? '')) problems.push(`${t.where}: missing "## ${s}" section`);
+    }
+  }
+  return problems;
+}

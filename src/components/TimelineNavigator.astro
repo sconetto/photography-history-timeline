@@ -5,20 +5,23 @@
  * while the chart is in view.
  */
 interface Props { eras: { name: string; a: number; b: number }[]; now: number }
+import { useT, pageLang, fmtYear } from '../i18n';
 const { eras, now } = Astro.props;
-const yr = (y: number) => (y < 0 ? `${-y} BCE` : y > now ? 'today' : String(y));
+const lang = pageLang(Astro);
+const t = useT(lang);
+const yr = (y: number) => (y > now ? t('year.today') : fmtYear(lang, y));
 ---
-<div class="nav" id="nav" role="group" aria-label="Timeline zoom and overview">
+<div class="nav" id="nav" role="group" aria-label={t('zoom.group')}>
   <div class="nav-bar">
     <div class="nav-zoom">
-      <button type="button" class="nav-out" aria-label="Zoom out"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8" /></svg></button>
-      <button type="button" class="nav-in" aria-label="Zoom in"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8M6 2v8" /></svg></button>
-      <button type="button" class="nav-all">Show all</button>
+      <button type="button" class="nav-out" aria-label={t('zoom.out')}><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8" /></svg></button>
+      <button type="button" class="nav-in" aria-label={t('zoom.in')}><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8M6 2v8" /></svg></button>
+      <button type="button" class="nav-all">{t('zoom.all')}</button>
     </div>
-    <label class="visually-hidden" for="nav-era">Zoom to an era</label>
+    <label class="visually-hidden" for="nav-era">{t('zoom.era')}</label>
     <select id="nav-era" class="nav-era">
-      <option value="">Jump to era…</option>
-      <option value="all">All of time</option>
+      <option value="">{t('zoom.jump')}</option>
+      <option value="all">{t('zoom.allTime')}</option>
       {eras.map((e) => <option value={`${e.a}:${e.b}`}>{e.name} ({yr(e.a)}–{yr(e.b)})</option>)}
     </select>
     <span class="nav-range" aria-hidden="true"></span>
@@ -29,11 +32,11 @@ const yr = (y: number) => (y < 0 ? `${-y} BCE` : y > now ? 'today' : String(y));
     <div class="ov-shade l" aria-hidden="true"></div>
     <div class="ov-shade r" aria-hidden="true"></div>
     <div class="ov-brush" hidden aria-hidden="true"></div>
-    <div class="ov-win" role="scrollbar" tabindex="0" aria-orientation="horizontal" aria-controls="scroller" aria-label="Visible part of the timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
-    <span class="ov-h l" role="slider" tabindex="0" aria-label="Start of visible range" aria-valuemin={-400} aria-valuemax={now} aria-valuenow={-400}></span>
-    <span class="ov-h r" role="slider" tabindex="0" aria-label="End of visible range" aria-valuemin={-400} aria-valuemax={now} aria-valuenow={now}></span>
+    <div class="ov-win" role="scrollbar" tabindex="0" aria-orientation="horizontal" aria-controls="scroller" aria-label={t('zoom.window')} aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+    <span class="ov-h l" role="slider" tabindex="0" aria-label={t('zoom.start')} aria-valuemin={-400} aria-valuemax={now} aria-valuenow={-400}></span>
+    <span class="ov-h r" role="slider" tabindex="0" aria-label={t('zoom.end')} aria-valuemin={-400} aria-valuemax={now} aria-valuenow={now}></span>
   </div>
-  <p class="nav-hint">Drag across the overview to zoom into a period, or ctrl-scroll / pinch on the chart.</p>
+  <p class="nav-hint">{t('zoom.hint')}</p>
 </div>
 
 <style>

@@ -1,0 +1,12 @@
+---
+import Base from '../../layouts/Base.astro';
+import AboutEn from '../../components/about/AboutEn.astro';
+import AboutPtBr from '../../components/about/AboutPtBr.astro';
+import { useT, langPaths, type Lang } from '../../i18n';
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useT(lang);
+---
+<Base title={t('about.title')} description={t('about.desc')}>
+  {lang === 'pt-br' ? <AboutPtBr /> : <AboutEn />}
+</Base>

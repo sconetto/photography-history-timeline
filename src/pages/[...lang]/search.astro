@@ -1,0 +1,36 @@
+---
+import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/url';
+import { useT, langPaths, type Lang } from '../../i18n';
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useT(lang);
+const ui = { placeholder: t('search.placeholder'), aria: t('search.aria'), unbuilt: t('search.unbuilt') };
+---
+<Base title={t('search.title')} description={t('search.desc')}>
+  <p class="eyebrow">{t('search.title')}</p>
+  <h1 class="page-title">{t('search.title')}</h1>
+  <p class="dek" set:html={t('search.dek', { key: '<kbd>/</kbd>' })} />
+  <div id="search" data-pagefind-ignore="all" data-ui={JSON.stringify(ui)}></div>
+  <noscript><p set:html={t('search.noscript', { index: `<a href="${url('/entries/', lang)}">${t('search.index')}</a>` })} /></noscript>
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+  <script is:inline src="/pagefind/pagefind-ui.js"></script>
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', function () {
+      var box = document.getElementById('search'), ui = JSON.parse(box.dataset.ui);
+      if (!window.PagefindUI) { box.textContent = ui.unbuilt; return; }
+      // Pagefind picks the index for this page's <html lang> and translates its own interface
+      new PagefindUI({ element: '#search', showSubResults: true, showImages: false, autofocus: true, resetStyles: false, translations: { placeholder: ui.placeholder } });
+      var field = document.querySelector('#search input'); if (field) field.setAttribute('aria-label', ui.aria);
+      var q = new URLSearchParams(location.search).get('q');
+      if (q) { var input = document.querySelector('#search input'); if (input) { input.value = q; input.dispatchEvent(new Event('input')); } }
+    });
+  </script>
+</Base>
+<style is:global>
+  #search { --pagefind-ui-primary: var(--accent); --pagefind-ui-text: var(--ink); --pagefind-ui-background: var(--panel); --pagefind-ui-border: var(--rule); --pagefind-ui-tag: var(--band); --pagefind-ui-font: var(--font-body); max-width: 860px; --pagefind-ui-border-radius: 10px; --pagefind-ui-scale: .9; }
+  kbd { font: 500 12px/1 var(--font-mono); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 2px 5px; background: var(--raised); }
+  #search .pagefind-ui__result-link { color: var(--ink); }
+  #search .pagefind-ui__result-link:hover { color: var(--accent); }
+  #search mark { background: var(--accent-soft); color: inherit; }
+</style>

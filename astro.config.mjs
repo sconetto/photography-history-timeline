@@ -11,5 +11,6 @@ export default defineConfig({
   build: { format: 'directory' },
   // unified (remark) processor so our wikilink plugin runs on .md and .mdx (MDX inherits it)
   markdown: { processor: unified({ remarkPlugins: [remarkWikilinks] }) },
-  integrations: [mdx(), sitemap()],
+  // the sitemap lists every page with its other-language versions (hreflang); keep in step with src/i18n/locales.ts
+  integrations: [mdx(), sitemap({ i18n: { defaultLocale: 'en', locales: { en: 'en', 'pt-br': 'pt-BR' } } })],
 });

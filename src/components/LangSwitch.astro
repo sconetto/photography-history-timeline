@@ -1,0 +1,19 @@
+---
+/** The language switcher: one link per language to this same page, the current one filled. */
+import { useT, pageLang, pathIn, LANGS, LOCALES } from '../i18n';
+interface Props { class?: string }
+const lang = pageLang(Astro);
+const t = useT(lang);
+---
+<div class:list={['langs', Astro.props.class]} role="group" aria-label={t('lang.group')}>
+  {LANGS.map((l) => (
+    <a href={pathIn(l, Astro.url.pathname)} hreflang={LOCALES[l].htmlLang} lang={LOCALES[l].htmlLang} aria-current={l === lang ? 'true' : undefined}
+      title={useT(l)('lang.readIn', { lang: LOCALES[l].label })}><span aria-hidden="true">{LOCALES[l].short}</span><span class="visually-hidden">{LOCALES[l].label}</span></a>
+  ))}
+</div>
+<style>
+  .langs { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 2px; }
+  .langs a { display: inline-block; border: 0; border-radius: 999px; padding: 4px 8px; font: 500 11.5px/1 var(--font-mono); letter-spacing: .04em; color: var(--ink-2); }
+  .langs a:hover { color: var(--ink); background: var(--rule-soft); }
+  .langs a[aria-current="true"] { background: var(--ink); color: var(--paper); }
+</style>

@@ -31,8 +31,6 @@ export function frac(year: number, s: number, span: Span = SPAN): number {
 /** Year → x pixel. */
 export const xOf = (year: number, s: number, x0: number, width: number, span: Span = SPAN) => x0 + frac(year, s, span) * width;
 
-export const fmtYear = (y: number) => (y < 0 ? `${-y} BCE` : String(Math.round(y)));
-
 /** Inverse of frac: the year at a fraction of the axis (bisection; frac is monotonic in the year). */
 export function yearAt(f: number, s: number, span: Span = SPAN): number {
   if (f <= 0) return span.y0;

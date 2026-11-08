@@ -1,14 +1,17 @@
 ---
-import Base from '../layouts/Base.astro';
-import { content } from '../lib/content';
-import { cropFactor, areaRatio } from '../lib/optics';
-import { url } from '../lib/url';
-const { formats, entryById } = await content();
+import Base from '../../layouts/Base.astro';
+import { content } from '../../lib/content';
+import { cropFactor, areaRatio } from '../../lib/optics';
+import { url } from '../../lib/url';
+import { useT, langPaths, fmtNum, type Lang } from '../../i18n';
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useT(lang);
+const num = (n: number, d = 1, min = 0) => fmtNum(lang, n, d, min);
+const { formats, entryById } = await content(lang);
 const area = (f: (typeof formats)[number]) => f.data.w * f.data.h;
 const list = [...formats].sort((a, b) => area(b) - area(a));
-const GROUPS = [
-  ['large', 'Sheet film'], ['medium', 'Medium format'], ['full', 'Full frame'], ['smaller', 'Smaller sensors'], ['film-small', 'Small film formats'],
-] as const;
+const GROUPS = (['large', 'medium', 'full', 'smaller', 'film-small'] as const).map((g) => [g, t(`formats.g.${g}`)] as const);
 const fmtData = list.map((f) => ({ id: f.id, name: f.data.name, w: f.data.w, h: f.data.h }));
 // first paint: fit full frame and its neighbours; the script re-fits to whatever is selected
 const view = (w: number, h: number) => { const W = Math.max(w, 36) * 1.14, H = Math.max(h, 24) * 1.14; return `${-W / 2} ${-H / 2} ${W} ${H}`; };
@@ -17,10 +20,10 @@ const DEFAULT = 'aps-c';
 const icon = (w: number, h: number) => { const s = 16 / Math.max(w, h), iw = w * s, ih = h * s; return { x: 10 - iw / 2, y: 10 - ih / 2, w: iw, h: ih }; };
 const d0 = list.find((f) => f.id === DEFAULT)!;
 ---
-<Base title="Formats & sensor sizes" description="Film and sensor formats from 8 × 10 inch sheet film to phone sensors, drawn to scale against 35mm full frame, with crop factors and an equivalence calculator.">
-  <p class="eyebrow">Formats</p>
-  <h1 class="page-title">Formats &amp; sensor sizes</h1>
-  <p class="dek">Every frame drawn to scale and centred on the 36 × 24 mm "full frame". Pick a format and the drawing zooms to fit it, from 8 × 10 inch sheet film down to a phone sensor. The <a href={url('/physics/formats/')}>formats primer</a> explains crop factor and equivalence.</p>
+<Base title={t('formats.title')} description={t('formats.desc')}>
+  <p class="eyebrow">{t('formats.eyebrow')}</p>
+  <h1 class="page-title">{t('formats.title')}</h1>
+  <p class="dek" set:html={t('formats.dek', { primer: `<a href="${url('/physics/formats/', lang)}">${t('formats.primer')}</a>` })} />
   <div class="layout">
     <figure class="panel overlay">
       <svg id="ov" viewBox={view(d0.data.w, d0.data.h)} role="img" aria-labelledby="ov-cap">
@@ -29,44 +32,45 @@ const d0 = list.find((f) => f.id === DEFAULT)!;
         ))}
         <rect class="ff-ref" x="-18" y="-12" width="36" height="24" vector-effect="non-scaling-stroke" />
       </svg>
-      <figcaption id="ov-cap"><span id="ov-text">APS-C (Nikon, Sony, Fujifilm), 23.5 × 15.6 mm, against full frame.</span> <span class="key"><i class="k-ff"></i>Full frame <i class="k-on"></i>Selected <i class="k-other"></i>Other formats</span></figcaption>
+      <figcaption id="ov-cap"><span id="ov-text">{t('formats.against', { name: d0.data.name, w: num(d0.data.w), h: num(d0.data.h) })}</span> <span class="key"><i class="k-ff"></i>{t('formats.key.ff')} <i class="k-on"></i>{t('formats.key.on')} <i class="k-other"></i>{t('formats.key.other')}</span></figcaption>
     </figure>
     <div class="calc panel">
-      <p class="kicker">Equivalence calculator</p>
-      <label for="fmt">Format</label>
+      <p class="kicker">{t('formats.calc')}</p>
+      <label for="fmt">{t('formats.format')}</label>
       <select id="fmt">
         {GROUPS.map(([g, label]) => (
           <optgroup label={label}>{list.filter((f) => f.data.group === g).map((f) => <option value={f.id} selected={f.id === DEFAULT}>{f.data.name}</option>)}</optgroup>
         ))}
       </select>
-      <label for="focal">Focal length (mm)</label>
+      <label for="focal">{t('formats.focal')}</label>
       <input id="focal" type="number" min="1" max="2000" value="28" inputmode="decimal" />
-      <label for="fnum">f-number</label>
+      <label for="fnum">{t('formats.fnum')}</label>
       <input id="fnum" type="number" min="0.7" max="128" step="0.1" value="1.8" inputmode="decimal" />
       <p class="out" id="out" aria-live="polite"></p>
     </div>
   </div>
   <div class="table-wrap">
     <table class="fmt-table">
-      <caption>Crop factor and area are measured against 35mm full frame (36 × 24 mm).</caption>
-      <thead><tr><th scope="col" class="show-col"><span class="visually-hidden">Show in the drawing</span></th><th scope="col">Format</th><th scope="col" class="size">Size (mm)</th><th scope="col" class="crop">Crop factor</th><th scope="col" class="area">Area</th><th scope="col">Note</th></tr></thead>
+      <caption>{t('formats.caption')}</caption>
+      <thead><tr><th scope="col" class="show-col"><span class="visually-hidden">{t('formats.showCol')}</span></th><th scope="col">{t('formats.th.format')}</th><th scope="col" class="size">{t('formats.th.size')}</th><th scope="col" class="crop">{t('formats.th.crop')}</th><th scope="col" class="area">{t('formats.th.area')}</th><th scope="col">{t('formats.th.note')}</th></tr></thead>
       {GROUPS.map(([g, label]) => (
         <tbody>
           <tr class="grp"><th scope="rowgroup" colspan="6">{label}</th></tr>
           {list.filter((f) => f.data.group === g).map((f) => {
             const e = f.data.entry ? entryById.get(f.data.entry.id) : undefined;
             const a = areaRatio(f.data.w, f.data.h);
-            const crop = `${cropFactor(f.data.w, f.data.h).toFixed(2)}×`;
-            const areaTxt = a >= 10 ? `${a.toFixed(0)}×` : a >= 1.05 ? `${a.toFixed(1)}×` : `${Math.round(a * 100)}%`;
+            const crop = `${num(cropFactor(f.data.w, f.data.h), 2, 2)}×`;
+            const areaTxt = a >= 10 ? `${num(a, 0)}×` : a >= 1.05 ? `${num(a, 1, 1)}×` : `${Math.round(a * 100)}%`;
+            const size = `${num(f.data.w)} × ${num(f.data.h)}`;
             return (
               <tr data-id={f.id} class:list={{ on: f.id === DEFAULT }}>
                 <td class="show-col">
-                  <button type="button" class="show" data-id={f.id} aria-pressed={f.id === DEFAULT ? 'true' : 'false'} aria-label={`Show ${f.data.name} in the drawing`} title="Show in the drawing">
+                  <button type="button" class="show" data-id={f.id} aria-pressed={f.id === DEFAULT ? 'true' : 'false'} aria-label={t('formats.show', { name: f.data.name })} title={t('formats.showCol')}>
                     {(() => { const r = icon(f.data.w, f.data.h); return <svg viewBox="0 0 20 20" aria-hidden="true"><rect x={r.x} y={r.y} width={r.w} height={r.h} rx="1" /></svg>; })()}
                   </button>
                 </td>
-                <td class="name">{e ? <a href={url(`/entries/${e.id}/`)}>{f.data.name}</a> : f.data.name}<span class="sub"><span>{f.data.w} × {f.data.h} mm</span> <span>· crop {crop}</span> <span>· area {areaTxt}</span></span></td>
-                <td class="mono size">{f.data.w} × {f.data.h}</td>
+                <td class="name">{e ? <a href={url(`/entries/${e.id}/`, lang)}>{f.data.name}</a> : f.data.name}<span class="sub"><span>{size} mm</span> <span>{t('formats.sub.crop', { c: crop })}</span> <span>{t('formats.sub.area', { a: areaTxt })}</span></span></td>
+                <td class="mono size">{size}</td>
                 <td class="mono crop">{crop}</td>
                 <td class="mono area">{areaTxt}</td>
                 <td>{f.data.note}</td>
@@ -79,7 +83,9 @@ const d0 = list.find((f) => f.id === DEFAULT)!;
   </div>
   <script type="application/json" id="fmt-data" set:html={JSON.stringify(fmtData)} />
   <script>
-    import { equivalent, areaRatio } from '../lib/optics';
+    import { equivalent, areaRatio } from '../../lib/optics';
+    import { useT, docLang, fmtNum } from '../../i18n';
+    const LANG = docLang(), T = useT(LANG), num = (n: number, d = 1, min = 0) => fmtNum(LANG, n, d, min);
     type F = { id: string; name: string; w: number; h: number };
     const data = JSON.parse(document.getElementById('fmt-data')!.textContent!) as F[];
     const sel = document.getElementById('fmt') as HTMLSelectElement;
@@ -115,11 +121,13 @@ const d0 = list.find((f) => f.id === DEFAULT)!;
       const a = areaRatio(f.w, f.h);
       out.innerHTML = '';
       const b = document.createElement('b');
-      b.textContent = `${Math.round(e.focal)} mm f/${e.fNumber < 10 ? e.fNumber.toFixed(1) : Math.round(e.fNumber)}`;
-      const areaText = a >= 1.05 ? `${a.toFixed(a >= 10 ? 0 : 1)}× the area` : `${Math.round(a * 100)}% of the area`;
+      b.textContent = `${Math.round(e.focal)} mm f/${e.fNumber < 10 ? num(e.fNumber, 1, 1) : Math.round(e.fNumber)}`;
+      const areaText = a >= 1.05 ? T('formats.areaMore', { a: num(a, a >= 10 ? 0 : 1, a >= 10 ? 0 : 1) }) : T('formats.areaLess', { p: Math.round(a * 100) });
       const isNormal = !focalTyped && fl === Math.round(Math.hypot(f.w, f.h));
-      out.append(`${fl} mm f/${n}${isNormal ? ' (the normal lens for this format)' : ''} on ${f.name} frames like `, b, ` on full frame (crop ${e.crop.toFixed(2)}×, ${areaText}). The same depth of field, too; exposure settings stay the same.`);
-      capText.textContent = `${f.name}, ${f.w} × ${f.h} mm, against full frame.`;
+      // the sentence has one bold part ({eq}): split around it so the rest stays text
+      const [before, after] = T('formats.out', { fl: num(fl), n: num(n, 1), normal: isNormal ? T('formats.normal') : '', name: f.name, c: num(e.crop, 2, 2), area: areaText }).split('{eq}');
+      out.append(before, b, after ?? '');
+      capText.textContent = T('formats.against', { name: f.name, w: num(f.w), h: num(f.h) });
       svg.querySelectorAll<SVGRectElement>('.fmt').forEach((r) => r.classList.toggle('on', r.dataset.id === f.id));
       document.querySelectorAll<HTMLTableRowElement>('.fmt-table tr[data-id]').forEach((r) => r.classList.toggle('on', r.dataset.id === f.id));
       document.querySelectorAll<HTMLButtonElement>('.show').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === f.id)));

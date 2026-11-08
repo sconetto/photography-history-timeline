@@ -1,25 +1,29 @@
 ---
 import { render } from 'astro:content';
 import { Image } from 'astro:assets';
-import Base from '../../layouts/Base.astro';
-import FrameToScale from '../../components/FrameToScale.astro';
-import CameraSilhouette from '../../components/CameraSilhouette.astro';
-import ExposureBar from '../../components/ExposureBar.astro';
-import { content, SIDE_TEXT, IMPACT_TEXT, STATUS_TEXT, KIND_UP, KIND_DOWN, WIKI, type Entry } from '../../lib/content';
-import { url } from '../../lib/url';
+import Base from '../../../layouts/Base.astro';
+import FrameToScale from '../../../components/FrameToScale.astro';
+import CameraSilhouette from '../../../components/CameraSilhouette.astro';
+import ExposureBar from '../../../components/ExposureBar.astro';
+import { content, wikiHref, type Entry } from '../../../lib/content';
+import { url } from '../../../lib/url';
+import { useT, langPaths, type Lang } from '../../../i18n';
 
 export async function getStaticPaths() {
-  const { entries } = await content();
-  return entries.map((entry, i) => ({ params: { id: entry.id }, props: { entry, prev: entries[i - 1], next: entries[i + 1] } }));
+  return (await Promise.all(langPaths().map(async ({ params, props: { lang } }) => {
+    const { entries } = await content(lang);
+    return entries.map((entry, i) => ({ params: { ...params, id: entry.id }, props: { lang, entry, prev: entries[i - 1], next: entries[i + 1] } }));
+  }))).flat();
 }
-interface Props { entry: Entry; prev?: Entry; next?: Entry }
-const { entry, prev, next } = Astro.props;
+interface Props { lang: Lang; entry: Entry; prev?: Entry; next?: Entry }
+const { lang, entry, prev, next } = Astro.props;
+const t = useT(lang);
 // the hero is capped at min(56vh, 520px) tall, so a portrait photo shows far narrower than the column
 const heroAspect = entry.data.image ? entry.data.image.src.width / entry.data.image.src.height : 1;
 const heroSizes = `min(calc(100vw - 32px), 860px, calc(56vh * ${heroAspect.toFixed(3)}), ${Math.round(520 * heroAspect)}px)`;
 const d = entry.data;
-const { Content } = await render(entry);
-const { entryById, makerById, primerById, familyById, children } = await content();
+const { Content } = await render(entry.tr ?? entry);
+const { entryById, makerById, primerById, familyById, children } = await content(lang);
 const fam = familyById.get(d.fam)!;
 const parents = d.parents.map((p) => ({ e: entryById.get(p.id.id)!, kind: p.kind }));
 const kids = (children.get(entry.id) ?? []).map((k) => ({ e: entryById.get(k.id)!, kind: k.kind }));
@@ -29,13 +33,13 @@ const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
 ---
 <Base title={d.title} description={d.summary}>
   <article class="entry" data-pagefind-meta={`family:${fam.data.name}`}>
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href={url(`/#${entry.id}`)}>Timeline</a> <span aria-hidden="true">›</span>
-      <a href={url(`/entries/?fam=${d.fam}`)}>{fam.data.name}</a>
+    <nav class="crumbs" aria-label={t('entry.crumbs')}>
+      <a href={url(`/#${entry.id}`, lang)}>{t('nav.timeline')}</a> <span aria-hidden="true">›</span>
+      <a href={url(`/entries/?fam=${d.fam}`, lang)}>{fam.data.name}</a>
     </nav>
     <div class="meta">
       <span class="fam-tag"><span class="sw" style={`background: var(--f-${d.fam})`} />{fam.data.name}</span>
-      <span>{SIDE_TEXT[d.side]}</span><span>{STATUS_TEXT[d.status]}</span><span>Impact: {IMPACT_TEXT[d.impact].toLowerCase()}</span>
+      <span>{t(`side.${d.side}`)}</span><span>{t(`status.${d.status}`)}</span><span>{t('entry.impact', { x: t(`impact.${d.impact}`).toLowerCase() })}</span>
     </div>
     <h1>{d.title}</h1>
     <p class="when-big">{d.date}</p>
@@ -44,66 +48,66 @@ const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
     {d.image && (
       <figure class="hero">
         <div class="mat"><Image src={d.image.src} alt={d.image.alt} widths={[400, 640, 960, 1400]} sizes={heroSizes} loading="eager" fetchpriority="high" /></div>
-        <figcaption>{d.image.credit} · {d.image.license} · <a href={d.image.source} rel="noopener">source ↗</a></figcaption>
+        <figcaption>{d.image.credit} · {d.image.license} · <a href={d.image.source} rel="noopener">{t('common.source')} ↗</a></figcaption>
       </figure>
     )}
 
     <div class="cols">
       <div class="body prose">
         <Content />
-        <h2>Today</h2>
+        <h2>{t('entry.today')}</h2>
         <p>{d.today}</p>
-        <h2 id="sources">Sources</h2>
+        <h2 id="sources">{t('entry.sources')}</h2>
         <ul class="refs">
-          {d.primary && <li><span class="k">Primary source</span> <a href={d.primary[1]} rel="noopener">{d.primary[0]} ↗</a></li>}
+          {d.primary && <li><span class="k">{t('entry.primary')}</span> <a href={d.primary[1]} rel="noopener">{d.primary[0]} ↗</a></li>}
           {d.refs.map((r) => <li><a href={r[1]} rel="noopener">{r[0]} ↗</a></li>)}
-          <li><a href={WIKI + d.wiki} rel="noopener">Wikipedia: {wikiTitle} ↗</a></li>
+          <li><a href={wikiHref(lang, entry)} rel="noopener" hreflang={entry.wikiLocal ? undefined : 'en'}>{t('common.wikipediaTitle', { title: wikiTitle })}{!entry.wikiLocal && t('common.inEnglish')} ↗</a></li>
           {d.sourceNotes.map((n) => <li class="note">{n}</li>)}
         </ul>
       </div>
 
-      <aside class="side" aria-label="Key facts">
-        {d.cameraType && <section class="box"><p class="kicker">The camera</p><CameraSilhouette id={entry.id} type={d.cameraType} /></section>}
+      <aside class="side" aria-label={t('entry.facts')}>
+        {d.cameraType && <section class="box"><p class="kicker">{t('entry.camera')}</p><CameraSilhouette id={entry.id} type={d.cameraType} /></section>}
         {d.specs.length > 0 && (
           <section class="box">
-            <p class="kicker">Spec card</p>
+            <p class="kicker">{t('entry.specs')}</p>
             <dl class="specs">{d.specs.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
             {d.frame && <FrameToScale w={d.frame[0]} h={d.frame[1]} />}
-            {d.exposure && <><p class="kicker">Typical exposure</p><ExposureBar seconds={d.exposure.seconds} note={d.exposure.note} /></>}
+            {d.exposure && <><p class="kicker">{t('entry.exposure')}</p><ExposureBar seconds={d.exposure.seconds} note={d.exposure.note} /></>}
           </section>
         )}
         {makers.length > 0 && (
-          <section class="box"><p class="kicker">Makers</p>
-            <ul class="plain">{makers.map((m) => <li><a href={url(`/makers/${m.id}/`)}>{m.data.name}</a> <span class="muted">· {m.data.country}</span></li>)}</ul>
+          <section class="box"><p class="kicker">{t('entry.makers')}</p>
+            <ul class="plain">{makers.map((m) => <li><a href={url(`/makers/${m.id}/`, lang)}>{m.data.name}</a> <span class="muted">· {t(`country.${m.data.country}`)}</span></li>)}</ul>
           </section>
         )}
         {d.people.length > 0 && (
-          <section class="box"><p class="kicker">Key people</p>
+          <section class="box"><p class="kicker">{t('entry.people')}</p>
             <ul class="plain people">{d.people.map(([n, y, r]) => <li><b>{n}</b>{y && <span class="yrs">{y}</span>}{r && <span class="role"> · {r}</span>}</li>)}</ul>
           </section>
         )}
         {d.moments.length > 0 && (
-          <section class="box"><p class="kicker">Key moments</p>
+          <section class="box"><p class="kicker">{t('entry.moments')}</p>
             <ol class="moments">{d.moments.map(([w, t]) => <li><span class="yr">{w}</span><span>{t}</span></li>)}</ol>
           </section>
         )}
-        <section class="box"><p class="kicker">Built on</p>
-          {parents.length ? <div class="rels">{parents.map(({ e, kind }) => <a class="chip" href={url(`/entries/${e.id}/`)}><span class="sw" style={`background: var(--f-${e.data.fam})`} />{e.data.label}<span class="k">{KIND_UP[kind]}</span></a>)}</div> : <p class="none">The start of its line on this timeline.</p>}
-          <p class="kicker">What came after</p>
-          {kids.length ? <div class="rels">{kids.map(({ e, kind }) => <a class="chip" href={url(`/entries/${e.id}/`)}><span class="sw" style={`background: var(--f-${e.data.fam})`} />{e.data.label}<span class="k">{KIND_DOWN[kind]}</span></a>)}</div> : <p class="none">Nothing later on this timeline yet.</p>}
+        <section class="box"><p class="kicker">{t('entry.builtOn')}</p>
+          {parents.length ? <div class="rels">{parents.map(({ e, kind }) => <a class="chip" href={url(`/entries/${e.id}/`, lang)}><span class="sw" style={`background: var(--f-${e.data.fam})`} />{e.data.label}<span class="k">{t(`kind.up.${kind}`)}</span></a>)}</div> : <p class="none">{t('entry.noParents')}</p>}
+          <p class="kicker">{t('entry.after')}</p>
+          {kids.length ? <div class="rels">{kids.map(({ e, kind }) => <a class="chip" href={url(`/entries/${e.id}/`, lang)}><span class="sw" style={`background: var(--f-${e.data.fam})`} />{e.data.label}<span class="k">{t(`kind.down.${kind}`)}</span></a>)}</div> : <p class="none">{t('entry.noKids')}</p>}
         </section>
         {primers.length > 0 && (
-          <section class="box"><p class="kicker">The physics</p>
-            <ul class="plain">{primers.map((p) => <li><a href={url(`/physics/${p.id}/`)}>{p.data.title}</a></li>)}</ul>
+          <section class="box"><p class="kicker">{t('entry.physics')}</p>
+            <ul class="plain">{primers.map((p) => <li><a href={url(`/physics/${p.id}/`, lang)}>{p.data.title}</a></li>)}</ul>
           </section>
         )}
-        <a class="see" href={url(`/#${entry.id}`)}>See it on the timeline →</a>
+        <a class="see" href={url(`/#${entry.id}`, lang)}>{t('entry.see')}</a>
       </aside>
     </div>
 
-    <nav class="pager" aria-label="Previous and next entries">
-      {prev ? <a href={url(`/entries/${prev.id}/`)}><span class="k">← Earlier · {prev.data.ds}</span>{prev.data.title}</a> : <span />}
-      {next ? <a class="r" href={url(`/entries/${next.id}/`)}><span class="k">Later · {next.data.ds} →</span>{next.data.title}</a> : <span />}
+    <nav class="pager" aria-label={t('entry.pager')}>
+      {prev ? <a href={url(`/entries/${prev.id}/`, lang)}><span class="k">{t('entry.earlier', { ds: prev.data.ds })}</span>{prev.data.title}</a> : <span />}
+      {next ? <a class="r" href={url(`/entries/${next.id}/`, lang)}><span class="k">{t('entry.later', { ds: next.data.ds })}</span>{next.data.title}</a> : <span />}
     </nav>
   </article>
 </Base>

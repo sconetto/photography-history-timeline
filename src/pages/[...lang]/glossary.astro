@@ -1,34 +1,41 @@
 ---
-import Base from '../layouts/Base.astro';
-import { content } from '../lib/content';
-import { url } from '../lib/url';
-const { glossary, glossaryUsage } = await content();
-const terms = [...glossary].sort((a, b) => a.data.term.localeCompare(b.data.term));
-const letters = [...new Set(terms.map((t) => t.data.term[0].toUpperCase()))];
+import Base from '../../layouts/Base.astro';
+import { content } from '../../lib/content';
+import { url } from '../../lib/url';
+import { useT, langPaths, type Lang } from '../../i18n';
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useT(lang);
+const { glossary, glossaryUsage } = await content(lang);
+const collator = new Intl.Collator(lang, { sensitivity: 'base' });
+const terms = [...glossary].sort((a, b) => collator.compare(a.data.term, b.data.term));
+// letters ignore accents, so "Ótica" files under O
+const letter = (s: string) => s[0].normalize('NFD').replace(/\p{M}/gu, '').toUpperCase();
+const letters = [...new Set(terms.map((g) => letter(g.data.term)))];
 ---
-<Base title="Glossary" description="Photographic terms explained in plain words: aperture, f-number, crop factor, latent image, fixer and more.">
-  <p class="eyebrow">Words</p>
-  <h1 class="page-title">Glossary</h1>
-  <p class="dek">{terms.length} terms used across the site. Underlined words in entries link here and show a short definition when you hover them; each term lists the pages that use it.</p>
+<Base title={t('glossary.title')} description={t('glossary.desc')}>
+  <p class="eyebrow">{t('glossary.eyebrow')}</p>
+  <h1 class="page-title">{t('glossary.title')}</h1>
+  <p class="dek">{t('glossary.dek', { n: terms.length })}</p>
   <div class="tools">
-    <label class="filter"><span class="visually-hidden">Filter terms</span>
+    <label class="filter"><span class="visually-hidden">{t('glossary.filter')}</span>
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="10.8" y1="10.8" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <input id="gl-q" type="search" placeholder="Filter terms" autocomplete="off" />
+      <input id="gl-q" type="search" placeholder={t('glossary.filter')} autocomplete="off" />
     </label>
-    <nav class="az" aria-label="Jump to letter">{letters.map((l) => <a href={`#letter-${l}`}>{l}</a>)}</nav>
+    <nav class="az" aria-label={t('glossary.az')}>{letters.map((l) => <a href={`#letter-${l}`}>{l}</a>)}</nav>
   </div>
-  <p id="gl-none" class="none" hidden>No term matches. Try <a href={url('/search/')}>search</a> for the whole site.</p>
+  <p id="gl-none" class="none" hidden set:html={t('glossary.none', { search: `<a href="${url('/search/', lang)}">${t('glossary.search')}</a>` })} />
   <dl class="gl">
     {terms.map((g, i) => {
-      const L = g.data.term[0].toUpperCase();
-      const first = i === 0 || terms[i - 1].data.term[0].toUpperCase() !== L;
+      const L = letter(g.data.term);
+      const first = i === 0 || letter(terms[i - 1].data.term) !== L;
       const used = glossaryUsage.get(g.id) ?? [];
       return (
         <div id={g.id} data-text={`${g.data.term} ${g.data.def}`.toLowerCase()}>
           <dt id={first ? `letter-${L}` : undefined}>{g.data.term}</dt>
           <dd>
             {g.data.def}
-            {used.length > 0 && <p class="used"><span>Used in</span> {used.map((u, j) => <>{j > 0 && ' · '}<a href={url(u.href)}>{u.label}</a></>)}</p>}
+            {used.length > 0 && <p class="used"><span>{t('glossary.used')}</span> {used.map((u, j) => <>{j > 0 && ' · '}<a href={url(u.href, lang)}>{u.label}</a></>)}</p>}
           </dd>
         </div>
       );

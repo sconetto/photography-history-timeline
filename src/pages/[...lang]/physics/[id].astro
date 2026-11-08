@@ -1,22 +1,26 @@
 ---
 import { render } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import { content, type Primer } from '../../lib/content';
-import { url } from '../../lib/url';
-import Widget from '../../components/widgets/Widget.astro';
+import Base from '../../../layouts/Base.astro';
+import { content, type Primer } from '../../../lib/content';
+import { url } from '../../../lib/url';
+import Widget from '../../../components/widgets/Widget.astro';
+import { useT, langPaths, type Lang } from '../../../i18n';
 export async function getStaticPaths() {
-  const { physics } = await content();
-  return physics.map((primer) => ({ params: { id: primer.id }, props: { primer } }));
+  return (await Promise.all(langPaths().map(async ({ params, props: { lang } }) => {
+    const { physics } = await content(lang);
+    return physics.map((primer) => ({ params: { ...params, id: primer.id }, props: { lang, primer } }));
+  }))).flat();
 }
-interface Props { primer: Primer }
-const { primer } = Astro.props;
+interface Props { lang: Lang; primer: Primer }
+const { lang, primer } = Astro.props;
+const t = useT(lang);
 const d = primer.data;
-const { Content } = await render(primer);
-const { primerEntries } = await content();
+const { Content } = await render(primer.tr ?? primer);
+const { primerEntries } = await content(lang);
 const related = primerEntries.get(primer.id) ?? [];
 ---
 <Base title={d.title} description={d.dek}>
-  <p class="eyebrow"><a href={url('/physics/')}>How it works</a> · {String(d.order).padStart(2, '0')}</p>
+  <p class="eyebrow"><a href={url('/physics/', lang)}>{t('nav.physics')}</a> · {String(d.order).padStart(2, '0')}</p>
   <h1 class="page-title">{d.title}</h1>
   <p class="lead">{d.dek}</p>
   <Widget kind={d.widget} />
@@ -24,13 +28,13 @@ const related = primerEntries.get(primer.id) ?? [];
     <div class="prose"><Content /></div>
     <aside>
       {d.equations.length > 0 && (
-        <section class="box"><p class="kicker">Key relations</p>
+        <section class="box"><p class="kicker">{t('physics.relations')}</p>
           <dl>{d.equations.map(([k, v]) => <div><dt>{k}</dt><dd class="eq">{v}</dd></div>)}</dl>
         </section>
       )}
       {related.length > 0 && (
-        <section class="box"><p class="kicker">On the timeline</p>
-          <ul>{related.map((e) => <li><a href={url(`/entries/${e.id}/`)}>{e.data.label}</a> <span class="mono">{e.data.ds}</span></li>)}</ul>
+        <section class="box"><p class="kicker">{t('physics.onTimeline')}</p>
+          <ul>{related.map((e) => <li><a href={url(`/entries/${e.id}/`, lang)}>{e.data.label}</a> <span class="mono">{e.data.ds}</span></li>)}</ul>
         </section>
       )}
     </aside>

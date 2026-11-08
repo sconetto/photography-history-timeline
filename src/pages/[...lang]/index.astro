@@ -1,12 +1,16 @@
 ---
 import { getImage } from 'astro:assets';
-import Base from '../layouts/Base.astro';
-import TimelineNavigator from '../components/TimelineNavigator.astro';
-import { content, STATUS_TEXT, SIDE_TEXT } from '../lib/content';
-import { url } from '../lib/url';
-import type { Payload } from '../scripts/timeline/types';
+import Base from '../../layouts/Base.astro';
+import TimelineNavigator from '../../components/TimelineNavigator.astro';
+import { content } from '../../lib/content';
+import { url } from '../../lib/url';
+import { useT, langPaths, type Lang } from '../../i18n';
+import type { Payload } from '../../scripts/timeline/types';
 
-const { entries, families, eras, milestones } = await content();
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useT(lang);
+const { entries, families, eras, milestones } = await content(lang);
 const items: Payload['items'] = await Promise.all(
   entries.map(async (e) => {
     const d = e.data;
@@ -15,13 +19,13 @@ const items: Payload['items'] = await Promise.all(
       id: e.id, label: d.label, title: d.title, ds: d.ds, date: d.date, year: d.year, range: d.range, end: d.end,
       fam: d.fam, side: d.side, impact: d.impact, status: d.status, summary: d.summary, today: d.today,
       parents: d.parents.map((p) => ({ id: p.id.id, kind: p.kind })), makers: d.makers.map((m) => m.id),
-      thumb, thumbAlt: d.image?.alt, cam: d.cameraType, href: url(`/entries/${e.id}/`),
+      thumb, thumbAlt: d.image?.alt, cam: d.cameraType, href: url(`/entries/${e.id}/`, lang),
     };
   }),
 );
 const payload: Payload = {
   items,
-  milestones: milestones.map((m) => ({ id: m.id, year: m.data.year, label: m.data.label, when: m.data.when, note: m.data.note, href: url(`/landmarks/#${m.id}`) })),
+  milestones: milestones.map((m) => ({ id: m.id, year: m.data.year, label: m.data.label, when: m.data.when, note: m.data.note, href: url(`/landmarks/#${m.id}`, lang) })),
   eras: eras.map((e) => ({ name: e.data.name, short: e.data.short, a: e.data.a, b: e.data.b })),
   families: families.map((f) => ({ id: f.id, name: f.data.name, short: f.data.short })),
   now: new Date().getFullYear(),
@@ -31,62 +35,58 @@ const famName = new Map(families.map((f) => [f.id, f.data.name]));
 ---
 <Base wide>
   <header class="intro">
-    <p class="eyebrow">Light, chemistry &amp; cameras</p>
+    <p class="eyebrow">{t('home.eyebrow')}</p>
     <h1>Photography <em>Through</em> Time</h1>
-    <p class="dek">
-      {entries.length} discoveries, cameras and formats, from the camera obscura to computational photography, on one line of time.
-      Stars <b>above the line</b> are discoveries and inventions; stars <b>below</b> are cameras, formats and products that photographers could buy.
-      Hover a star for a summary and to light up everything it built on; click it to read the full entry.
-    </p>
+    <p class="dek" set:html={t('home.dek', { n: entries.length })} />
   </header>
 
   <div class="controls">
-    <div class="chips" id="chips" role="group" aria-label="Highlight a family">
-      <button type="button" class="chip" data-fam="all" aria-pressed="true">All <span class="n">{entries.length}</span></button>
+    <div class="chips" id="chips" role="group" aria-label={t('home.chips')}>
+      <button type="button" class="chip" data-fam="all" aria-pressed="true">{t('common.all')} <span class="n">{entries.length}</span></button>
       {families.map((f) => (
         <button type="button" class="chip" data-fam={f.id} aria-pressed="false"><span class="sw" style={`background: var(--f-${f.id})`} />{f.data.name} <span class="n">{count(f.id)}</span></button>
       ))}
     </div>
     <div class="toggles">
-      <div class="seg" role="group" aria-label="View">
-        <button type="button" id="v-time" aria-pressed="true">Timeline</button>
-        <button type="button" id="v-lanes" aria-pressed="false">By family</button>
-        <button type="button" id="v-list" aria-pressed="false">List</button>
+      <div class="seg" role="group" aria-label={t('home.view')}>
+        <button type="button" id="v-time" aria-pressed="true">{t('home.view.time')}</button>
+        <button type="button" id="v-lanes" aria-pressed="false">{t('home.view.lanes')}</button>
+        <button type="button" id="v-list" aria-pressed="false">{t('home.view.list')}</button>
       </div>
-      <div class="seg" role="group" aria-label="Time scale">
-        <button type="button" id="sc-stretch" aria-pressed="true">Recent stretched</button>
-        <button type="button" id="sc-true" aria-pressed="false">True to time</button>
+      <div class="seg" role="group" aria-label={t('home.scale')}>
+        <button type="button" id="sc-stretch" aria-pressed="true">{t('home.scale.stretch')}</button>
+        <button type="button" id="sc-true" aria-pressed="false">{t('home.scale.true')}</button>
       </div>
     </div>
   </div>
 
-  <div class="legend" id="legend" aria-label="How to read the chart">
-    <span class="item"><svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true"><line x1="7" y1="17" x2="7" y2="6" style="stroke:var(--muted)"/><circle cx="7" cy="5" r="4" style="fill:var(--ink)"/></svg>Above: discovery or invention</span>
-    <span class="item"><svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true"><line x1="7" y1="1" x2="7" y2="12" style="stroke:var(--muted)"/><circle cx="7" cy="13" r="4" style="fill:var(--ink)"/></svg>Below: camera, format or product</span>
-    <span class="item"><svg width="66" height="20" viewBox="0 0 66 20" aria-hidden="true"><circle cx="9" cy="10" r="9" style="fill:var(--ink)"/><circle cx="29" cy="10" r="7" style="fill:var(--ink)"/><circle cx="45" cy="10" r="5.2" style="fill:var(--ink)"/><circle cx="58" cy="10" r="3.8" style="fill:var(--ink)"/></svg>Impact: changed photography for everyone · major · significant · niche</span>
-    <span class="item"><svg width="96" height="16" viewBox="0 0 96 16" aria-hidden="true"><circle cx="8" cy="8" r="5" style="fill:var(--ink)"/><circle cx="32" cy="8" r="4" style="fill:var(--panel);stroke:var(--ink);stroke-width:2.6"/><circle cx="56" cy="8" r="4.5" style="fill:var(--panel);stroke:var(--ink-2);stroke-width:1.4"/><circle cx="84" cy="8" r="4.5" style="fill:var(--panel);stroke:var(--ink-2);stroke-width:1.4"/><circle cx="84" cy="8" r="7.5" style="fill:none;stroke:var(--ink-2);stroke-width:1;stroke-dasharray:2 2.2"/></svg>In use · niche today · obsolete · revived</span>
-    <span class="item"><svg width="88" height="10" viewBox="0 0 88 10" aria-hidden="true"><line x1="0" y1="5" x2="24" y2="5" style="stroke:var(--ink-2)"/><line x1="32" y1="5" x2="56" y2="5" style="stroke:var(--ink-2);stroke-dasharray:4 4"/><line x1="64" y1="5" x2="88" y2="5" style="stroke:var(--ink-2);stroke-dasharray:1 4;stroke-linecap:round"/></svg>Built on · made possible by · replaced</span>
-    <span class="item"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 L11 6 L6 11 L1 6Z" style="fill:var(--ink-2)"/></svg>Landmark photograph or event</span>
+  <div class="legend" id="legend" aria-label={t('home.legend')}>
+    <span class="item"><svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true"><line x1="7" y1="17" x2="7" y2="6" style="stroke:var(--muted)"/><circle cx="7" cy="5" r="4" style="fill:var(--ink)"/></svg>{t('home.legend.above')}</span>
+    <span class="item"><svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true"><line x1="7" y1="1" x2="7" y2="12" style="stroke:var(--muted)"/><circle cx="7" cy="13" r="4" style="fill:var(--ink)"/></svg>{t('home.legend.below')}</span>
+    <span class="item"><svg width="66" height="20" viewBox="0 0 66 20" aria-hidden="true"><circle cx="9" cy="10" r="9" style="fill:var(--ink)"/><circle cx="29" cy="10" r="7" style="fill:var(--ink)"/><circle cx="45" cy="10" r="5.2" style="fill:var(--ink)"/><circle cx="58" cy="10" r="3.8" style="fill:var(--ink)"/></svg>{t('home.legend.impact')}</span>
+    <span class="item"><svg width="96" height="16" viewBox="0 0 96 16" aria-hidden="true"><circle cx="8" cy="8" r="5" style="fill:var(--ink)"/><circle cx="32" cy="8" r="4" style="fill:var(--panel);stroke:var(--ink);stroke-width:2.6"/><circle cx="56" cy="8" r="4.5" style="fill:var(--panel);stroke:var(--ink-2);stroke-width:1.4"/><circle cx="84" cy="8" r="4.5" style="fill:var(--panel);stroke:var(--ink-2);stroke-width:1.4"/><circle cx="84" cy="8" r="7.5" style="fill:none;stroke:var(--ink-2);stroke-width:1;stroke-dasharray:2 2.2"/></svg>{t('home.legend.status')}</span>
+    <span class="item"><svg width="88" height="10" viewBox="0 0 88 10" aria-hidden="true"><line x1="0" y1="5" x2="24" y2="5" style="stroke:var(--ink-2)"/><line x1="32" y1="5" x2="56" y2="5" style="stroke:var(--ink-2);stroke-dasharray:4 4"/><line x1="64" y1="5" x2="88" y2="5" style="stroke:var(--ink-2);stroke-dasharray:1 4;stroke-linecap:round"/></svg>{t('home.legend.links')}</span>
+    <span class="item"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 L11 6 L6 11 L1 6Z" style="fill:var(--ink-2)"/></svg>{t('home.legend.landmark')}</span>
   </div>
 
-  <section class="chart-shell panel" id="shell" aria-label="Timeline">
+  <section class="chart-shell panel" id="shell" aria-label={t('home.chart')}>
     <div class="scroller" id="scroller">
-      <svg id="chart" role="group" aria-label="Timeline of photography: discoveries above the time band, products below"></svg>
+      <svg id="chart" role="group" aria-label={t('home.chart.time')}></svg>
     </div>
     <div class="scroller" id="lanescroller" hidden>
-      <svg id="lanes-svg" role="group" aria-label="Photography's history arranged in one lane per family"></svg>
+      <svg id="lanes-svg" role="group" aria-label={t('home.chart.lanes')}></svg>
     </div>
     <div class="listwrap" id="listwrap">
       <table>
-        <thead><tr><th scope="col">Entry</th><th scope="col">When</th><th scope="col">Kind</th><th scope="col">Family</th><th scope="col">Status</th></tr></thead>
+        <thead><tr><th scope="col">{t('home.th.entry')}</th><th scope="col">{t('home.th.when')}</th><th scope="col">{t('home.th.kind')}</th><th scope="col">{t('home.th.family')}</th><th scope="col">{t('home.th.status')}</th></tr></thead>
         <tbody id="tbody">
           {entries.map((e) => (
             <tr data-id={e.id} data-fam={e.data.fam}>
-              <td><a href={url(`/entries/${e.id}/`)}>{e.data.title}</a></td>
+              <td><a href={url(`/entries/${e.id}/`, lang)}>{e.data.title}</a></td>
               <td class="when">{e.data.ds}</td>
-              <td>{SIDE_TEXT[e.data.side]}</td>
+              <td>{t(`side.${e.data.side}`)}</td>
               <td><span class="fam"><span class="sw" style={`background: var(--f-${e.data.fam})`} />{famName.get(e.data.fam)}</span></td>
-              <td>{STATUS_TEXT[e.data.status]}</td>
+              <td>{t(`status.${e.data.status}`)}</td>
             </tr>
           ))}
         </tbody>
@@ -95,13 +95,13 @@ const famName = new Map(families.map((f) => [f.id, f.data.name]));
     <div class="card" id="card" role="tooltip" hidden></div>
     <TimelineNavigator eras={payload.eras} now={payload.now} />
     <div class="caption" id="caption">
-      <span id="scale-note">Time is stretched toward the present, so the crowded last two centuries have room.</span>
+      <span id="scale-note">{t('home.note.stretchShort')}</span>
     </div>
   </section>
 
   <script type="application/json" id="timeline-data" set:html={JSON.stringify(payload).replace(/</g, '\\u003c')} />
   <script>
-    import '../scripts/timeline/main';
+    import '../../scripts/timeline/main';
   </script>
 </Base>
 

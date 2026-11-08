@@ -1,8 +1,10 @@
 ---
 /** Three-colour mixing (light adds, dyes subtract) and colour temperature with white balance. */
+import { useT, pageLang } from '../../i18n';
+const t = useT(pageLang(Astro));
 ---
 <figure class="wg" id="wg-col">
-  <div class="wg-head"><p class="kicker">Try it: mixing colour, and the colour of light</p></div>
+  <div class="wg-head"><p class="kicker">{t('w.col.kicker')}</p></div>
   <div class="wg-stage">
     <svg viewBox="0 0 300 250" role="img" aria-labelledby="col-sum">
       <rect id="col-bg" width="300" height="220" rx="10" />
@@ -14,16 +16,16 @@
     </svg>
   </div>
   <div class="wg-controls">
-    <div class="wg-ctl"><label for="col-mode">Mixing</label>
-      <select id="col-mode"><option value="add">Light: red, green, blue (additive)</option><option value="sub">Dyes: cyan, magenta, yellow (subtractive)</option></select></div>
-    <div class="wg-ctl"><label for="col-a"><span id="col-a-l">Red</span> <output id="col-a-out" for="col-a"></output></label><input id="col-a" type="range" min="0" max="100" value="100" /></div>
-    <div class="wg-ctl"><label for="col-b"><span id="col-b-l">Green</span> <output id="col-b-out" for="col-b"></output></label><input id="col-b" type="range" min="0" max="100" value="100" /></div>
-    <div class="wg-ctl"><label for="col-c"><span id="col-c-l">Blue</span> <output id="col-c-out" for="col-c"></output></label><input id="col-c" type="range" min="0" max="100" value="100" /></div>
+    <div class="wg-ctl"><label for="col-mode">{t('w.col.mixing')}</label>
+      <select id="col-mode"><option value="add">{t('w.col.add')}</option><option value="sub">{t('w.col.sub')}</option></select></div>
+    <div class="wg-ctl"><label for="col-a"><span id="col-a-l">{t('w.col.red')}</span> <output id="col-a-out" for="col-a"></output></label><input id="col-a" type="range" min="0" max="100" value="100" /></div>
+    <div class="wg-ctl"><label for="col-b"><span id="col-b-l">{t('w.col.green')}</span> <output id="col-b-out" for="col-b"></output></label><input id="col-b" type="range" min="0" max="100" value="100" /></div>
+    <div class="wg-ctl"><label for="col-c"><span id="col-c-l">{t('w.col.blue')}</span> <output id="col-c-out" for="col-c"></output></label><input id="col-c" type="range" min="0" max="100" value="100" /></div>
   </div>
   <div class="wg-controls">
-    <div class="wg-ctl"><label for="col-k">Light source <output id="col-k-out" for="col-k"></output></label><input id="col-k" type="range" min="1800" max="10000" step="100" value="3200" /></div>
-    <div class="wg-ctl"><label for="col-wbk">White balance set to <output id="col-wbk-out" for="col-wbk"></output></label><input id="col-wbk" type="range" min="1800" max="10000" step="100" value="5500" /></div>
-    <div class="wg-ctl"><button type="button" class="chip" id="col-match">Match the light (auto white balance)</button></div>
+    <div class="wg-ctl"><label for="col-k">{t('w.col.k')} <output id="col-k-out" for="col-k"></output></label><input id="col-k" type="range" min="1800" max="10000" step="100" value="3200" /></div>
+    <div class="wg-ctl"><label for="col-wbk">{t('w.col.wbk')} <output id="col-wbk-out" for="col-wbk"></output></label><input id="col-wbk" type="range" min="1800" max="10000" step="100" value="5500" /></div>
+    <div class="wg-ctl"><button type="button" class="chip" id="col-match">{t('w.col.match')}</button></div>
   </div>
   <p class="wg-sum" id="col-sum" aria-live="polite"></p>
   <p class="wg-sum" id="col-wb-sum" aria-live="polite"></p>
@@ -32,6 +34,8 @@
 <script>
   import { kelvinRgb } from '../../lib/optics';
   import { $ } from '../../scripts/widgets/util';
+  import { useT, docLang, type Key } from '../../i18n';
+  const T = useT(docLang());
   const root = document.getElementById('wg-col')!;
   const mode = $<HTMLSelectElement>(root, '#col-mode');
   const ins = ['#col-a', '#col-b', '#col-c'].map((s) => $<HTMLInputElement>(root, s));
@@ -43,14 +47,14 @@
   function name(c: number[]) {
     const [r, g, b] = c.map((v) => v > 170 ? 2 : v > 70 ? 1 : 0);
     const key = `${r}${g}${b}`;
-    const N: Record<string, string> = { '222': 'white', '000': 'black', '200': 'red', '020': 'green', '002': 'blue', '220': 'yellow', '022': 'cyan', '202': 'magenta', '111': 'grey', '210': 'orange', '201': 'pink', '120': 'yellow-green', '021': 'teal', '012': 'azure', '102': 'violet' };
-    return N[key] ?? 'a mixed colour';
+    const N: Record<string, string> = { '222': 'white', '000': 'black', '200': 'red', '020': 'green', '002': 'blue', '220': 'yellow', '022': 'cyan', '202': 'magenta', '111': 'grey', '210': 'orange', '201': 'pink', '120': 'yellowGreen', '021': 'teal', '012': 'azure', '102': 'violet' };
+    return T((N[key] ? `w.col.n.${N[key]}` : 'w.col.n.mixed') as Key);
   }
 
   function mix() {
     const add = mode.value === 'add', v = ins.map((i) => Number(i.value) / 100);
-    const labels = add ? ['Red', 'Green', 'Blue'] : ['Cyan', 'Magenta', 'Yellow'];
-    labels.forEach((l, i) => { set(`#col-${'abc'[i]}-l`, `${l} ${add ? 'light' : 'dye'}`); set(`#col-${'abc'[i]}-out`, `${Math.round(v[i] * 100)}%`); });
+    const labels = (add ? ['red', 'green', 'blue'] : ['cyan', 'magenta', 'yellow']).map((c) => T(`w.col.l.${c}` as Key));
+    labels.forEach((l, i) => { set(`#col-${'abc'[i]}-l`, l); set(`#col-${'abc'[i]}-out`, `${Math.round(v[i] * 100)}%`); });
     $<SVGRectElement>(root, '#col-bg').setAttribute('fill', add ? '#000' : '#fff');
     // three overlapping discs: screen (adds light) or multiply (each dye removes one primary)
     const pos = [[150, 82], [116, 140], [184, 140]];
@@ -61,10 +65,9 @@
     // the centre, where all three overlap
     const centre = add ? v.map(enc) : v.map((x) => enc(1 - x));
     $<SVGGElement>(root, '#col-mix').innerHTML = `<g style="isolation:isolate">${pos.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="58" fill="${fills[i]}" style="mix-blend-mode:${blend}"/>`).join('')}</g>`;
-    set('#col-cap', `centre: ${name(centre)} ${hex(centre)}`);
-    set('#col-sum', add
-      ? `Light adds: red ${Math.round(v[0] * 100)}%, green ${Math.round(v[1] * 100)}% and blue ${Math.round(v[2] * 100)}% make ${name(centre)} where all three overlap. Screens and sensors mix colour this way.`
-      : `Dyes subtract from white light: cyan ${Math.round(v[0] * 100)}%, magenta ${Math.round(v[1] * 100)}% and yellow ${Math.round(v[2] * 100)}% leave ${name(centre)} where all three overlap. Colour film and prints mix colour this way.`);
+    set('#col-cap', T('w.col.centre', { name: name(centre), hex: hex(centre) }));
+    const pct = { a: Math.round(v[0] * 100), b: Math.round(v[1] * 100), c: Math.round(v[2] * 100), name: name(centre) };
+    set('#col-sum', T(add ? 'w.col.sumAdd' : 'w.col.sumSub', pct));
   }
 
   // a small still life: reflectances in linear light
@@ -83,18 +86,18 @@
     const fixed = (r: number[]) => hex(r.map((x, i) => enc(x * gain[i] * norm * 1.08)));
     const scene = (f: (r: number[]) => string, dx: number, dy: number, s: number) => `<g transform="translate(${dx},${dy}) scale(${s})">${OBJ.map(([, r, d]) => d.replace(/^<(\w+)/, `<$1 fill="${f(r)}"`)).join('')}</g>`;
     $<SVGGElement>(root, '#col-wb').innerHTML =
-      `<text class="lbl" x="4" y="14">To the eye</text><text class="lbl" x="154" y="14">To the camera</text>`
+      `<text class="lbl" x="4" y="14">${T('w.col.eye')}</text><text class="lbl" x="154" y="14">${T('w.col.camera')}</text>`
       + `<rect x="0" y="22" width="146" height="110" rx="8" fill="#000"/>${scene(eye, -20, 4, 0.6)}`
       + `<rect x="154" y="22" width="146" height="110" rx="8" fill="#000"/>${scene(fixed, 134, 4, 0.6)}`
-      + `<text x="73" y="148" text-anchor="middle">adapted to ${K} K</text><text x="227" y="148" text-anchor="middle">balanced for ${W} K</text>`
-      + `<text class="lbl" x="4" y="180">Colour of the light</text>`
+      + `<text x="73" y="148" text-anchor="middle">${T('w.col.adapted', { k: K })}</text><text x="227" y="148" text-anchor="middle">${T('w.col.balanced', { k: W })}</text>`
+      + `<text class="lbl" x="4" y="180">${T('w.col.lightColour')}</text>`
       + Array.from({ length: 30 }, (_, i) => { const k = 1800 + (i * 8200) / 29; return `<rect x="${4 + i * 9.73}" y="190" width="10.3" height="18" fill="${hex(kelvinRgb(k))}"/>`; }).join('')
       + `<path d="M${4 + ((K - 1800) / 8200) * 292},214 l-6,10 h12Z" class="fill-acc"/><path d="M${4 + ((W - 1800) / 8200) * 292},186 l-6,-10 h12Z" fill="var(--ink-2)"/>`
       + `<text x="4" y="240">1800 K</text><text x="${4 + (3700 / 8200) * 292}" y="240" text-anchor="middle">5500 K</text><text x="296" y="240" text-anchor="end">10 000 K</text>`;
     const off = Math.log2(W / K);
     set('#col-wb-sum', Math.abs(off) < 0.08
-      ? `White balance matches the ${K} K light, so the paper records as neutral white.`
-      : `The camera is balanced for ${W} K but the light is ${K} K, so the picture comes out too ${off > 0 ? 'orange' : 'blue'}. Our eyes adapt and see white paper; film and sensors do not.`);
+      ? T('w.col.wbOk', { k: K })
+      : T('w.col.wbOff', { w: W, k: K, tint: T(off > 0 ? 'w.col.orange' : 'w.col.blueTint') }));
   }
   for (const el of [mode, ...ins]) el.addEventListener('input', mix);
   for (const el of [kIn, wIn]) el.addEventListener('input', wb);

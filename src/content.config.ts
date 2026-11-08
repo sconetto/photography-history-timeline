@@ -137,4 +137,52 @@ const sources = defineCollection({
   schema: z.object({ label: z.string(), url: https.optional(), note: z.string().optional(), kind: z.enum(['book', 'web', 'archive']) }),
 });
 
-export const collections = { entries, makers, physics, families, eras, milestones, formats, glossary, sources };
+// ---------- translations: words only, keyed by the English ids; facts (dates, links, references) stay in the English files.
+// Files live in src/content/i18n/<lang>/… and get ids like "pt-br/entries/daguerreotype" or "pt-br/glossary".
+const I18N = './src/content/i18n';
+const pair = z.tuple([z.string(), z.string()]);
+
+const trEntries = defineCollection({
+  loader: glob({ pattern: '*/entries/*.mdx', base: I18N }),
+  schema: z.object({
+    title: z.string(),
+    label: z.string().max(40),
+    ds: z.string(),
+    date: z.string(),
+    summary: z.string().min(40).max(260),
+    today: z.string().min(10).max(290),
+    people: z.array(z.tuple([z.string(), z.string(), z.string()])).optional(),
+    moments: z.array(pair).optional(),
+    specs: z.array(pair).optional(),
+    exposureNote: z.string().optional(),
+    imageAlt: z.string().min(10).optional(),
+    sourceNotes: z.array(z.string()).optional(),
+    wiki: z.string().optional(), // the article on this language's Wikipedia
+  }),
+});
+const trMakers = defineCollection({
+  loader: glob({ pattern: '*/makers/*.md', base: I18N }),
+  schema: z.object({
+    name: z.string().optional(),
+    fate: z.string(),
+    linkNotes: z.record(z.string(), z.string()).optional(), // keyed by the target maker id
+    wiki: z.string().optional(),
+  }),
+});
+const trPhysics = defineCollection({
+  loader: glob({ pattern: '*/physics/*.mdx', base: I18N }),
+  schema: z.object({ title: z.string(), short: z.string().max(34), dek: z.string(), equations: z.array(pair).optional() }),
+});
+const byId = <T extends z.ZodTypeAny>(item: T) => z.record(z.string(), item);
+const trData = (name: string, item: z.ZodTypeAny) => defineCollection({ loader: glob({ pattern: `*/${name}.yaml`, base: I18N }), schema: byId(item) });
+const trFamilies = trData('families', z.object({ name: z.string(), short: z.string(), blurb: z.string() }));
+const trEras = trData('eras', z.object({ name: z.string(), short: z.string() }));
+const trMilestones = trData('milestones', z.object({ label: z.string(), when: z.string(), note: z.string(), imageAlt: z.string().optional() }));
+const trFormats = trData('formats', z.object({ name: z.string().optional(), note: z.string() }));
+const trGlossary = trData('glossary', z.object({ term: z.string(), def: z.string() }));
+const trSources = trData('sources', z.object({ label: z.string().optional(), note: z.string().optional() }));
+
+export const collections = {
+  entries, makers, physics, families, eras, milestones, formats, glossary, sources,
+  trEntries, trMakers, trPhysics, trFamilies, trEras, trMilestones, trFormats, trGlossary, trSources,
+};

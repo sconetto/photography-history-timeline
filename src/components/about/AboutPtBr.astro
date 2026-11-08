@@ -1,0 +1,136 @@
+---
+/** A página Sobre em português do Brasil (cada idioma tem sua cópia: o texto é longo demais para o dicionário). */
+import './about.css';
+import { content } from '../../lib/content';
+import { url } from '../../lib/url';
+import { REPO, KO_FI, INSPIRATION } from '../../lib/nav';
+
+const lang = 'pt-br';
+const { entries, makers, physics, milestones, glossary } = await content(lang);
+const ext = { rel: 'noopener', target: '_blank' } as const;
+const u = (path: string) => url(path, lang);
+const e = (id: string) => u(`/entries/${id}/`);
+
+const chapters = [
+  { when: 'c. 400 a.C. – 1604', title: 'Um furo na parede' },
+  { when: '1717 – 1841', title: 'A prata que se lembra da luz' },
+  { when: '1843 – 1844', title: 'Os primeiros livros fotográficos' },
+  { when: '1871 – 1900', title: 'Uma câmera para todos' },
+  { when: '1878 – 1925', title: 'Imagens que se movem' },
+  { when: '1861 – 1935', title: 'O mundo em cores' },
+  { when: '1969 – hoje', title: 'Da prata ao silício' },
+] as const;
+
+const explore = [
+  ['/', 'A linha do tempo', `Os ${entries.length} verbetes como um mapa estelar. Passe o mouse sobre uma estrela para ver um resumo, clique para ler a história completa e siga as linhas para ver o que se baseou em quê.`],
+  ['/entries/', 'Verbetes', 'Cada invenção, processo, câmera e formato, com suas pessoas, datas, especificações e fontes.'],
+  ['/makers/', 'Fabricantes', `${makers.length} empresas, da Voigtländer em 1756 à DJI, com suas fusões, mudanças de nome e destinos.`],
+  ['/formats/', 'Formatos', 'Das chapas de 8 × 10 polegadas a um sensor de celular, desenhados em escala, com fatores de corte e uma calculadora de equivalência.'],
+  ['/physics/', 'Como funciona', `${physics.length} explicações curtas sobre luz, lentes, exposição, prata, cor e sensores, cada uma com algo para experimentar.`],
+  ['/landmarks/', 'Marcos', `${milestones.length} fotografias e momentos que mudaram a forma como vemos, de um bulevar de Paris em 1838 ao Nascer da Terra.`],
+  ['/glossary/', 'Glossário', `${glossary.length} termos, de abertura a zoom, em palavras simples.`],
+] as const;
+
+const creatorLinks = [
+  ['https://github.com/sconetto', 'GitHub'],
+  ['https://www.linkedin.com/in/sconetto', 'LinkedIn'],
+  ['https://sconetto.me', 'Site'],
+  ['https://blog.sconetto.me', 'Blog'],
+  ['https://photos.sconetto.me', 'Fotos'],
+] as const;
+---
+<div class="about-page">
+  <header class="hero">
+    <p class="eyebrow">Sobre</p>
+    <h1 class="page-title">Sobre o site</h1>
+    <p class="lede">Um furo na parede, alguns grãos de prata e dois mil anos de curiosidade. Esta é a história de como aprendemos a guardar a luz, contada para que você se apaixone um pouco mais pela fotografia.</p>
+  </header>
+
+  <div class="prose">
+    <h2>Por que este site existe</h2>
+    <p>Cada foto que você faz se apoia numa longa corrente de ideias. O celular no seu bolso usa o mesmo princípio que um filósofo chinês descreveu por volta de 400 a.C. Seu sensor conta a luz do jeito que Einstein explicou em 1905. O "full frame" com que o sensor é comparado vem de um engenheiro alemão que colocou filme de cinema numa câmera pequena por volta de 1913. Quase toda essa história está espalhada por livros antigos, acervos de museus e histórias de empresas, e a maioria dos fotógrafos nunca chega a conhecê-la.</p>
+    <p>O Photography Through Time reúne tudo num só lugar. Ele é gratuito e aberto a todos: um lugar para aprender, consultar e se perder seguindo uma invenção até a próxima. Se você sair daqui sabendo um pouco mais sobre a sua câmera, e gostando um pouco mais dela, o site cumpriu seu papel.</p>
+  </div>
+
+  <section class="story" aria-labelledby="story-h">
+    <h2 id="story-h" class="sec">A história que ele conta</h2>
+    <ol class="chapters">
+      <li style="--c: var(--f-optics)">
+        <p class="when">{chapters[0].when}</p>
+        <h3>{chapters[0].title}</h3>
+        <p>Tudo começa num quarto escuro. A luz que passa por um pequeno furo pinta na parede uma imagem de cabeça para baixo do mundo lá fora: a <a href={e('camera-obscura')}>câmara escura</a>, notada por Mozi na China e por Aristóteles na Grécia. Por volta de 1011–21, no Cairo, Ibn al-Haytham explicou o porquê em seu <a href={e('book-of-optics')}><i>Livro de Óptica</i></a>. Depois vieram as <a href={e('spectacle-lenses')}>lentes de óculos</a>, e em 1604 <a href={e('kepler-optics')}>Kepler</a> deu nome ao quarto escuro. Artistas desenharam sobre suas imagens por dois séculos, mas ninguém conseguia guardá-las.</p>
+      </li>
+      <li style="--c: var(--f-chem)">
+        <p class="when">{chapters[1].when}</p>
+        <h3>{chapters[1].title}</h3>
+        <p>Então a química entrou em cena. Em 1717, Johann Schulze viu <a href={e('silver-salts')}>sais de prata</a> escurecerem com a luz. <a href={e('wedgwood-davy')}>Wedgwood e Davy</a> fizeram imagens em 1802, mas não conseguiram impedir que elas desaparecessem. Por volta de 1826, Nicéphore Niépce fixou a vista da sua janela depois de uma exposição de muitas horas: a fotografia de câmera mais antiga que sobreviveu, feita por <a href={e('heliography')}>heliografia</a>. No Brasil, <a href={e('hercules-florence')}>Hércules Florence</a> inventou seu próprio processo e o chamou de <i>photographie</i>. Em 1839, o <a href={e('daguerreotype')}>daguerreótipo</a> foi dado ao mundo, e os negativos em papel de Talbot logo vieram em seguida, como o <a href={e('calotype')}>calótipo</a>.</p>
+      </li>
+      <li style="--c: var(--f-sharing)">
+        <p class="when">{chapters[2].when}</p>
+        <h3>{chapters[2].title}</h3>
+        <p>A fotografia logo chegou aos livros. Em 1843, a botânica Anna Atkins começou a publicar <a href={u('/landmarks/#atkins')}>suas algas em azul</a>, impressas como <a href={e('cyanotype')}>cianótipos</a>. Em 1844, Talbot publicou <a href={u('/landmarks/#pencil-of-nature')}><i>The Pencil of Nature</i></a> (O lápis da natureza), o primeiro livro comercial ilustrado com fotografias. As imagens agora podiam ser copiadas, encadernadas e compartilhadas, e continuam sendo, dos <a href={e('carte-de-visite')}>cartões de visita</a> aos <a href={e('online-sharing')}>álbuns on-line</a>.</p>
+      </li>
+      <li style="--c: var(--f-cameras)">
+        <p class="when">{chapters[3].when}</p>
+        <h3>{chapters[3].title}</h3>
+        <p>Os primeiros fotógrafos carregavam o laboratório nas costas. As <a href={e('gelatin-dry-plate')}>chapas secas</a> acabaram com isso, e o <a href={e('roll-film')}>filme em rolo</a> deixou as câmeras pequenas. Em 1888, a <a href={e('kodak-camera')}>Kodak</a> prometia "You press the button, we do the rest" (você aperta o botão, nós fazemos o resto). Em 1900, a <a href={e('brownie')}>Brownie</a> custava um dólar. A partir daí, qualquer pessoa podia ser fotógrafa.</p>
+      </li>
+      <li style="--c: var(--f-formats)">
+        <p class="when">{chapters[4].when}</p>
+        <h3>{chapters[4].title}</h3>
+        <p>Em 1878, Eadweard Muybridge <a href={u('/landmarks/#muybridge')}>congelou um cavalo a galope</a> numa sequência de imagens, e logo as imagens se moveram. A oficina de Edison cortou o filme em <a href={e('cine-35mm')}>35mm</a>, e em 1895 os irmãos Lumière encheram um café de Paris de imagens em movimento. Desde então, cinema e fotografia compartilham o mesmo filme. Oskar Barnack colocou filme de cinema numa câmera pequena, dobrou o quadro para 36 × 24 mm, e a <a href={e('leica-i')}>Leica I</a> de 1925 definiu o <a href={e('format-135')}>"full frame"</a> com que as câmeras digitais ainda se comparam.</p>
+      </li>
+      <li style="--c: var(--f-colour)">
+        <p class="when">{chapters[5].when}</p>
+        <h3>{chapters[5].title}</h3>
+        <p>Em 1861, James Clerk Maxwell mostrou uma <a href={e('maxwell-colour')}>fita xadrez em cores</a> usando três fotografias em preto e branco. O <a href={e('autochrome')}>Autochrome</a> dos Lumière tornou a cor prática em 1907, com grãos tingidos de fécula de batata, e o <a href={e('kodachrome')}>Kodachrome</a> a levou a todos em 1935.</p>
+      </li>
+      <li style="--c: var(--f-digital)">
+        <p class="when">{chapters[6].when}</p>
+        <h3>{chapters[6].title}</h3>
+        <p>O <a href={e('ccd')}>CCD</a> de 1969 transformou a luz em números, e em 1975 Steven Sasson construiu a <a href={e('digital-camera-sasson')}>primeira câmera digital</a>, justamente na Kodak. O <a href={e('bayer-filter')}>filtro Bayer</a> deu cor aos sensores, e o <a href={e('cmos-sensor')}>CMOS</a> os tornou baratos. Em 2007, o <a href={e('iphone')}>iPhone</a> pôs uma câmera em quase todos os bolsos, e a <a href={e('computational-photography')}>fotografia computacional</a> hoje junta muitos quadros num só. Enquanto isso, <a href={e('film-revival')}>o filme voltou</a>, amado pelo que ele é.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="prose">
+    <h2>A física por baixo</h2>
+    <p>Por trás de cada passo há um pouco de ciência, e você não precisa de matemática para aproveitá-la. Por que um <a href={u('/physics/pinhole/')}>orifício</a> menor dá uma imagem mais nítida só até certo ponto. Por que cada <a href={u('/physics/aperture/')}>ponto de diafragma</a> reduz a luz pela metade. Como um cristal de <a href={u('/physics/silver/')}>prata</a> se lembra de alguns fótons até que o revelador multiplique essa marca milhões de vezes. Como um <a href={u('/physics/sensors/')}>sensor</a> enxerga cor através de um mosaico de filtros. Cada <a href={u('/physics/')}>explicação</a> traz um pequeno modelo interativo para experimentar.</p>
+  </div>
+
+  <section aria-labelledby="explore-h">
+    <h2 id="explore-h" class="sec">Como se orientar</h2>
+    <ul class="explore">
+      {explore.map(([href, title, text]) => <li><a href={u(href)}><span class="t">{title} →</span><span class="d">{text}</span></a></li>)}
+    </ul>
+  </section>
+
+  <div class="prose">
+    <h2>Como ele é feito</h2>
+    <p>O texto é escrito do zero a partir de acervos de museus, artigos e patentes originais e das histórias clássicas de Josef Maria Eder e Beaumont Newhall. Cada verbete lista suas fontes, e todos os links são verificados. As datas e o "impacto" são explicados em <a href={u('/sources/')}>Fontes e método</a>. O site foi escrito em inglês e traduzido para o português do Brasil; se você encontrar um erro, <a href={`${REPO}/issues`} {...ext}>sugira uma correção</a>.</p>
+    <p>As fotografias estão todas em domínio público. As câmeras são desenhadas como silhuetas simples. O site não tem anúncios, rastreamento nem contas, e seu <a href={REPO} {...ext}>código-fonte</a> é aberto sob a licença GPL-3.0.</p>
+    <p>A ideia do mapa estelar vem do <a href={INSPIRATION.repo} {...ext}><i>Politics Through Time</i></a>, de <a href={INSPIRATION.profile} {...ext}>{INSPIRATION.author}</a>, uma linha do tempo das ideias políticas. O Photography Through Time empresta a ideia, não o código.</p>
+  </div>
+
+  <section class="creator" aria-labelledby="creator-h">
+    <h2 id="creator-h" class="sec">Sobre o autor</h2>
+    <div class="card">
+      <p class="name">João Pedro Sconetto</p>
+      <p class="role">Engenheiro de software, gestor e fotógrafo 🇧🇷</p>
+      <p class="loc">Brasília, Brasil</p>
+      <p class="bio">Engenheiro de software brasileiro, apaixonado por tecnologia, código aberto e boas histórias. Quando não está programando, está fotografando a cidade, assistindo à F1 e a corridas de endurance ou tomando um café especial. Acredita que bom software resolve problemas reais para pessoas reais, e que compartilhar conhecimento é a melhor forma de crescer. Este site junta duas dessas paixões: a fotografia e o hábito de compartilhar o que aprendeu sobre ela.</p>
+      <ul class="links">
+        {creatorLinks.map(([href, label]) => <li><a href={href} {...ext}>{label}</a></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="support" aria-labelledby="support-h">
+    <h2 id="support-h">Apoie o projeto</h2>
+    <p>O Photography Through Time é gratuito e vai continuar assim. Se ele te ensinou algo ou fez você olhar para a sua câmera de outro jeito, considere pagar um café virtual no Ko-fi. Isso ajuda a manter o site no ar e a história crescendo.</p>
+    <a class="kofi" href={KO_FI} {...ext}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 8h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Zm12 2h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5v2M12 3.5v2"/></svg>
+      Me pague um café no Ko-fi
+    </a>
+  </section>
+</div>

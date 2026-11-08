@@ -3,7 +3,9 @@
  * products below. mode "lanes": one horizontal lane per family.
  * Stars are SVG <a> links to the entry page; hovering is handled by the caller through callbacks.
  */
-import { xOf, fmtYear, SPAN } from '../../lib/scale';
+import { xOf, SPAN } from '../../lib/scale';
+import { useT, docLang, fmtYear as fmtYearIn } from '../../i18n';
+const LANG = docLang(), T = useT(LANG), fmtYear = (y: number) => fmtYearIn(LANG, y);
 import { zoomGeometry, ticksFor } from '../../lib/zoom';
 import { place, type Box } from '../../lib/layout';
 import type { Frame, Item, Milestone, Payload, Pos } from './types';
@@ -77,7 +79,7 @@ export class Chart {
   }
 
   private buildGem(m: Milestone, i: number, h: Hooks) {
-    const a = el('a', { href: m.href, class: 'ms', 'aria-label': `Landmark, ${m.when}: ${m.label}` }, this.g.mil);
+    const a = el('a', { href: m.href, class: 'ms', 'aria-label': T('card.landmarkAria', { when: m.when, label: m.label }) }, this.g.mil);
     const line = this.mode === 'lanes' ? el('line', { class: 'ms-line' }, a) : undefined;
     el('rect', { class: 'ms-hit', width: 18, height: 18 }, a);
     const gem = el('path', { class: 'gem' }, a);
@@ -171,7 +173,7 @@ export class Chart {
       // full name if it fits, else the short name; titles carry the full name and dates either way
       const label = b - a > tw(e.name) + 14 ? e.name : b - a > tw(e.short) + 8 ? e.short : '';
       if (label) {
-        html += `<text class="era-name" x="${f1((a + b) / 2)}" y="20" text-anchor="middle"><title>${e.name}, ${e.a < 0 ? 'antiquity' : e.a}–${e.b > this.data.now ? 'today' : e.b}</title>${label}</text>`;
+        html += `<text class="era-name" x="${f1((a + b) / 2)}" y="20" text-anchor="middle"><title>${e.name}, ${e.a < 0 ? T('year.antiquity') : e.a}–${e.b > this.data.now ? T('year.today') : e.b}</title>${label}</text>`;
         meta.push({ a, b, w: tw(label) });
       }
     });
@@ -184,7 +186,7 @@ export class Chart {
     let html = '';
     const kept: [number, number][] = [];
     for (const t of ticksFor((y) => this.x(f, y), SPAN.y0, SPAN.y1, TICKS)) {
-      const x = this.x(f, t), label = t === 1 ? '1 CE' : fmtYear(t);
+      const x = this.x(f, t), label = t === 1 ? T('year.ce1') : fmtYear(t);
       const hw = measure('400 10.5px "IBM Plex Mono"', label) / 2 + 8;
       if (kept.some((k) => x + hw > k[0] && x - hw < k[1])) continue;
       kept.push([x - hw, x + hw]);
@@ -203,7 +205,7 @@ export class Chart {
     this.g.axis.innerHTML = html;
     let th = this.ticks(f, ay + 3.8, measure, [top, bot]);
     const nx = this.x(f, this.data.now);
-    th += `<path class="now-mark" d="M${f1(nx)},${top - 8} l4,4 l-4,4 l-4,-4z"/><text class="now-label" x="${f1(nx - 8)}" y="${top - 4}" text-anchor="end">TODAY</text>`;
+    th += `<path class="now-mark" d="M${f1(nx)},${top - 8} l4,4 l-4,4 l-4,-4z"/><text class="now-label" x="${f1(nx - 8)}" y="${top - 4}" text-anchor="end">${T('year.todayCaps')}</text>`;
     this.g.ticks.innerHTML = th;
     let lastX = -Infinity;
     this.data.milestones.forEach((m, i) => {

@@ -3,7 +3,9 @@
  * Drag the window to pan, drag its edges to zoom to a range, drag across the strip to zoom into a period, or tap
  * to centre the window there. Works in axis fractions, the same space as frac() and the main chart.
  */
-import { frac, yearAt, fmtYear, SPAN } from '../../lib/scale';
+import { frac, yearAt, SPAN } from '../../lib/scale';
+import { useT, docLang, fmtYear as fmtYearIn } from '../../i18n';
+const LANG = docLang(), T = useT(LANG), fmtYear = (y: number) => fmtYearIn(LANG, y);
 import type { Item, Payload } from './types';
 
 export interface NavState { s: number; k: number; fa: number; fb: number; pick: string | null; sel: string | null; maxK: number }
@@ -139,13 +141,13 @@ export class Navigator {
     this.hR.style.left = `${Math.max(b, a + 4)}px`;
     this.shadeR.style.width = `${Math.max(0, this.width - PADX - b)}px`;
     const ya = yearAt(st.fa, st.s), yb = yearAt(st.fb, st.s);
-    const yr = (y: number) => (y >= this.data.now ? 'today' : fmtYear(Math.round(y)));
+    const yr = (y: number) => (y >= this.data.now ? T('year.today') : fmtYear(Math.round(y)));
     const range = `${yr(ya)} – ${yr(yb)}`;
     const k = st.k < 10 && Math.abs(st.k - Math.round(st.k)) > 0.05 ? st.k.toFixed(1) : String(Math.round(st.k));
     this.readout.textContent = `${range} · ${k}×`;
     const pct = st.fb - st.fa >= 1 ? 0 : Math.round((st.fa / (1 - (st.fb - st.fa))) * 100);
     this.win.setAttribute('aria-valuenow', String(Math.min(100, Math.max(0, pct))));
-    this.win.setAttribute('aria-valuetext', `Showing ${yr(ya)} to ${yr(yb)}`);
+    this.win.setAttribute('aria-valuetext', T('zoom.showing', { a: yr(ya), b: yr(yb) }));
     for (const [h, y] of [[this.hL, ya], [this.hR, yb]] as const) {
       h.setAttribute('aria-valuenow', String(Math.round(y)));
       h.setAttribute('aria-valuetext', yr(y));
@@ -155,7 +157,7 @@ export class Navigator {
     this.all.disabled = this.zout.disabled;
     // announce the range once things settle, not on every frame
     clearTimeout(this.liveTimer);
-    this.liveTimer = window.setTimeout(() => { this.live.textContent = `Showing ${range}, zoom ${k}×`; }, 700);
+    this.liveTimer = window.setTimeout(() => { this.live.textContent = T('zoom.live', { range, k }); }, 700);
   }
 
   // ---------- pointer: pan, resize, brush, tap ----------

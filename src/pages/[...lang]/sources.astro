@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import { content } from '../../lib/content';
+import { useT, langPaths, type Lang } from '../../i18n';
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useT(lang);
+const { sources } = await content(lang);
+const order = { book: 0, archive: 1, web: 2 } as const;
+const list = [...sources].sort((a, b) => order[a.data.kind] - order[b.data.kind]);
+---
+<Base title={t('sources.title')} description={t('sources.desc')}>
+  <p class="eyebrow">{t('sources.eyebrow')}</p>
+  <h1 class="page-title">{t('sources.title')}</h1>
+  <div class="prose">
+    <p>{t('sources.p1')}</p>
+    <p set:html={t('sources.p2')} />
+    <p set:html={t('sources.p3')} />
+    <p set:html={t('sources.p4')} />
+    {t('sources.p5') && <p set:html={t('sources.p5')} />}
+    <h2>{t('sources.general')}</h2>
+    <ul class="src">{list.map((s) => <li>{s.data.url ? <a href={s.data.url} rel="noopener">{s.data.label} ↗</a> : s.data.label}{s.data.note && <span class="n"> {s.data.note}</span>}</li>)}</ul>
+  </div>
+</Base>
+<style>
+  .src { padding-left: 18px; display: grid; gap: 8px; }
+  .n { color: var(--muted); font-size: 13.5px; }
+</style>

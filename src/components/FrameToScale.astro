@@ -1,6 +1,10 @@
 ---
 /** A frame drawn to scale inside the 36 × 24 mm full-frame outline (or outside it, if larger). */
 import { cropFactor } from '../lib/optics';
+import { useT, pageLang, fmtNum } from '../i18n';
+const lang = pageLang(Astro);
+const t = useT(lang);
+const num = (n: number) => fmtNum(lang, n, 1);
 interface Props { w: number; h: number; label?: string }
 const { w, h, label } = Astro.props;
 const maxW = Math.max(36, w), maxH = Math.max(24, h);
@@ -10,12 +14,12 @@ const cx = VW / 2, cy = (VH - 14) / 2;
 const c = cropFactor(w, h);
 ---
 <figure class="fts">
-  <svg viewBox={`0 0 ${VW} ${VH}`} width={VW} height={VH} role="img" aria-label={`${w} × ${h} mm compared with the 36 × 24 mm full frame; crop factor ${c.toFixed(2)}`}>
+  <svg viewBox={`0 0 ${VW} ${VH}`} width={VW} height={VH} role="img" aria-label={t('frame.aria', { w: num(w), h: num(h), c: fmtNum(lang, c, 2, 2) })}>
     <rect class="ff" x={cx - 18 * S} y={cy - 12 * S} width={36 * S} height={24 * S} rx="2" />
     <rect class="this" x={cx - (w / 2) * S} y={cy - (h / 2) * S} width={w * S} height={h * S} rx="2" />
-    <text class="lab" x={cx} y={VH - 3} text-anchor="middle">{label ?? `${w} × ${h} mm`} · crop {c.toFixed(2)}×</text>
+    <text class="lab" x={cx} y={VH - 3} text-anchor="middle">{label ?? `${num(w)} × ${num(h)} mm`} · {t('frame.crop', { c: fmtNum(lang, c, 2, 2) })}</text>
   </svg>
-  <figcaption>Dashed: 35mm full frame, 36 × 24 mm.</figcaption>
+  <figcaption>{t('frame.caption')}</figcaption>
 </figure>
 <style>
   .fts { margin: 0; }

@@ -1,10 +1,12 @@
 ---
-import Base from '../layouts/Base.astro';
-import { content } from '../lib/content';
-import { url } from '../lib/url';
-import { REPO, KO_FI, INSPIRATION } from '../lib/nav';
+/** The about page in English (each language has its own copy: the prose is too long for the dictionary). */
+import './about.css';
+import { content } from '../../lib/content';
+import { url } from '../../lib/url';
+import { REPO, KO_FI, INSPIRATION } from '../../lib/nav';
 
-const { entries, makers, physics, milestones, glossary } = await content();
+const lang = 'en';
+const { entries, makers, physics, milestones, glossary } = await content(lang);
 const ext = { rel: 'noopener', target: '_blank' } as const;
 const e = (id: string) => url(`/entries/${id}/`);
 
@@ -37,7 +39,7 @@ const creatorLinks = [
   ['https://photos.sconetto.me', 'Photos'],
 ] as const;
 ---
-<Base title="About" description="Why Photography Through Time exists, the story it tells, and who made it.">
+<div class="about-page">
   <header class="hero">
     <p class="eyebrow">About</p>
     <h1 class="page-title">About this site</h1>
@@ -131,44 +133,4 @@ const creatorLinks = [
       Buy me a coffee on Ko-fi
     </a>
   </section>
-</Base>
-
-<style>
-  .hero { max-width: 70ch; }
-  .lede { font: 400 clamp(19px, 2.2vw, 23px)/1.45 var(--font-display); color: var(--ink-2); margin: 6px 0 8px; }
-  .sec { font: 400 clamp(24px, 3vw, 30px)/1.15 var(--font-display); margin: 1.6em 0 0.7em; }
-  section { max-width: 860px; }
-
-  /* the story: a film strip of chapters, each marked with its family colour */
-  .chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: ch; }
-  .chapters li { position: relative; padding: 4px 0 26px 34px; counter-increment: ch; }
-  .chapters li::before { content: ''; position: absolute; left: 6px; top: 12px; bottom: -6px; width: 2px; background: var(--rule); }
-  .chapters li:last-child::before { display: none; }
-  .chapters li::after { content: ''; position: absolute; left: 0; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px var(--paper); }
-  .when { margin: 0; font: 500 11px/1.4 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-  .when::before { content: counter(ch, decimal-leading-zero) ' · '; color: var(--ink-2); }
-  .chapters h3 { margin: 4px 0 6px; font: 400 22px/1.2 var(--font-display); }
-  .chapters p:not(.when) { margin: 0; color: var(--ink-2); max-width: 70ch; }
-
-  .explore { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-  .explore a { display: grid; align-content: start; gap: 6px; height: 100%; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); text-decoration: none; border-bottom-width: 1px; transition: border-color .15s; }
-  .explore a:hover { border-color: var(--accent); }
-  .explore .t { color: var(--ink); font-weight: 500; }
-  .explore .d { color: var(--ink-2); font-size: 14px; line-height: 1.5; }
-
-  .card { border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); padding: 22px 24px; }
-  .card p { margin: 0; }
-  .name { font: 400 24px/1.2 var(--font-display); color: var(--ink); }
-  .role, .loc { font-size: 13.5px; color: var(--muted); margin-top: 4px !important; }
-  .bio { margin-top: 14px !important; color: var(--ink-2); max-width: 70ch; }
-  .links { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-  .links a { display: inline-block; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
-  .links a:hover { border-color: var(--accent); color: var(--accent); }
-
-  .support { margin-top: 40px; padding: 26px 24px; border: 1px solid var(--accent-soft); border-radius: 14px; background: color-mix(in srgb, var(--accent) 7%, var(--panel)); text-align: center; }
-  .support h2 { margin: 0; font: 400 26px/1.2 var(--font-display); }
-  .support p { margin: 10px auto 0; max-width: 58ch; color: var(--ink-2); }
-  .kofi { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 10px 18px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent); color: var(--paper); font-weight: 500; text-decoration: none; }
-  .kofi:hover { filter: brightness(1.08); }
-  .kofi svg { width: 18px; height: 18px; }
-</style>
+</div>

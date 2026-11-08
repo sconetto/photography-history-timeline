@@ -1,18 +1,20 @@
 ---
 /** Burst stacking: averaging N short, noisy frames, with and without aligning them first. */
+import { useT, pageLang } from '../../i18n';
+const t = useT(pageLang(Astro));
 ---
 <figure class="wg" id="wg-stk">
-  <div class="wg-head"><p class="kicker">Try it: stacking a burst of frames at night</p></div>
+  <div class="wg-head"><p class="kicker">{t('w.stk.kicker')}</p></div>
   <canvas id="stk-c" width="160" height="100" role="img" aria-labelledby="stk-sum"></canvas>
   <div class="wg-controls">
-    <div class="wg-ctl"><label for="stk-n">Frames averaged <output id="stk-n-out" for="stk-n"></output></label><input id="stk-n" type="range" min="0" max="6" step="1" value="0" /></div>
-    <div class="wg-ctl"><label for="stk-p">Light per frame (photons, brightest pixel) <output id="stk-p-out" for="stk-p"></output></label><input id="stk-p" type="range" min="0" max="1000" /></div>
-    <div class="wg-ctl"><label class="check"><input type="checkbox" id="stk-align" checked /> Align the frames first (hand shake)</label></div>
+    <div class="wg-ctl"><label for="stk-n">{t('w.stk.n')} <output id="stk-n-out" for="stk-n"></output></label><input id="stk-n" type="range" min="0" max="6" step="1" value="0" /></div>
+    <div class="wg-ctl"><label for="stk-p">{t('w.stk.p')} <output id="stk-p-out" for="stk-p"></output></label><input id="stk-p" type="range" min="0" max="1000" /></div>
+    <div class="wg-ctl"><label class="check"><input type="checkbox" id="stk-align" checked /> {t('w.stk.align')}</label></div>
   </div>
   <dl class="wg-read">
-    <div><dt>Signal-to-noise, one frame</dt><dd id="stk-one"></dd></div>
-    <div><dt>Signal-to-noise, stacked</dt><dd id="stk-all"></dd></div>
-    <div><dt>Improvement (√N)</dt><dd id="stk-gain"></dd></div>
+    <div><dt>{t('w.stk.one')}</dt><dd id="stk-one"></dd></div>
+    <div><dt>{t('w.stk.all')}</dt><dd id="stk-all"></dd></div>
+    <div><dt>{t('w.stk.gain')}</dt><dd id="stk-gain"></dd></div>
   </dl>
   <p class="wg-sum" id="stk-sum" aria-live="polite"></p>
 </figure>
@@ -24,6 +26,8 @@
 <script>
   import { stackedSnr } from '../../lib/optics';
   import { $, logRange, rng, gauss } from '../../scripts/widgets/util';
+  import { useT, docLang, fmtNum } from '../../i18n';
+  const LANG = docLang(), T = useT(LANG), one1 = (x: number) => fmtNum(LANG, x, 1, 1);
   const root = document.getElementById('wg-stk')!;
   const cv = $<HTMLCanvasElement>(root, '#stk-c'), ctx = cv.getContext('2d')!;
   const W = 160, H = 100;
@@ -74,10 +78,10 @@
     ctx.putImageData(img, 0, 0);
     // SNR for a lit window (0.6 of the brightest pixel on average across channels)
     const one = stackedSnr(P * 0.6, 1), all = stackedSnr(P * 0.6, n);
-    set('#stk-one', `${one.toFixed(1)} : 1`); set('#stk-all', `${all.toFixed(1)} : 1`); set('#stk-gain', `×${Math.sqrt(n).toFixed(n === 1 ? 0 : 1)}`);
+    set('#stk-one', `${one1(one)} : 1`); set('#stk-all', `${one1(all)} : 1`); set('#stk-gain', `×${n === 1 ? '1' : one1(Math.sqrt(n))}`);
     set('#stk-sum', n === 1
-      ? 'One short frame: little light, so the random arrival of photons shows as heavy noise.'
-      : `Averaging ${n} frames collects ${n} times the light, so noise falls by √${n} ≈ ${Math.sqrt(n).toFixed(1)}×.${align.checked ? '' : ' Without alignment, hand shake smears the frames into a blurred picture.'}`);
+      ? T('w.stk.sumOne')
+      : T('w.stk.sum', { n, g: one1(Math.sqrt(n)) }) + (align.checked ? '' : T('w.stk.sumShake')));
   }
   for (const el of [nIn, pIn, align]) el.addEventListener('input', draw);
   photons.set(12); draw();

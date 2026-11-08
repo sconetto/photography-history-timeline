@@ -1,4 +1,5 @@
 /** Small helpers shared by the physics widgets. */
+import { fmtNum, useT, type Lang } from '../../i18n';
 export const $ = <T extends Element>(root: ParentNode, sel: string) => root.querySelector(sel) as T;
 export const clamp = (x: number, a: number, b: number) => Math.min(b, Math.max(a, x));
 
@@ -9,22 +10,23 @@ export function logRange(input: HTMLInputElement, lo: number, hi: number) {
   return { get: () => to(Number(input.value)), set: (x: number) => { input.value = String(from(clamp(x, lo, hi))); } };
 }
 
-export function fmtSec(t: number): string {
-  if (t >= 3600) return `${+(t / 3600).toFixed(t >= 36000 ? 0 : 1)} h`;
-  if (t >= 60) return `${+(t / 60).toFixed(t >= 600 ? 0 : 1)} min`;
-  if (t >= 1) return `${+t.toFixed(t >= 10 ? 0 : 1)} s`;
+// Formatting follows the reader's language (decimal comma in Portuguese); `lang` defaults to English for server code.
+const n = (lang: Lang, x: number, d: number) => fmtNum(lang, +x.toFixed(d), d);
+export function fmtSec(t: number, lang: Lang = 'en'): string {
+  if (t >= 3600) return `${n(lang, t / 3600, t >= 36000 ? 0 : 1)} h`;
+  if (t >= 60) return `${n(lang, t / 60, t >= 600 ? 0 : 1)} min`;
+  if (t >= 1) return `${n(lang, t, t >= 10 ? 0 : 1)} s`;
   return `1/${Math.round(1 / t)} s`;
 }
-export function fmtMm(x: number): string {
+export function fmtMm(x: number, lang: Lang = 'en'): string {
   if (!Number.isFinite(x)) return '∞';
   if (x < 0.1) return `${Math.round(x * 1000)} µm`;
-  if (x < 10) return `${x.toFixed(2)} mm`;
+  if (x < 10) return `${fmtNum(lang, x, 2, 2)} mm`;
   if (x < 1000) return `${Math.round(x)} mm`;
-  return `${+(x / 1000).toFixed(x < 10000 ? 2 : 1)} m`;
+  return `${n(lang, x / 1000, x < 10000 ? 2 : 1)} m`;
 }
-export const fmtN = (N: number) => `f/${N < 10 ? +N.toFixed(1) : Math.round(N)}`;
-export const fmtStops = (s: number) => `${s > 0 ? '+' : s < 0 ? '−' : '±'}${Math.abs(+s.toFixed(1))} ${Math.abs(s) === 1 ? 'stop' : 'stops'}`;
-
+export const fmtN = (N: number, lang: Lang = 'en') => `f/${N < 10 ? n(lang, N, 1) : Math.round(N)}`;
+export const fmtStops = (s: number, lang: Lang = 'en') => `${s > 0 ? '+' : s < 0 ? '−' : '±'}${n(lang, Math.abs(s), 1)} ${useT(lang)(Math.abs(s) === 1 ? 'w.stop' : 'w.stops')}`;
 /** Deterministic random numbers (mulberry32), so redraws don't shimmer. */
 export function rng(seed: number) {
   let a = seed >>> 0;

@@ -1,16 +1,13 @@
 ---
 /** Focal length, sensor size and angle of view, with the thin-lens equation for focusing. */
-const SENSORS = [
-  { id: 'ff', name: 'Full frame, 36 × 24 mm', w: 36, h: 24 },
-  { id: 'apsc', name: 'APS-C, 23.5 × 15.6 mm', w: 23.5, h: 15.6 },
-  { id: 'm43', name: 'Four Thirds, 17.3 × 13 mm', w: 17.3, h: 13 },
-  { id: 'one', name: '1-inch type, 13.2 × 8.8 mm', w: 13.2, h: 8.8 },
-  { id: 'phone', name: 'Phone, 9.8 × 7.4 mm', w: 9.8, h: 7.4 },
-  { id: 'mf', name: 'Medium format 6 × 6, 56 × 56 mm', w: 56, h: 56 },
-];
+import { useT, pageLang } from '../../i18n';
+const t = useT(pageLang(Astro));
+const SENSORS = ([
+  ['ff', 36, 24], ['apsc', 23.5, 15.6], ['m43', 17.3, 13], ['one', 13.2, 8.8], ['phone', 9.8, 7.4], ['mf', 56, 56],
+] as const).map(([id, w, h]) => ({ id, name: t(`w.lf.${id}`), w, h }));
 ---
 <figure class="wg" id="wg-lens" data-sensors={JSON.stringify(SENSORS)}>
-  <div class="wg-head"><p class="kicker">Try it: focal length and angle of view</p></div>
+  <div class="wg-head"><p class="kicker">{t('w.lf.kicker')}</p></div>
   <svg class="wide" viewBox="0 0 720 210" role="img" aria-labelledby="lf-sum">
     <defs>
       <clipPath id="lf-clip"><rect x="0" y="0" width="720" height="130" rx="8" /></clipPath>
@@ -31,28 +28,30 @@ const SENSORS = [
     <g id="lf-top"></g>
   </svg>
   <div class="wg-controls">
-    <div class="wg-ctl"><label for="lf-f">Focal length <output id="lf-f-out" for="lf-f"></output></label><input id="lf-f" type="range" min="0" max="1000" /></div>
-    <div class="wg-ctl"><label for="lf-s">Sensor</label><select id="lf-s">{SENSORS.map((s) => <option value={s.id}>{s.name}</option>)}</select></div>
-    <div class="wg-ctl"><label for="lf-u">Focus distance <output id="lf-u-out" for="lf-u"></output></label><input id="lf-u" type="range" min="0" max="1000" /></div>
+    <div class="wg-ctl"><label for="lf-f">{t('w.lf.f')} <output id="lf-f-out" for="lf-f"></output></label><input id="lf-f" type="range" min="0" max="1000" /></div>
+    <div class="wg-ctl"><label for="lf-s">{t('w.lf.s')}</label><select id="lf-s">{SENSORS.map((s) => <option value={s.id}>{s.name}</option>)}</select></div>
+    <div class="wg-ctl"><label for="lf-u">{t('w.lf.u')} <output id="lf-u-out" for="lf-u"></output></label><input id="lf-u" type="range" min="0" max="1000" /></div>
   </div>
   <dl class="wg-read">
-    <div><dt>Horizontal angle of view</dt><dd id="lf-h"></dd></div>
-    <div><dt>Diagonal angle of view</dt><dd id="lf-d"></dd></div>
-    <div><dt>Full-frame equivalent</dt><dd id="lf-eq"></dd></div>
-    <div><dt>Lens moves out to focus</dt><dd id="lf-ext"></dd></div>
+    <div><dt>{t('w.lf.h')}</dt><dd id="lf-h"></dd></div>
+    <div><dt>{t('w.lf.d')}</dt><dd id="lf-d"></dd></div>
+    <div><dt>{t('w.lf.eq')}</dt><dd id="lf-eq"></dd></div>
+    <div><dt>{t('w.lf.ext')}</dt><dd id="lf-ext"></dd></div>
   </dl>
   <p class="wg-sum" id="lf-sum" aria-live="polite"></p>
 </figure>
 
 <script>
   import { angleOfView, cropFactor, thinLens } from '../../lib/optics';
-  import { $, logRange, fmtMm } from '../../scripts/widgets/util';
+  import { $, logRange, fmtMm as mm } from '../../scripts/widgets/util';
+  import { useT, docLang, fmtNum } from '../../i18n';
+  const LANG = docLang(), T = useT(LANG), fmtMm = (x: number) => mm(x, LANG);
   const root = document.getElementById('wg-lens')!;
   const SENSORS = JSON.parse(root.dataset.sensors!) as { id: string; name: string; w: number; h: number }[];
   const fIn = $<HTMLInputElement>(root, '#lf-f'), uIn = $<HTMLInputElement>(root, '#lf-u'), sIn = $<HTMLSelectElement>(root, '#lf-s');
   const f = logRange(fIn, 8, 800), u = logRange(uIn, 250, 100000);
   const set = (id: string, t: string) => { $<HTMLElement>(root, id).textContent = t; };
-  const deg = (x: number) => `${x < 10 ? x.toFixed(1) : Math.round(x)}°`;
+  const deg = (x: number) => `${x < 10 ? fmtNum(LANG, x, 1, 1) : Math.round(x)}°`;
 
   function draw() {
     const fl = f.get(), s = SENSORS.find((x) => x.id === sIn.value)!, ud = u.get();
@@ -71,8 +70,8 @@ const SENSORS = [
     const x1 = 360 - Math.sin(half) * L * 1.6, x2 = 360 + Math.sin(half) * L * 1.6, y = 190 - Math.cos(half) * L;
     $<SVGGElement>(root, '#lf-top').innerHTML = `<path d="M360,190 L${x1},${y} M360,190 L${x2},${y}" stroke="var(--accent)" stroke-width="1.5" fill="none"/>`
       + `<path d="M${x1},${y} Q360,${y - 10} ${x2},${y}" stroke="var(--accent)" stroke-dasharray="2 3" fill="none"/>`
-      + `<rect x="350" y="190" width="20" height="12" rx="2" fill="var(--ink-2)"/><text x="380" y="200">camera, seen from above</text>`;
-    set('#lf-sum', `A ${Math.round(fl)} mm lens on ${s.name.split(',')[0]} sees ${deg(h)} across (${deg(dg)} diagonally), like a ${Math.round(fl * c)} mm lens on full frame. To focus at ${fmtMm(ud)} it moves ${fmtMm(tl.v - fl)} further from the sensor.`);
+      + `<rect x="350" y="190" width="20" height="12" rx="2" fill="var(--ink-2)"/><text x="380" y="200">${T('w.lf.top')}</text>`;
+    set('#lf-sum', T('w.lf.sum', { f: Math.round(fl), sensor: s.name.split(',')[0], h: deg(h), d: deg(dg), eq: Math.round(fl * c), u: fmtMm(ud), ext: fmtMm(tl.v - fl) }));
   }
   for (const el of [fIn, uIn, sIn]) el.addEventListener('input', draw);
   f.set(50); u.set(3000); draw();

@@ -1,7 +1,11 @@
+---
+import { useT, pageLang } from '../i18n';
+const t = useT(pageLang(Astro));
+---
 <div class="seg theme" role="group" aria-labelledby="mode-cap">
-  <button type="button" data-t="auto" aria-pressed="true">Auto</button>
-  <button type="button" data-t="day" aria-pressed="false">Day</button>
-  <button type="button" data-t="night" aria-pressed="false">Night</button>
+  <button type="button" data-t="auto" aria-pressed="true">{t('theme.auto')}</button>
+  <button type="button" data-t="day" aria-pressed="false">{t('theme.day')}</button>
+  <button type="button" data-t="night" aria-pressed="false">{t('theme.night')}</button>
 </div>
 <script>
   const root = document.documentElement;

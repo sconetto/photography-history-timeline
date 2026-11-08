@@ -1,8 +1,10 @@
 ---
 /** Pinhole camera: hole size and box depth against brightness and the two kinds of blur (geometric, diffraction). */
+import { useT, pageLang } from '../../i18n';
+const t = useT(pageLang(Astro));
 ---
 <figure class="wg" id="wg-pinhole">
-  <div class="wg-head"><p class="kicker">Try it: a pinhole camera</p></div>
+  <div class="wg-head"><p class="kicker">{t('w.ph.kicker')}</p></div>
   <div class="wg-stage">
     <svg viewBox="0 0 420 220" role="img" aria-labelledby="ph-sum">
       <defs><filter id="ph-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur id="ph-gb" stdDeviation="1" /></filter></defs>
@@ -18,30 +20,33 @@
       <rect id="ph-screen" x="358" y="42" width="4" height="136" fill="var(--rule)" />
       <g id="ph-rays"></g>
       <g id="ph-img" filter="url(#ph-blur)"></g>
-      <text x="200" y="32" text-anchor="middle">hole</text>
+      <text x="200" y="32" text-anchor="middle">{t('w.ph.hole')}</text>
       <text x="300" y="200" text-anchor="middle" id="ph-depth-l"></text>
     </svg>
-    <svg viewBox="0 0 460 250" role="img" aria-label="Blur against hole size: geometric blur rises with the hole, diffraction blur falls, and the sharpest hole is where they balance.">
+    <svg viewBox="0 0 460 250" role="img" aria-label={t('w.ph.chartAria')}>
       <g id="ph-chart"></g>
     </svg>
   </div>
   <div class="wg-controls">
-    <div class="wg-ctl"><label for="ph-d">Hole diameter <output id="ph-d-out" for="ph-d"></output></label><input id="ph-d" type="range" min="0" max="1000" value="500" /></div>
-    <div class="wg-ctl"><label for="ph-f">Box depth (hole to screen) <output id="ph-f-out" for="ph-f"></output></label><input id="ph-f" type="range" min="20" max="300" step="5" value="100" /></div>
-    <div class="wg-ctl"><button type="button" class="chip" id="ph-best">Use the sharpest hole</button></div>
+    <div class="wg-ctl"><label for="ph-d">{t('w.ph.d')} <output id="ph-d-out" for="ph-d"></output></label><input id="ph-d" type="range" min="0" max="1000" value="500" /></div>
+    <div class="wg-ctl"><label for="ph-f">{t('w.ph.f')} <output id="ph-f-out" for="ph-f"></output></label><input id="ph-f" type="range" min="20" max="300" step="5" value="100" /></div>
+    <div class="wg-ctl"><button type="button" class="chip" id="ph-best">{t('w.ph.best')}</button></div>
   </div>
   <dl class="wg-read">
-    <div><dt>f-number (depth ÷ hole)</dt><dd id="ph-n"></dd></div>
-    <div><dt>Blur from the hole’s size</dt><dd id="ph-geo"></dd></div>
-    <div><dt>Blur from diffraction</dt><dd id="ph-dif"></dd></div>
-    <div><dt>Sharpest hole for this depth</dt><dd id="ph-opt"></dd></div>
+    <div><dt>{t('w.ph.n')}</dt><dd id="ph-n"></dd></div>
+    <div><dt>{t('w.ph.geo')}</dt><dd id="ph-geo"></dd></div>
+    <div><dt>{t('w.ph.dif')}</dt><dd id="ph-dif"></dd></div>
+    <div><dt>{t('w.ph.opt')}</dt><dd id="ph-opt"></dd></div>
   </dl>
   <p class="wg-sum" id="ph-sum" aria-live="polite"></p>
 </figure>
 
 <script>
   import { pinholeBlur, rayleighPinhole } from '../../lib/optics';
-  import { $, logRange, fmtMm, fmtN } from '../../scripts/widgets/util';
+  import { $, logRange, fmtMm as mm, fmtN as fn } from '../../scripts/widgets/util';
+  import { useT, docLang } from '../../i18n';
+  const LANG = docLang(), T_ = useT(LANG);
+  const fmtMm = (x: number) => mm(x, LANG), fmtN = (x: number) => fn(x, LANG);
   const root = document.getElementById('wg-pinhole')!;
   const dIn = $<HTMLInputElement>(root, '#ph-d'), fIn = $<HTMLInputElement>(root, '#ph-f');
   const d = logRange(dIn, 0.05, 3);
@@ -90,16 +95,16 @@
       gs += `${c}${lx(x).toFixed(1)},${ly(bb.geometric).toFixed(1)}`; gd += `${c}${lx(x).toFixed(1)},${ly(bb.diffraction).toFixed(1)}`; gt += `${c}${lx(x).toFixed(1)},${ly(bb.total).toFixed(1)}`;
     }
     g.innerHTML = `<line class="ln-soft" x1="${L}" y1="${B}" x2="${R}" y2="${B}"/><line class="ln-soft" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/>`
-      + [0.1, 0.3, 1, 3].map((x) => `<text x="${lx(x)}" y="${B + 14}" text-anchor="middle">${x} mm</text>`).join('')
+      + [0.1, 0.3, 1, 3].map((x) => `<text x="${lx(x)}" y="${B + 14}" text-anchor="middle">${String(x).replace('.', LANG === 'en' ? '.' : ',')} mm</text>`).join('')
       + [0, 1, 2, 3].map((y) => `<text x="${L - 6}" y="${ly(y) + 4}" text-anchor="end">${y}</text>`).join('')
-      + `<text x="${L}" y="${T - 4}">blur, mm</text><text x="${R}" y="${B + 32}" text-anchor="end">hole diameter →</text>`
+      + `<text x="${L}" y="${T - 4}">${T_('w.ph.axisY')}</text><text x="${R}" y="${B + 32}" text-anchor="end">${T_('w.ph.axisX')}</text>`
       + `<path d="${gs}" stroke="var(--f-chem)" stroke-dasharray="4 3" fill="none"/><path d="${gd}" stroke="var(--f-optics)" stroke-dasharray="1.5 3" stroke-linecap="round" fill="none"/>`
       + `<path d="${gt}" stroke="var(--ink)" stroke-width="2" fill="none"/>`
       + `<line x1="${lx(best)}" x2="${lx(best)}" y1="${T}" y2="${B}" stroke="var(--muted)" stroke-dasharray="2 3"/>`
       + `<circle cx="${lx(dm)}" cy="${ly(b.total)}" r="5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"/>`
-      + `<text x="${lx(0.06)}" y="${ly(2.7)}" fill="var(--f-optics)">diffraction</text><text x="${lx(2.2)}" y="${ly(2.3)}" text-anchor="end" fill="var(--f-chem)">hole size</text>`;
-    const verdict = dm < best * 0.7 ? 'too small: diffraction spreads the light' : dm > best * 1.4 ? 'too big: each point becomes a wide disc' : 'close to the sharpest size';
-    set('#ph-sum', `A ${fmtMm(dm)} hole in a ${f} mm box works at ${fmtN(N)}. Total blur is about ${fmtMm(b.total)}; the hole is ${verdict}.`);
+      + `<text x="${lx(0.06)}" y="${ly(2.7)}" fill="var(--f-optics)">${T_('w.ph.lDif')}</text><text x="${lx(2.2)}" y="${ly(2.3)}" text-anchor="end" fill="var(--f-chem)">${T_('w.ph.lGeo')}</text>`;
+    const verdict = T_(dm < best * 0.7 ? 'w.ph.small' : dm > best * 1.4 ? 'w.ph.big' : 'w.ph.ok');
+    set('#ph-sum', T_('w.ph.sum', { d: fmtMm(dm), f, n: fmtN(N), b: fmtMm(b.total), verdict }));
   }
   dIn.addEventListener('input', draw); fIn.addEventListener('input', draw);
   $<HTMLButtonElement>(root, '#ph-best').addEventListener('click', () => { d.set(rayleighPinhole(Number(fIn.value))); draw(); });

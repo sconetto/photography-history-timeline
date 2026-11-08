@@ -1,0 +1,28 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { content } from '../../../lib/content';
+import { url } from '../../../lib/url';
+import { useT, langPaths, type Lang } from '../../../i18n';
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useT(lang);
+const { physics } = await content(lang);
+---
+<Base title={t('physics.title')} description={t('physics.desc')}>
+  <p class="eyebrow">{t('physics.eyebrow')}</p>
+  <h1 class="page-title">{t('physics.title')}</h1>
+  <p class="dek">{t('physics.dek')}</p>
+  <ol class="primers">
+    {physics.map((p) => (
+      <li><a href={url(`/physics/${p.id}/`, lang)}><span class="n">{String(p.data.order).padStart(2, '0')}</span><span class="t">{p.data.title}</span><span class="d">{p.data.dek}</span></a></li>
+    ))}
+  </ol>
+</Base>
+<style>
+  .primers { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 12px; }
+  .primers a { display: grid; gap: 6px; padding: 18px; border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); color: var(--ink-2); height: 100%; }
+  .primers a:hover { border-color: var(--muted); }
+  .n { font: 500 12px/1 var(--font-mono); color: var(--accent); }
+  .t { font: 400 24px/1.15 var(--font-display); color: var(--ink); }
+  .d { font-size: 14px; }
+</style>

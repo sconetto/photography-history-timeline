@@ -1,9 +1,33 @@
 ---
+/**
+ * GitHub Pages serves this one page for every missing path, in any language. It shows the page in the language
+ * of the requested path (a tiny script swaps it before paint); without JS both languages are shown.
+ */
 import Base from '../layouts/Base.astro';
 import { url } from '../lib/url';
+import { useT, LANGS, LOCALES } from '../i18n';
+const copy = LANGS.map((lang) => {
+  const t = useT(lang);
+  const link = (path: string, key: 'notfound.timeline' | 'notfound.entries' | 'notfound.search') => `<a href="${url(path, lang)}">${t(key)}</a>`;
+  return { lang, h: t('notfound.h'), dek: t('notfound.dek', { timeline: link('/', 'notfound.timeline'), entries: link('/entries/', 'notfound.entries'), search: link('/search/', 'notfound.search') }) };
+});
 ---
-<Base title="Not found">
-  <p class="eyebrow">404</p>
-  <h1 class="page-title">Underexposed</h1>
-  <p class="dek">This page didn't develop. Try the <a href={url('/')}>timeline</a>, the <a href={url('/entries/')}>entries index</a> or <a href={url('/search/')}>search</a>.</p>
+<Base title={useT('en')('notfound.title')}>
+  {copy.map((c) => (
+    <section class="nf" data-nf={c.lang} lang={LOCALES[c.lang].htmlLang}>
+      <p class="eyebrow">404</p>
+      <h1 class="page-title">{c.h}</h1>
+      <p class="dek" set:html={c.dek} />
+    </section>
+  ))}
+  <script is:inline>
+    (function () {
+      var m = location.pathname.match(/^\/(pt-br)(\/|$)/), want = m ? m[1] : 'en';
+      document.querySelectorAll('[data-nf]').forEach(function (s) { s.hidden = s.getAttribute('data-nf') !== want; });
+      if (want !== 'en') document.documentElement.lang = 'pt-BR';
+    })();
+  </script>
 </Base>
+<style>
+  .nf + .nf { margin-top: 36px; }
+</style>

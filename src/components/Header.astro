@@ -1,30 +1,37 @@
 ---
 import PalettePicker from './PalettePicker.astro';
-const path = Astro.url.pathname;
+import LangSwitch from './LangSwitch.astro';
 import { NAV as nav } from '../lib/nav';
+import { url } from '../lib/url';
+import { useT, pageLang, stripLang } from '../i18n';
+const lang = pageLang(Astro);
+const t = useT(lang);
+const path = stripLang(Astro.url.pathname);
 const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 ---
 <header class="site-head">
   <div class="wrap row">
-    <a class="brand" href="/" aria-label="Photography Through Time, home">
+    <a class="brand" href={url('/', lang)} aria-label={t('site.home')}>
       <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="9.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="11" cy="11" r="3.2" fill="currentColor"/></svg>
       <span>Photography <em>Through</em> Time</span>
     </a>
-    <nav id="site-nav" aria-label="Sections">
+    <nav id="site-nav" aria-label={t('nav.sections')}>
       <ul>
-        {nav.map(([href, label]) => <li><a href={href} aria-current={active(href) ? 'page' : undefined}>{label}</a></li>)}
-        <li class="nav-search"><a href="/search/" aria-current={active('/search/') ? 'page' : undefined}>Search</a></li>
+        {nav.map(([href, key]) => <li><a href={url(href, lang)} aria-current={active(href) ? 'page' : undefined}>{t(key)}</a></li>)}
+        <li class="nav-langs"><LangSwitch /></li>
+        <li class="nav-search"><a href={url('/search/', lang)} aria-current={active('/search/') ? 'page' : undefined}>{t('nav.search')}</a></li>
       </ul>
     </nav>
     <div class="tools">
-      <a class="search-link" href="/search/" aria-keyshortcuts="/" title="Search (press /)">
+      <a class="search-link" href={url('/search/', lang)} aria-keyshortcuts="/" title={t('header.searchTitle')}>
         <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="10.8" y1="10.8" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <span class="lbl">Search</span>
+        <span class="lbl">{t('nav.search')}</span>
       </a>
+      <LangSwitch class="langs-tools" />
       <PalettePicker />
       <button type="button" class="menu-btn" aria-expanded="false" aria-controls="site-nav">
         <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path class="l1" d="M2 4h12"/><path class="l2" d="M2 8h12"/><path class="l3" d="M2 12h12"/></svg>
-        <span class="lbl">Menu</span>
+        <span class="lbl">{t('header.menu')}</span>
       </button>
     </div>
   </div>
@@ -43,7 +50,7 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
     if (t.closest('input, textarea, select, [contenteditable]')) return;
     e.preventDefault();
     const field = document.querySelector<HTMLInputElement>('#search input');
-    if (field) field.focus(); else location.href = '/search/';
+    if (field) field.focus(); else location.href = document.querySelector<HTMLAnchorElement>('.search-link')!.href;
   });
   // leaving the collapsed layout (rotate, resize) resets the menu
   matchMedia('(min-width: 1141px)').addEventListener('change', (m) => { if (m.matches) set(false); });
@@ -59,7 +66,7 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
   nav a { display: inline-block; padding: 6px 9px; border-radius: 999px; border: 0; color: var(--ink-2); font-size: 13.5px; white-space: nowrap; }
   nav a:hover { color: var(--ink); background: var(--rule-soft); }
   nav a[aria-current="page"] { color: var(--ink); background: var(--band); }
-  .nav-search { display: none; }
+  .nav-search, .nav-langs { display: none; }
   .tools { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: none; }
   .search-link, .menu-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 11px; font: inherit; font-size: 13px; background: none; cursor: pointer; white-space: nowrap; }
   .search-link:hover, .menu-btn:hover, .menu-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--muted); }
@@ -89,6 +96,10 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
     .brand { font-size: 17px; gap: 7px; }
     :global(html.js) .search-link { display: none; }
     :global(html.js) .nav-search { display: block; }
+    /* phones: the language switcher moves from the tools into the nav (the menu, or the no-JS row) */
+    .tools :global(.langs-tools) { display: none; }
+    .nav-langs { display: block; }
+    :global(html.js) .nav-langs { padding: 6px 14px; }
     .menu-btn { padding: 7px 9px; }
     .menu-btn .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   }

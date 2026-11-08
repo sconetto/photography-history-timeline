@@ -1,7 +1,7 @@
-/** The site's sections, shared by the header menu and the footer. */
+/** The site's sections, shared by the header menu and the footer: [path, dictionary key for the label]. */
 export const NAV = [
-  ['/', 'Timeline'], ['/entries/', 'Entries'], ['/makers/', 'Makers'], ['/formats/', 'Formats'],
-  ['/physics/', 'How it works'], ['/landmarks/', 'Landmarks'], ['/glossary/', 'Glossary'], ['/sources/', 'Sources'],
+  ['/', 'nav.timeline'], ['/entries/', 'nav.entries'], ['/makers/', 'nav.makers'], ['/formats/', 'nav.formats'],
+  ['/physics/', 'nav.physics'], ['/landmarks/', 'nav.landmarks'], ['/glossary/', 'nav.glossary'], ['/sources/', 'nav.sources'],
 ] as const;
 
 export const REPO = 'https://github.com/sconetto/photography-history-timeline';

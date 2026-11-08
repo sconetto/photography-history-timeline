@@ -1,15 +1,17 @@
 ---
 /** The drawing of an entry's camera, at its real proportions, for the facts column. */
-import { cameraDrawing, CAMERA_NAMES, type CameraType } from '../lib/cameras';
+import { cameraDrawing, type CameraType } from '../lib/cameras';
+import { useT, pageLang, fmtNum } from '../i18n';
 interface Props { id: string; type: CameraType }
 const { id, type } = Astro.props;
 const d = cameraDrawing(id, type, 1.25, 280);
-const cm = (mm: number) => (mm >= 100 ? Math.round(mm / 10) : +(mm / 10).toFixed(1));
-const view = { front: 'Front view', side: 'Side view', back: 'Back view' }[d.view];
+const lang = pageLang(Astro);
+const t = useT(lang);
+const cm = (mm: number) => fmtNum(lang, mm >= 100 ? Math.round(mm / 10) : mm / 10, 1);
 ---
 <figure class="camsil">
   <div class="art"><Fragment set:html={d.svg} /></div>
-  <figcaption><b>{CAMERA_NAMES[type]}</b><span>{view}, about {cm(d.w)} × {cm(d.h)} cm{d.own ? '' : ' (a typical example)'}</span></figcaption>
+  <figcaption><b>{t(`camera.${type}`)}</b><span>{t('camera.size', { view: t(`camera.${d.view}`), w: cm(d.w), h: cm(d.h) })}{d.own ? '' : t('camera.typical')}</span></figcaption>
 </figure>
 <style>
   .camsil { margin: 0; display: grid; gap: 8px; }

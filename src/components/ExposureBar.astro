@@ -1,13 +1,15 @@
 ---
 /** Where an exposure time sits on a log scale from 1/8000 s to 1 day. */
+import { useT, pageLang } from '../i18n';
 interface Props { seconds: number; note: string }
 const { seconds, note } = Astro.props;
+const t = useT(pageLang(Astro));
 const lo = Math.log10(1 / 8000), hi = Math.log10(86400);
 const pct = ((Math.log10(seconds) - lo) / (hi - lo)) * 100;
-const marks: [number, string][] = [[1 / 1000, '1/1000 s'], [1, '1 s'], [60, '1 min'], [3600, '1 h']];
+const marks: [number, string][] = [[1 / 1000, '1/1000 s'], [1, '1 s'], [60, t('exposure.min')], [3600, t('exposure.hour')]];
 const at = (s: number) => ((Math.log10(s) - lo) / (hi - lo)) * 100;
 ---
-<div class="xb" role="img" aria-label={`Typical exposure: ${note}`}>
+<div class="xb" role="img" aria-label={t('exposure.aria', { note })}>
   <div class="track">
     {marks.map(([s]) => <span class="tick" style={`left: ${at(s)}%`} />)}
     <span class="pin" style={`left: ${pct}%`} />

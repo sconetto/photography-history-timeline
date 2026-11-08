@@ -9,6 +9,9 @@ import { clampK, kForRange, scrollFor, visible, ZMAX } from '../../lib/zoom';
 import { Navigator } from './navigator';
 import type { Frame, Item, Payload } from './types';
 import { cameraDrawing } from '../../lib/cameras';
+import { useT, docLang } from '../../i18n';
+
+const T = useT(docLang());
 
 const data = JSON.parse(document.getElementById('timeline-data')!.textContent!) as Payload;
 const ORDER = [...data.items].sort((a, b) => a.year - b.year || a.label.localeCompare(b.label));
@@ -80,12 +83,12 @@ function showCard(it: Item, anchor: Element) {
   if (it.thumb) { const img = document.createElement('img'); img.src = it.thumb; img.alt = it.thumbAlt ?? ''; img.className = 'thumb'; img.width = 280; card.append(img); }
   else if (it.cam) { const c = document.createElement('div'); c.className = 'cam-thumb'; c.innerHTML = cameraDrawing(it.id, it.cam, 0.95, 180).svg; card.append(c); }
   add('strong', 'nm', it.title);
-  add('span', 'when', it.date + (it.end ? ` – mainstream until ${it.end}` : ''));
+  add('span', 'when', it.date + (it.end ? T('card.mainstream', { y: it.end }) : ''));
   add('span', 's', it.summary);
   const f = add('span', 'fam', fam.name);
   const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = `var(--f-${it.fam})`; f.prepend(sw);
-  add('span', 'today', `Today: ${it.today}`);
-  add('span', 'go', lastPT === 'touch' ? 'Tap again to open the entry →' : 'Click to open the entry →');
+  add('span', 'today', T('card.today', { t: it.today }));
+  add('span', 'go', T(lastPT === 'touch' ? 'card.tap' : 'card.click'));
   card.hidden = false;
   placeCard(anchor);
 }
@@ -93,7 +96,7 @@ function showGem(i: number, anchor: Element) {
   const m = data.milestones[i];
   card.innerHTML = '';
   const add = (tag: string, cls: string, text: string) => { const n = document.createElement(tag); n.className = cls; n.textContent = text; card.append(n); };
-  add('strong', 'nm', m.label); add('span', 'when', `Landmark · ${m.when}`); add('span', 's', m.note);
+  add('strong', 'nm', m.label); add('span', 'when', T('card.landmark', { when: m.when })); add('span', 's', m.note);
   card.hidden = false;
   placeCard(anchor);
 }
@@ -319,10 +322,10 @@ function syncScaleButtons() {
 }
 function setNote() {
   note.textContent = state.view === 'lanes'
-    ? 'One lane per family, in its own colour. Hover a star to light up everything it built on and everything built on it.'
+    ? T('home.note.lanes')
     : state.s === 0
-      ? 'Time is stretched toward the present, so the crowded last two centuries have room. Photography itself is less than 200 years old.'
-      : 'True to time: every century gets the same width. Photography occupies only the last sliver of the dark box’s 2,400-year story.';
+      ? T('home.note.stretch')
+      : T('home.note.true');
 }
 function setView(v: View, persist = true) {
   cancelAnimationFrame(anim);

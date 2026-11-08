@@ -1,5 +1,7 @@
 ---
 import ThemeSwitch from './ThemeSwitch.astro';
+import { useT, pageLang, type Key } from '../i18n';
+const t = useT(pageLang(Astro));
 /** Appearance menu: light/dark mode plus the colour palette. The palette is set on <html data-palette> before first paint (see Base.astro). */
 export const PALETTES = [
   { id: 'kodachrome', name: 'Kodachrome', note: 'Film-box yellow and red', day: ['#f6f3ea', '#f6c344', '#b5121b'], night: ['#1a1917', '#3a2f0c', '#ffc233'] },
@@ -10,15 +12,15 @@ export const PALETTES = [
 ---
 <details class="palette">
   <summary>
-    <span class="visually-hidden">Appearance: </span>
+    <span class="visually-hidden">{t('appearance.label')} </span>
     <span class="cur" aria-hidden="true"><i style="background: var(--band)"></i><i style="background: var(--accent)"></i></span>
-    <span class="cur-name">Kodachrome</span>
+    <span class="cur-name">{t('palette.kodachrome')}</span>
     <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
   </summary>
   <div class="pop">
-  <div class="mode"><span class="cap" id="mode-cap">Mode</span><ThemeSwitch /></div>
+  <div class="mode"><span class="cap" id="mode-cap">{t('appearance.mode')}</span><ThemeSwitch /></div>
   <fieldset>
-    <legend>Palette</legend>
+    <legend>{t('appearance.palette')}</legend>
     {PALETTES.map((p) => (
       <label>
         <input type="radio" name="ptt-palette" value={p.id} checked={p.id === 'kodachrome'} />
@@ -26,7 +28,7 @@ export const PALETTES = [
         <span class="chips" aria-hidden="true">
           {[...p.day, ...p.night].map((c) => <i style={`background:${c}`}></i>)}
         </span>
-        <span class="txt"><b>{p.name}</b><small>{p.note}</small></span>
+        <span class="txt"><b>{t(`palette.${p.id}` as Key)}</b><small>{t(`palette.${p.id}.note` as Key)}</small></span>
       </label>
     ))}
   </fieldset>

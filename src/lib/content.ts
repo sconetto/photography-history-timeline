@@ -1,33 +1,37 @@
-/** One place that loads, validates and shapes all content. Every page goes through here. */
+/**
+ * One place that loads, validates and shapes all content. Every page goes through here.
+ * content() is the English site; content('pt-br') is the same content with that language's translated words laid
+ * over it by id (src/content/i18n/pt-br/…). Facts (years, links, lineage, images) always come from the English files.
+ */
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { validate } from './validate';
+import { validate, validateTranslations, type VTranslation } from './validate';
+import { LANGS, DEFAULT_LANG, type Lang } from '../i18n/locales';
+import { useT } from '../i18n';
 
-export type Entry = CollectionEntry<'entries'>;
-export type Maker = CollectionEntry<'makers'>;
-/** How each kind of maker link reads, forwards (A → B) and backwards (B ← A). */
-export const LINK_TEXT: Record<string, { out: string; in: string }> = {
-  merged: { out: 'Merged into', in: 'Formed by merger of' },
-  acquired: { out: 'Bought by', in: 'Bought' },
-  sold: { out: 'Sold business to', in: 'Took over business of' },
-  renamed: { out: 'Renamed', in: 'Formerly' },
-  stake: { out: 'Controlling stake taken by', in: 'Holds a controlling stake in' },
-  revived: { out: 'Product revived by', in: 'Revived the product of' },
-};
-export type Primer = CollectionEntry<'physics'>;
+/** A content record in one language: `tr` is the translation it was built from (render its body), if any. */
+type Loc<C extends 'entries' | 'makers' | 'physics', T extends 'trEntries' | 'trMakers' | 'trPhysics'> =
+  CollectionEntry<C> & { tr?: CollectionEntry<T>; wikiLocal?: boolean };
+export type Entry = Loc<'entries', 'trEntries'>;
+export type Maker = Loc<'makers', 'trMakers'>;
+export type Primer = Loc<'physics', 'trPhysics'>;
 
-export const SIDE_TEXT = { invention: 'Discovery or invention', product: 'Camera, format or product' } as const;
-export const IMPACT_TEXT = { xl: 'Changed photography for everyone', l: 'Major', m: 'Significant', s: 'Niche' } as const;
-export const STATUS_TEXT = { inuse: 'Still in use', revived: 'Revived', niche: 'Niche today', obsolete: 'Obsolete' } as const;
-export const KIND_UP = { built: 'built on', enabled: 'made possible by', replaced: 'replaced' } as const;
-export const KIND_DOWN = { built: 'built on it', enabled: 'it made possible', replaced: 'replaced it' } as const;
 export const WIKI = 'https://en.wikipedia.org/wiki/';
+/** The Wikipedia article for a record: this language's article when the translation names one, else English. */
+export const wikiHref = (lang: Lang, rec: { data: { wiki: string }; wikiLocal?: boolean }) =>
+  rec.wikiLocal ? `https://${lang.split('-')[0]}.wikipedia.org/wiki/${rec.data.wiki}` : WIKI + rec.data.wiki;
 
-let cache: Promise<Awaited<ReturnType<typeof load>>> | null = null;
+type Base = Awaited<ReturnType<typeof loadBase>>;
+let base: Promise<Base> | null = null;
+const built = new Map<Lang, Promise<ReturnType<typeof build>>>();
 
-async function load() {
+async function loadBase() {
   const [entries, makers, physics, families, eras, milestones, formats, glossary, sources] = await Promise.all([
     getCollection('entries'), getCollection('makers'), getCollection('physics'), getCollection('families'),
     getCollection('eras'), getCollection('milestones'), getCollection('formats'), getCollection('glossary'), getCollection('sources'),
+  ]);
+  const [trEntries, trMakers, trPhysics, trFamilies, trEras, trMilestones, trFormats, trGlossary, trSources] = await Promise.all([
+    getCollection('trEntries'), getCollection('trMakers'), getCollection('trPhysics'), getCollection('trFamilies'), getCollection('trEras'),
+    getCollection('trMilestones'), getCollection('trFormats'), getCollection('trGlossary'), getCollection('trSources'),
   ]);
 
   const problems = validate({
@@ -43,23 +47,108 @@ async function load() {
       ...sources.flatMap((s) => (s.data.url ? [{ where: `source ${s.id}`, url: s.data.url }] : [])),
     ],
   });
+
+  // translations, split by language: "pt-br/entries/daguerreotype" → lang pt-br, id daguerreotype
+  const split = (id: string) => { const [lang, ...rest] = id.split('/'); return { lang: lang as Lang, id: rest.at(-1)! }; };
+  const byLang = <T extends { id: string }>(list: T[]) => {
+    const out = new Map<Lang, Map<string, T>>();
+    for (const t of list) { const { lang, id } = split(t.id); (out.get(lang) ?? out.set(lang, new Map()).get(lang)!).set(id, t); }
+    return out;
+  };
+  const dataByLang = <D>(list: { id: string; data: Record<string, D> }[]) => {
+    const out = new Map<Lang, Map<string, D>>();
+    for (const t of list) out.set(split(t.id).lang, new Map(Object.entries(t.data)));
+    return out;
+  };
+  const tr = {
+    entries: byLang(trEntries), makers: byLang(trMakers), physics: byLang(trPhysics),
+    families: dataByLang(trFamilies), eras: dataByLang(trEras), milestones: dataByLang(trMilestones),
+    formats: dataByLang(trFormats), glossary: dataByLang(trGlossary), sources: dataByLang(trSources),
+  };
+  const known = {
+    entry: new Set(entries.map((e) => e.id)), maker: new Set(makers.map((m) => m.id)), primer: new Set(physics.map((p) => p.id)),
+    data: new Set([...families, ...eras, ...milestones, ...formats, ...glossary, ...sources].map((x) => x.id)),
+  };
+  for (const lang of LANGS.filter((l) => l !== DEFAULT_LANG)) {
+    if (![...trEntries, ...trMakers, ...trPhysics].some((t) => split(t.id).lang === lang) && !tr.families.has(lang)) continue;
+    const t = useT(lang);
+    const items: VTranslation[] = [
+      ...[...(tr.entries.get(lang)?.values() ?? [])].map((x) => ({ where: x.id, kind: 'entry' as const, id: split(x.id).id, body: x.body })),
+      ...[...(tr.makers.get(lang)?.values() ?? [])].map((x) => ({ where: x.id, kind: 'maker' as const, id: split(x.id).id })),
+      ...[...(tr.physics.get(lang)?.values() ?? [])].map((x) => ({ where: x.id, kind: 'primer' as const, id: split(x.id).id })),
+      ...(['families', 'eras', 'milestones', 'formats', 'glossary', 'sources'] as const).flatMap((k) =>
+        [...(tr[k].get(lang)?.keys() ?? [])].map((id) => ({ where: `${lang}/${k}.yaml`, kind: 'data' as const, id }))),
+    ];
+    problems.push(...validateTranslations(items, known, [t('entry.how.began'), t('entry.how.works'), t('entry.how.mattered'), t('entry.how.limits')]));
+  }
   if (problems.length) {
     throw new Error(`Content problems, nothing built:\n  ${problems.join('\n  ')}`);
   }
 
-  const byYear = (a: Entry, b: Entry) => a.data.year - b.data.year || a.data.label.localeCompare(b.data.label);
+  const byYear = (a: CollectionEntry<'entries'>, b: CollectionEntry<'entries'>) => a.data.year - b.data.year || a.data.label.localeCompare(b.data.label);
   entries.sort(byYear);
   families.sort((a, b) => a.data.order - b.data.order);
   physics.sort((a, b) => a.data.order - b.data.order);
   milestones.sort((a, b) => a.data.year - b.data.year);
   eras.sort((a, b) => a.data.a - b.data.a);
+  return { entries, makers, physics, families, eras, milestones, formats, glossary, sources, tr };
+}
 
+/** Lay one language's words over the English records (order and facts unchanged). */
+function localise(b: Base, lang: Lang) {
+  const L = <K extends keyof Base['tr']>(k: K) => b.tr[k].get(lang) as Base['tr'][K] extends Map<Lang, infer M> ? M | undefined : never;
+  const te = L('entries'), tm = L('makers'), tp = L('physics');
+  const entries: Entry[] = b.entries.map((e) => {
+    const t = te?.get(e.id);
+    if (!t) return e;
+    const d = t.data;
+    return {
+      ...e, tr: t, wikiLocal: !!d.wiki, body: t.body,
+      data: {
+        ...e.data, title: d.title, label: d.label, ds: d.ds, date: d.date, summary: d.summary, today: d.today,
+        people: d.people ?? e.data.people, moments: d.moments ?? e.data.moments, specs: d.specs ?? e.data.specs,
+        sourceNotes: d.sourceNotes ?? e.data.sourceNotes, wiki: d.wiki ?? e.data.wiki,
+        exposure: e.data.exposure && d.exposureNote ? { ...e.data.exposure, note: d.exposureNote } : e.data.exposure,
+        image: e.data.image && d.imageAlt ? { ...e.data.image, alt: d.imageAlt } : e.data.image,
+      },
+    };
+  });
+  const makers: Maker[] = b.makers.map((m) => {
+    const t = tm?.get(m.id);
+    if (!t) return m;
+    const d = t.data;
+    return {
+      ...m, tr: t, wikiLocal: !!d.wiki, body: t.body,
+      data: { ...m.data, name: d.name ?? m.data.name, fate: d.fate, wiki: d.wiki ?? m.data.wiki, links: m.data.links.map((l) => ({ ...l, note: l.note && (d.linkNotes?.[l.to.id] ?? l.note) })) },
+    };
+  });
+  const physics: Primer[] = b.physics.map((p) => {
+    const t = tp?.get(p.id);
+    return t ? { ...p, tr: t, body: t.body, data: { ...p.data, ...t.data, equations: t.data.equations ?? p.data.equations } } : p;
+  });
+  const over = <R extends { id: string; data: object }>(list: R[], words: Map<string, unknown> | undefined) =>
+    list.map((r) => { const w = words?.get(r.id) as object | undefined; return w ? { ...r, data: { ...r.data, ...w } } : r; }) as R[];
+  const milestones = b.milestones.map((m) => {
+    const w = L('milestones')?.get(m.id) as { imageAlt?: string } | undefined;
+    const r = over([m], L('milestones'))[0];
+    return w?.imageAlt && r.data.image ? { ...r, data: { ...r.data, image: { ...r.data.image, alt: w.imageAlt } } } : r;
+  });
+  return {
+    entries, makers, physics, milestones,
+    families: over(b.families, L('families')), eras: over(b.eras, L('eras')), formats: over(b.formats, L('formats')),
+    glossary: over(b.glossary, L('glossary')), sources: over(b.sources, L('sources')),
+  };
+}
+
+/** Lookups and reverse links for one language's records. */
+function build(lists: ReturnType<typeof localise>) {
+  const { entries, makers, physics, families } = lists;
   const entryById = new Map(entries.map((e) => [e.id, e]));
   const makerById = new Map(makers.map((m) => [m.id, m]));
   const primerById = new Map(physics.map((p) => [p.id, p]));
   const familyById = new Map(families.map((f) => [f.id, f]));
 
-  const children = new Map<string, { id: string; kind: keyof typeof KIND_DOWN }[]>();
+  const children = new Map<string, { id: string; kind: 'built' | 'enabled' | 'replaced' }[]>();
   for (const e of entries) children.set(e.id, []);
   for (const e of entries) for (const p of e.data.parents) children.get(p.id.id)!.push({ id: e.id, kind: p.kind });
 
@@ -68,7 +157,7 @@ async function load() {
   /** links pointing at a maker: who merged into it, was bought by it, sold to it… */
   const makerIncoming = new Map<string, { from: Maker; year: number; kind: string; note?: string }[]>();
   for (const m of makers) for (const l of m.data.links) (makerIncoming.get(l.to.id) ?? makerIncoming.set(l.to.id, []).get(l.to.id)!).push({ from: m, year: l.year, kind: l.kind, note: l.note });
-  /** which pages link each glossary term with [[g:term]] */
+  /** which pages link each glossary term with [[g:term]]; hrefs are unprefixed (pages pass them through url()) */
   const glossaryUsage = new Map<string, { href: string; label: string; kind: 'entry' | 'maker' | 'primer' }[]>();
   const scan = (body: string | undefined, href: string, label: string, kind: 'entry' | 'maker' | 'primer') => {
     for (const m of new Set([...(body ?? '').matchAll(/\[\[g:([a-z0-9-]+)/g)].map((x) => x[1])))
@@ -80,13 +169,22 @@ async function load() {
   const makerEntries = new Map<string, Entry[]>();
   for (const e of entries) for (const m of e.data.makers) (makerEntries.get(m.id) ?? makerEntries.set(m.id, []).get(m.id)!).push(e);
 
-  return {
-    entries, makers, physics, families, eras, milestones, formats, glossary, sources,
-    entryById, makerById, primerById, familyById, children, primerEntries, makerEntries, makerIncoming, glossaryUsage,
-  };
+  return { ...lists, entryById, makerById, primerById, familyById, children, primerEntries, makerEntries, makerIncoming, glossaryUsage };
 }
 
-/** Loads and validates once per build. */
-export function content() {
-  return (cache ??= load());
+/** All content in one language, loaded and validated once per build. */
+export function content(lang: Lang = DEFAULT_LANG) {
+  base ??= loadBase();
+  if (!built.has(lang)) built.set(lang, base.then((b) => build(lang === DEFAULT_LANG ? (b as unknown as ReturnType<typeof localise>) : localise(b, lang))));
+  return built.get(lang)!;
+}
+
+/** What is not yet translated into a language (empty for English). Used by tests and scripts/i18n-status.ts. */
+export async function untranslated(lang: Lang) {
+  if (lang === DEFAULT_LANG) return [];
+  const b = await (base ??= loadBase());
+  const missing: string[] = [];
+  for (const k of ['entries', 'makers', 'physics'] as const) for (const r of b[k]) if (!b.tr[k].get(lang)?.has(r.id)) missing.push(`${k}/${r.id}`);
+  for (const k of ['families', 'eras', 'milestones', 'formats', 'glossary', 'sources'] as const) for (const r of b[k]) if (!b.tr[k].get(lang)?.has(r.id)) missing.push(`${k}/${r.id}`);
+  return missing;
 }

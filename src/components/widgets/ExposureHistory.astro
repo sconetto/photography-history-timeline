@@ -5,28 +5,32 @@
  */
 import { content } from '../../lib/content';
 import { url } from '../../lib/url';
-import { fmtSec } from '../../scripts/widgets/util';
-const { entries } = await content();
+import { fmtSec as fs } from '../../scripts/widgets/util';
+import { useT, pageLang } from '../../i18n';
+const lang = pageLang(Astro);
+const t = useT(lang);
+const fmtSec = (s: number) => fs(s, lang);
+const { entries } = await content(lang);
 const rows = entries.filter((e) => e.data.exposure).sort((a, b) => a.data.year - b.data.year || b.data.exposure!.seconds - a.data.exposure!.seconds);
 const LO = 1e-4, HI = 86400, L = 214, R = 690, ROW = 26, T = 34;
 const x = (s: number) => L + ((Math.log10(s) - Math.log10(LO)) / (Math.log10(HI) - Math.log10(LO))) * (R - L);
 const H = T + rows.length * ROW + 34;
-const TICKS: [number, string][] = [[1 / 1000, '1/1000 s'], [1 / 30, '1/30 s'], [1, '1 s'], [60, '1 min'], [3600, '1 hour'], [86400, '1 day']];
+const TICKS: [number, string][] = [[1 / 1000, '1/1000 s'], [1 / 30, '1/30 s'], [1, '1 s'], [60, '1 min'], [3600, t('w.exh.hour')], [86400, t('w.exh.day')]];
 ---
 <figure class="wg" id="wg-exh">
-  <div class="wg-head"><p class="kicker">From hours to a five-thousandth of a second</p></div>
-  <svg class="wide" viewBox={`0 0 720 ${H}`} role="group" aria-label="Typical exposure times in sunlight, from heliography (about eight hours, 1826) to a phone camera (about 1/5000 second). The table below lists every value.">
+  <div class="wg-head"><p class="kicker">{t('w.exh.kicker')}</p></div>
+  <svg class="wide" viewBox={`0 0 720 ${H}`} role="group" aria-label={t('w.exh.aria')}>
     {TICKS.map(([s, t]) => (
       <g>
         <line class="ln-soft" x1={x(s)} x2={x(s)} y1={T - 8} y2={H - 26} />
         <text x={x(s)} y={H - 10} text-anchor="middle">{t}</text>
       </g>
     ))}
-    <text class="lbl" x={R} y="14" text-anchor="end">shorter ← exposure → longer</text>
+    <text class="lbl" x={R} y="14" text-anchor="end">{t('w.exh.axis')}</text>
     {rows.map((e, i) => {
       const y = T + i * ROW + ROW / 2, s = e.data.exposure!.seconds;
       return (
-        <a href={url(`/entries/${e.id}/`)}>
+        <a href={url(`/entries/${e.id}/`, lang)}>
           <title>{`${e.data.label} (${e.data.ds}): ${e.data.exposure!.note}`}</title>
           <text class="lbl" x={L - 12} y={y + 4} text-anchor="end">{e.data.label}</text>
           <text x="4" y={y + 4}>{e.data.ds}</text>
@@ -38,13 +42,13 @@ const TICKS: [number, string][] = [[1 / 1000, '1/1000 s'], [1 / 30, '1/30 s'], [
     })}
   </svg>
   <details class="wg-table">
-    <summary>Show the data as a table</summary>
+    <summary>{t('w.exh.table')}</summary>
     <table>
-      <thead><tr><th scope="col">Year</th><th scope="col">Entry</th><th scope="col">Exposure</th><th scope="col">Notes</th></tr></thead>
-      <tbody>{rows.map((e) => <tr><td>{e.data.ds}</td><td><a href={url(`/entries/${e.id}/`)}>{e.data.label}</a></td><td>{fmtSec(e.data.exposure!.seconds)}</td><td>{e.data.exposure!.note}</td></tr>)}</tbody>
+      <thead><tr><th scope="col">{t('w.exh.th.year')}</th><th scope="col">{t('w.exh.th.entry')}</th><th scope="col">{t('w.exh.th.exposure')}</th><th scope="col">{t('w.exh.th.notes')}</th></tr></thead>
+      <tbody>{rows.map((e) => <tr><td>{e.data.ds}</td><td><a href={url(`/entries/${e.id}/`, lang)}>{e.data.label}</a></td><td>{fmtSec(e.data.exposure!.seconds)}</td><td>{e.data.exposure!.note}</td></tr>)}</tbody>
     </table>
   </details>
-  <p class="wg-sum">Typical exposures in daylight. Each bar runs from the exposure out to the long end, so the shrinking bars show how much faster photography became. Exposure also depends on the lens and the light, so these are rough, period-typical figures.</p>
+  <p class="wg-sum">{t('w.exh.sum')}</p>
 </figure>
 
 <style>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { frac, SPAN, xOf, fmtYear } from '../../src/lib/scale';
+import { frac, SPAN, xOf } from '../../src/lib/scale';
+import { fmtYear } from '../../src/i18n';
 import { place, type Box } from '../../src/lib/layout';
 
 describe('scale', () => {
@@ -16,7 +17,7 @@ describe('scale', () => {
     expect(1 - frac(1826, 1)).toBeLessThan(0.1);
   });
   it('clamps years outside the span', () => expect(xOf(-5000, 0, 10, 100)).toBe(10));
-  it('formats BCE years', () => { expect(fmtYear(-400)).toBe('400 BCE'); expect(fmtYear(1839)).toBe('1839'); });
+  it('formats BCE years', () => { expect(fmtYear('en', -400)).toBe('400 BCE'); expect(fmtYear('en', 1839)).toBe('1839'); expect(fmtYear('pt-br', -400)).toBe('400 a.C.'); });
 });
 
 describe('label layout', () => {

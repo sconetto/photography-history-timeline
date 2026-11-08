@@ -1,26 +1,30 @@
 ---
-import Base from '../../layouts/Base.astro';
-import { content, STATUS_TEXT, SIDE_TEXT } from '../../lib/content';
-import { url } from '../../lib/url';
-const { entries, families } = await content();
+import Base from '../../../layouts/Base.astro';
+import { content } from '../../../lib/content';
+import { url } from '../../../lib/url';
+import { useT, langPaths, type Lang } from '../../../i18n';
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useT(lang);
+const { entries, families } = await content(lang);
 const famName = new Map(families.map((f) => [f.id, f.data.name]));
 ---
-<Base title="All entries" description="Every discovery, camera, format and process on the timeline, by family and date.">
-  <p class="eyebrow">Index</p>
-  <h1 class="page-title">All entries</h1>
-  <p class="dek">{entries.length} entries, oldest first. Filter by family, or open the <a href={url('/')}>timeline</a> to see how they connect.</p>
-  <div class="chips" role="group" aria-label="Filter by family">
-    <button type="button" class="chip" data-fam="all" aria-pressed="true">All</button>
+<Base title={t('entries.title')} description={t('entries.desc')}>
+  <p class="eyebrow">{t('entries.eyebrow')}</p>
+  <h1 class="page-title">{t('entries.title')}</h1>
+  <p class="dek" set:html={t('entries.dek', { n: entries.length, timeline: `<a href="${url('/', lang)}">${t('entries.timeline')}</a>` })} />
+  <div class="chips" role="group" aria-label={t('entries.filter')}>
+    <button type="button" class="chip" data-fam="all" aria-pressed="true">{t('common.all')}</button>
     {families.map((f) => <button type="button" class="chip" data-fam={f.id} aria-pressed="false"><span class="sw" style={`background: var(--f-${f.id})`} />{f.data.name}</button>)}
   </div>
   <ol class="cards">
     {entries.map((e) => (
       <li data-fam={e.data.fam}>
-        <a href={url(`/entries/${e.id}/`)}>
+        <a href={url(`/entries/${e.id}/`, lang)}>
           <span class="when">{e.data.ds}</span>
           <span class="t">{e.data.title}</span>
           <span class="s">{e.data.summary}</span>
-          <span class="m"><span class="sw" style={`background: var(--f-${e.data.fam})`} />{famName.get(e.data.fam)} · {SIDE_TEXT[e.data.side]} · {STATUS_TEXT[e.data.status]}</span>
+          <span class="m"><span class="sw" style={`background: var(--f-${e.data.fam})`} />{famName.get(e.data.fam)} · {t(`side.${e.data.side}`)} · {t(`status.${e.data.status}`)}</span>
         </a>
       </li>
     ))}
