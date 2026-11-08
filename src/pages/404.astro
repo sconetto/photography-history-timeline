@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+---
+<Base title="Not found">
+  <p class="eyebrow">404</p>
+  <h1 class="page-title">Underexposed</h1>
+  <p class="dek">This page didn't develop. Try the <a href={url('/')}>timeline</a>, the <a href={url('/entries/')}>entries index</a> or <a href={url('/search/')}>search</a>.</p>
+</Base>

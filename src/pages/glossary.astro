@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import { content } from '../lib/content';
+const { glossary } = await content();
+const terms = [...glossary].sort((a, b) => a.data.term.localeCompare(b.data.term));
+---
+<Base title="Glossary" description="Photographic terms explained in plain words: aperture, f-number, crop factor, latent image, fixer and more.">
+  <p class="eyebrow">Words</p>
+  <h1 class="page-title">Glossary</h1>
+  <p class="dek">Terms used across the site. Underlined words in entries link here and show a short definition when you hover them.</p>
+  <dl class="gl">
+    {terms.map((g) => <div id={g.id}><dt>{g.data.term}</dt><dd>{g.data.def}</dd></div>)}
+  </dl>
+</Base>
+<style>
+  .gl { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 12px; margin: 0; }
+  .gl div { border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); padding: 14px 16px; scroll-margin-top: 90px; }
+  .gl div:target { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  dt { font: 400 21px/1.2 var(--font-display); color: var(--ink); text-transform: none; margin-bottom: 6px; }
+  dd { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+</style>

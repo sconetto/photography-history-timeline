@@ -1,0 +1,51 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { content, type Primer } from '../../lib/content';
+import { url } from '../../lib/url';
+export async function getStaticPaths() {
+  const { physics } = await content();
+  return physics.map((primer) => ({ params: { id: primer.id }, props: { primer } }));
+}
+interface Props { primer: Primer }
+const { primer } = Astro.props;
+const d = primer.data;
+const { Content } = await render(primer);
+const { primerEntries } = await content();
+const related = primerEntries.get(primer.id) ?? [];
+---
+<Base title={d.title} description={d.dek}>
+  <p class="eyebrow"><a href={url('/physics/')}>How it works</a> · {String(d.order).padStart(2, '0')}</p>
+  <h1 class="page-title">{d.title}</h1>
+  <p class="lead">{d.dek}</p>
+  <div class="cols">
+    <div class="prose"><Content /></div>
+    <aside>
+      {d.equations.length > 0 && (
+        <section class="box"><p class="kicker">Key relations</p>
+          <dl>{d.equations.map(([k, v]) => <div><dt>{k}</dt><dd class="eq">{v}</dd></div>)}</dl>
+        </section>
+      )}
+      {related.length > 0 && (
+        <section class="box"><p class="kicker">On the timeline</p>
+          <ul>{related.map((e) => <li><a href={url(`/entries/${e.id}/`)}>{e.data.label}</a> <span class="mono">{e.data.ds}</span></li>)}</ul>
+        </section>
+      )}
+    </aside>
+  </div>
+</Base>
+<style>
+  .eyebrow a { color: inherit; border: 0; }
+  .lead { font-size: 19px; max-width: 62ch; color: var(--ink); margin: 0 0 10px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 330px); gap: 40px; }
+  @media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+  .prose :global(p) { font-size: 16.5px; line-height: 1.65; }
+  aside { display: grid; gap: 14px; align-content: start; padding-top: 24px; }
+  .box { border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); padding: 2px 16px 16px; font-size: 14px; color: var(--ink-2); }
+  dl { display: grid; gap: 10px; margin: 0; }
+  dt { font-size: 12.5px; color: var(--muted); }
+  dd { margin: 2px 0 0; }
+  .eq { font: 500 15px/1.4 var(--font-mono); color: var(--ink); }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+  .mono { font: 400 11.5px/1 var(--font-mono); color: var(--muted); }
+</style>

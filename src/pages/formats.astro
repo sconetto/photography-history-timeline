@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import { content } from '../lib/content';
+import { cropFactor, areaRatio } from '../lib/optics';
+import { url } from '../lib/url';
+const { formats, entryById } = await content();
+const list = [...formats].sort((a, b) => b.data.w * b.data.h - a.data.w * a.data.h);
+const S = 8; // px per mm
+const VW = 36 * S + 40, VH = 24 * S + 40;
+const fmtData = list.map((f) => ({ id: f.id, name: f.data.name, w: f.data.w, h: f.data.h }));
+---
+<Base title="Formats & sensor sizes" description="Film and sensor formats drawn to scale against 35mm full frame, with crop factors and an equivalence calculator.">
+  <p class="eyebrow">Formats</p>
+  <h1 class="page-title">Formats &amp; sensor sizes</h1>
+  <p class="dek">Frames drawn to scale against the 36 × 24 mm "full frame". The <a href={url('/physics/formats/')}>formats primer</a> explains crop factor and equivalence; more formats, from 8 × 10 inch sheet film to phone sensors, arrive in the next phase.</p>
+  <div class="layout">
+    <figure class="panel overlay">
+      <svg viewBox={`0 0 ${VW} ${VH}`} role="img" aria-label="Formats drawn to scale, centred on each other">
+        {list.map((f, i) => (
+          <g class="fmt" data-id={f.id}>
+            <rect x={VW / 2 - (f.data.w * S) / 2} y={VH / 2 - (f.data.h * S) / 2} width={f.data.w * S} height={f.data.h * S} rx="3" style={`--i: ${i}`} />
+          </g>
+        ))}
+      </svg>
+      <figcaption>All frames centred; 1 mm = {S} px at full size.</figcaption>
+    </figure>
+    <div class="calc panel">
+      <p class="kicker">Equivalence calculator</p>
+      <label>Format
+        <select id="fmt">{list.map((f) => <option value={f.id} selected={f.id === 'aps-c'}>{f.data.name}</option>)}</select>
+      </label>
+      <label>Focal length (mm) <input id="focal" type="number" min="1" max="2000" value="50" inputmode="decimal" /></label>
+      <label>f-number <input id="fnum" type="number" min="0.7" max="64" step="0.1" value="1.8" inputmode="decimal" /></label>
+      <p class="out" id="out" aria-live="polite"></p>
+    </div>
+  </div>
+  <table class="fmt-table">
+    <thead><tr><th scope="col">Format</th><th scope="col">Size (mm)</th><th scope="col">Crop factor</th><th scope="col">Area vs full frame</th><th scope="col">Note</th></tr></thead>
+    <tbody>
+      {list.map((f) => {
+        const e = f.data.entry ? entryById.get(f.data.entry.id) : undefined;
+        return (
+          <tr>
+            <td>{e ? <a href={url(`/entries/${e.id}/`)}>{f.data.name}</a> : f.data.name}</td>
+            <td class="mono">{f.data.w} × {f.data.h}</td>
+            <td class="mono">{cropFactor(f.data.w, f.data.h).toFixed(2)}×</td>
+            <td class="mono">{Math.round(areaRatio(f.data.w, f.data.h) * 100)}%</td>
+            <td>{f.data.note}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+  <script type="application/json" id="fmt-data" set:html={JSON.stringify(fmtData)} />
+  <script>
+    import { equivalent, areaRatio } from '../lib/optics';
+    const data = JSON.parse(document.getElementById('fmt-data')!.textContent!) as { id: string; name: string; w: number; h: number }[];
+    const sel = document.getElementById('fmt') as HTMLSelectElement;
+    const focal = document.getElementById('focal') as HTMLInputElement;
+    const fnum = document.getElementById('fnum') as HTMLInputElement;
+    const out = document.getElementById('out')!;
+    function update() {
+      const f = data.find((x) => x.id === sel.value)!;
+      const fl = Number(focal.value) || 50, n = Number(fnum.value) || 1.8;
+      const e = equivalent(fl, n, f.w, f.h);
+      out.innerHTML = '';
+      const b = document.createElement('b');
+      b.textContent = `${Math.round(e.focal)} mm f/${e.fNumber.toFixed(1)}`;
+      out.append(`${fl} mm f/${n} on ${f.name} frames like `, b, ` on full frame (crop ${e.crop.toFixed(2)}×, ${Math.round(areaRatio(f.w, f.h) * 100)}% of the area). Exposure settings stay the same.`);
+      document.querySelectorAll('.fmt').forEach((g) => g.classList.toggle('on', (g as SVGGElement).dataset.id === f.id));
+    }
+    [sel, focal, fnum].forEach((x) => x.addEventListener('input', update));
+    update();
+  </script>
+</Base>
+<style>
+  .layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(260px, 1fr); gap: 16px; margin-top: 8px; }
+  @media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+  .overlay { margin: 0; padding: 14px; }
+  .overlay svg { width: 100%; height: auto; display: block; }
+  .overlay rect { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+  .overlay .fmt[data-id="ff"] rect { stroke: var(--ink); stroke-width: 1.8; }
+  .overlay .fmt.on rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.2; }
+  figcaption { font-size: 12px; color: var(--muted); }
+  .calc { padding: 4px 18px 18px; display: grid; gap: 12px; align-content: start; }
+  label { display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); }
+  select, input { font: 400 15px/1.3 var(--font-body); color: var(--ink); background: var(--raised); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; }
+  .out { font-size: 14.5px; color: var(--ink-2); margin: 4px 0 0; }
+  .out :global(b) { color: var(--accent); font-family: var(--font-mono); }
+  .fmt-table { width: 100%; border-collapse: collapse; margin-top: 22px; font-size: 14px; }
+  .fmt-table th { text-align: left; font: 500 10.5px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 12px; border-bottom: 1px solid var(--rule); }
+  .fmt-table td { padding: 10px 12px; border-bottom: 1px solid var(--rule-soft); color: var(--ink-2); vertical-align: top; }
+  .fmt-table .mono { font-family: var(--font-mono); font-size: 13px; white-space: nowrap; }
+  @media (max-width: 700px) { .fmt-table th:last-child, .fmt-table td:last-child { display: none; } }
+</style>

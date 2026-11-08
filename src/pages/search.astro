@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Search" description="Search entries, makers, primers and glossary terms.">
+  <p class="eyebrow">Search</p>
+  <h1 class="page-title">Search</h1>
+  <div id="search" data-pagefind-ignore="all"></div>
+  <noscript><p>Search needs JavaScript. The <a href="/entries/">entries index</a> lists everything.</p></noscript>
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+  <script is:inline src="/pagefind/pagefind-ui.js"></script>
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', function () {
+      if (!window.PagefindUI) { document.getElementById('search').textContent = 'The search index is built with the production site (pnpm build).'; return; }
+      new PagefindUI({ element: '#search', showSubResults: true, showImages: false, autofocus: true });
+      var q = new URLSearchParams(location.search).get('q');
+      if (q) { var input = document.querySelector('#search input'); if (input) { input.value = q; input.dispatchEvent(new Event('input')); } }
+    });
+  </script>
+</Base>
+<style is:global>
+  #search { --pagefind-ui-primary: var(--accent); --pagefind-ui-text: var(--ink); --pagefind-ui-background: var(--panel); --pagefind-ui-border: var(--rule); --pagefind-ui-tag: var(--band); --pagefind-ui-font: var(--font-body); max-width: 860px; }
+</style>

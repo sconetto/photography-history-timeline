@@ -1,0 +1,40 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { content } from '../lib/content';
+import { url } from '../lib/url';
+const { milestones, entryById } = await content();
+---
+<Base title="Landmarks" description="Landmark photographs and turning points in photography's history.">
+  <p class="eyebrow">Turning points</p>
+  <h1 class="page-title">Landmarks</h1>
+  <p class="dek">The diamonds under the timeline: photographs and events that changed what photography could do or mean. Public-domain images of each are being added.</p>
+  <ol class="lm">
+    {milestones.map((m) => {
+      const e = m.data.entry ? entryById.get(m.data.entry.id) : undefined;
+      return (
+        <li id={m.id}>
+          {m.data.image && <figure><Image src={m.data.image.src} alt={m.data.image.alt} width={720} /><figcaption>{m.data.image.credit} · {m.data.image.license}</figcaption></figure>}
+          <p class="when">{m.data.when}</p>
+          <h2>{m.data.label}</h2>
+          <p>{m.data.note}</p>
+          {e && <p class="rel">Related: <a href={url(`/entries/${e.id}/`)}>{e.data.title}</a></p>}
+          <a class="tl" href={url('/')}>Back to the timeline</a>
+        </li>
+      );
+    })}
+  </ol>
+</Base>
+<style>
+  .lm { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 14px; }
+  .lm li { border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); padding: 18px; scroll-margin-top: 90px; }
+  .lm li:target { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .when { font: 500 12px/1 var(--font-mono); color: var(--accent); margin: 0; }
+  h2 { font: 400 23px/1.2 var(--font-display); margin: 8px 0; }
+  p { color: var(--ink-2); font-size: 14.5px; margin: 0 0 8px; }
+  .rel { font-size: 13.5px; }
+  .tl { font: 500 11.5px/1 var(--font-mono); }
+  figure { margin: 0 0 12px; }
+  figure :global(img) { border-radius: 8px; width: 100%; height: auto; }
+  figcaption { font-size: 11.5px; color: var(--muted); }
+</style>

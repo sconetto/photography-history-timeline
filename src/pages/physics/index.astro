@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import { content } from '../../lib/content';
+import { url } from '../../lib/url';
+const { physics } = await content();
+---
+<Base title="How photography works" description="Short explainers of the physics and chemistry behind photography: pinholes, lenses, apertures, exposure, silver, colour, sensors and formats.">
+  <p class="eyebrow">The physics</p>
+  <h1 class="page-title">How photography works</h1>
+  <p class="dek">Short explainers of the science behind the timeline, each linked to the inventions that put it to use. More primers, each with an interactive diagram, are on the way.</p>
+  <ol class="primers">
+    {physics.map((p) => (
+      <li><a href={url(`/physics/${p.id}/`)}><span class="n">{String(p.data.order).padStart(2, '0')}</span><span class="t">{p.data.title}</span><span class="d">{p.data.dek}</span></a></li>
+    ))}
+  </ol>
+</Base>
+<style>
+  .primers { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 12px; }
+  .primers a { display: grid; gap: 6px; padding: 18px; border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); color: var(--ink-2); height: 100%; }
+  .primers a:hover { border-color: var(--muted); }
+  .n { font: 500 12px/1 var(--font-mono); color: var(--accent); }
+  .t { font: 400 24px/1.15 var(--font-display); color: var(--ink); }
+  .d { font-size: 14px; }
+</style>

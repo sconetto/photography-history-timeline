@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import { content } from '../../lib/content';
+import { url } from '../../lib/url';
+const { makers, makerEntries } = await content();
+const byCountry = new Map<string, typeof makers>();
+for (const m of [...makers].sort((a, b) => a.data.founded - b.data.founded)) (byCountry.get(m.data.country) ?? byCountry.set(m.data.country, []).get(m.data.country)!).push(m);
+const now = new Date().getFullYear();
+const Y0 = 1840, Y1 = now + 2;
+const pct = (y: number) => ((Math.max(Y0, y) - Y0) / (Y1 - Y0)) * 100;
+const decades = [1850, 1875, 1900, 1925, 1950, 1975, 2000, 2025];
+---
+<Base title="Makers" description="The companies behind photography, from Voigtländer and Kodak to Canon, Nikon and Sony, by country and lifespan.">
+  <p class="eyebrow">Companies</p>
+  <h1 class="page-title">Makers</h1>
+  <p class="dek">Who built photography's cameras, lenses and film, grouped by country. Each bar runs from founding to today, or to the year the company left photography; dots mark its entries on the timeline. The full chart, with mergers and successors, is coming in the next phase.</p>
+  <div class="chart panel" role="list">
+    <div class="axis" aria-hidden="true">{decades.map((d) => <span style={`left: ${pct(d)}%`}>{d}</span>)}</div>
+    {[...byCountry].map(([country, list]) => (
+      <section class="country" role="listitem">
+        <h2>{country}</h2>
+        {list.map((m) => (
+          <a class="row" href={url(`/makers/${m.id}/`)}>
+            <span class="name">{m.data.name} <span class="y">{m.data.founded}{m.data.ended ? `–${m.data.ended}` : ''}</span></span>
+            <span class="track">
+              <span class="bar" style={`left: ${pct(m.data.founded)}%; width: ${pct(m.data.ended ?? now) - pct(m.data.founded)}%`} />
+              {m.data.founded < Y0 && <span class="before" title={`Founded ${m.data.founded}`}>←</span>}
+              {(makerEntries.get(m.id) ?? []).map((e) => <span class="dot" style={`left: ${pct(e.data.year)}%; background: var(--f-${e.data.fam})`} title={`${e.data.label}, ${e.data.ds}`} />)}
+            </span>
+          </a>
+        ))}
+      </section>
+    ))}
+  </div>
+</Base>
+<style>
+  .chart { padding: 14px 18px 18px; overflow-x: auto; }
+  .axis { position: relative; height: 18px; margin-left: 240px; font: 400 10.5px/1 var(--font-mono); color: var(--muted); min-width: 520px; }
+  .axis span { position: absolute; transform: translateX(-50%); }
+  .country h2 { font: 500 10.5px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 18px 0 6px; }
+  .row { display: grid; grid-template-columns: 240px minmax(520px, 1fr); align-items: center; gap: 0; padding: 5px 0; border: 0; color: var(--ink); border-radius: 6px; }
+  .row:hover { background: var(--rule-soft); }
+  .name { font-size: 14px; padding-right: 12px; }
+  .y { font: 400 11px/1 var(--font-mono); color: var(--muted); margin-left: 4px; }
+  .track { position: relative; height: 16px; }
+  .bar { position: absolute; top: 6px; height: 4px; border-radius: 2px; background: var(--ink-2); opacity: .55; }
+  .before { position: absolute; left: -2px; top: -1px; font-size: 12px; color: var(--muted); }
+  .dot { position: absolute; top: 3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; box-shadow: 0 0 0 2px var(--panel); }
+</style>
