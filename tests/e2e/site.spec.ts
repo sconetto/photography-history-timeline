@@ -120,7 +120,7 @@ const PALETTES = ['kodachrome', 'print', 'cyanotype', 'platinum'];
 for (const pal of PALETTES) for (const mode of ['day', 'night']) {
   test(`no serious axe violations: ${pal} ${mode}`, async ({ page }) => {
     await page.addInitScript(([p, m]) => { localStorage.setItem('ptt-palette', p); localStorage.setItem('ptt-theme', m); }, [pal, mode]);
-    for (const path of ['/', '/entries/daguerreotype/']) {
+    for (const path of ['/', '/entries/daguerreotype/', '/pt-br/entries/daguerreotype/']) {
       await page.goto(path);
       const { violations } = await new AxeBuilder({ page }).analyze();
       const serious = violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
@@ -458,5 +458,102 @@ test.describe('images and camera silhouettes', () => {
     await page.goto('/');
     await page.locator('a[href$="/entries/nikon-f/"]').first().focus();
     await expect(page.locator('.card .cam-thumb svg')).toBeVisible();
+  });
+});
+
+test.describe('portuguese site', () => {
+  test('/pt-br/ is in Portuguese with hreflang alternates', async ({ page }) => {
+    const errors = errorsOn(page);
+    await page.goto('/pt-br/');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+    await expect(page.locator('header nav')).toContainText('Linha do tempo');
+    await expect(page.locator('header nav')).toContainText('Verbetes');
+    for (const [hl, href] of [['en', '/'], ['pt-BR', '/pt-br/'], ['x-default', '/']]) {
+      await expect(page.locator(`link[rel="alternate"][hreflang="${hl}"]`)).toHaveAttribute('href', new RegExp(`${href.replace(/\//g, '\\/')}$`));
+    }
+    expect(errors).toEqual([]);
+  });
+
+  test('the switcher moves between languages on the same page', async ({ page }) => {
+    await page.goto('/entries/daguerreotype/');
+    await page.locator('.langs-tools a[hreflang="pt-BR"]').click();
+    await expect(page).toHaveURL(/\/pt-br\/entries\/daguerreotype\/$/);
+    await expect(page.locator('.langs-tools a[aria-current="true"]')).toHaveAttribute('hreflang', 'pt-BR');
+    await expect(page.locator('article h2').first()).toHaveText('Como começou');
+    await page.locator('.langs-tools a[hreflang="en"]').click();
+    await expect(page).toHaveURL(/\/entries\/daguerreotype\/$/);
+    expect(new URL(page.url()).pathname).toBe('/entries/daguerreotype/');
+  });
+
+  test('the hover card is in Portuguese and a star stays in /pt-br/', async ({ page }) => {
+    await page.goto('/pt-br/');
+    await dot(page, 'daguerreotype').hover();
+    await expect(page.locator('#card')).toContainText('Hoje:');
+    await expect(page.locator('#card')).toContainText('Clique para abrir o verbete');
+    await dot(page, 'daguerreotype').click();
+    await expect(page).toHaveURL(/\/pt-br\/entries\/daguerreotype\/$/);
+  });
+
+  test('cross-links inside a translated entry stay in Portuguese', async ({ page }) => {
+    await page.goto('/pt-br/entries/daguerreotype/');
+    const hrefs = await page.locator('article a.xref').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const h of hrefs) expect(h).toMatch(/^\/pt-br\//);
+  });
+
+  test('the glossary popover is in Portuguese', async ({ page }) => {
+    await page.goto('/pt-br/entries/daguerreotype/');
+    const g = page.locator('article a.gloss').first();
+    await g.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(150); // let the scroll event (which hides the popover) settle first
+    await g.hover();
+    await expect(page.locator('#gloss-pop')).toBeVisible();
+    await expect(page.locator('#gloss-pop strong')).toHaveText((await g.textContent())!.trim(), { ignoreCase: true });
+    expect(await g.getAttribute('href')).toMatch(/^\/pt-br\/glossary\/#/);
+  });
+
+  test('the formats calculator uses a decimal comma', async ({ page }) => {
+    await page.goto('/pt-br/formats/');
+    await page.selectOption('#fmt', 'aps-c-canon');
+    await page.locator('#focal').fill('50');
+    await expect(page.locator('#out')).toContainText('1,61');
+    await expect(page.locator('#out')).toContainText('81 mm');
+  });
+
+  test('search in Portuguese returns only Portuguese pages', async ({ page }) => {
+    await page.goto('/pt-br/search/');
+    await page.locator('#search input').fill('daguerreótipo');
+    await expect(page.locator('.pagefind-ui__result-link[href="/pt-br/entries/daguerreotype/"]')).toBeVisible({ timeout: 15000 });
+    const hrefs = () => page.locator('.pagefind-ui__result-link').evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
+    await expect.poll(async () => (await hrefs()).filter((h) => !h.startsWith('/pt-br/'))).toEqual([]);
+  });
+
+  test('no English section headings are left on any translated entry', async ({ page }) => {
+    await page.goto('/pt-br/entries/');
+    const ids = await page.locator('a[href^="/pt-br/entries/"][href$="/"]').evaluateAll((as) => [...new Set(as.map((a) => a.getAttribute('href')!).filter((h) => h.split('/').length === 5))]);
+    expect(ids.length).toBeGreaterThan(100);
+    for (const href of ids.slice(0, 12)) {
+      await page.goto(href);
+      await expect(page.locator('article h2', { hasText: /^How it began$/ })).toHaveCount(0);
+    }
+  });
+
+  for (const path of ['/pt-br/', '/pt-br/entries/daguerreotype/', '/pt-br/formats/', '/pt-br/about/', '/pt-br/makers/', '/pt-br/glossary/']) {
+    test(`no serious axe violations on ${path}`, async ({ page }) => {
+      await page.goto(path);
+      const { violations } = await new AxeBuilder({ page }).analyze();
+      const serious = violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
+      expect(serious.map((v) => `${v.id}: ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')}`)).toEqual([]);
+    });
+  }
+});
+
+test.describe('portuguese site on a phone', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 800 } });
+  test('no horizontal page scroll at 375px', async ({ page }) => {
+    for (const path of ['/pt-br/', '/pt-br/entries/daguerreotype/', '/pt-br/formats/', '/pt-br/makers/', '/pt-br/about/']) {
+      await page.goto(path);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBeLessThanOrEqual(375);
+    }
   });
 });
