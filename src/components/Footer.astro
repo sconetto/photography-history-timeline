@@ -1,10 +1,70 @@
+---
+import { NAV, REPO, KO_FI, INSPIRATION } from '../lib/nav';
+import { url } from '../lib/url';
+const year = new Date().getFullYear();
+const ext = { rel: 'noopener', target: '_blank' } as const;
+---
 <footer class="site-foot">
-  <div class="wrap">
-    <p>Dates are approximate: most inventions grew over years, and each sits at a widely used starting point (a first demonstration, a patent, a first product). "Impact" is a judgment for orientation, not a measurement.</p>
-    <p>Images are public domain and credited on each page. Text is original, written from the sources listed on <a href="/sources/">Sources</a>. Inspired by <i>Politics Through Time</i>.</p>
+  <div class="wrap cols">
+    <div class="about">
+      <a class="brand" href={url('/')}>
+        <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="9.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="11" cy="11" r="3.2" fill="currentColor"/></svg>
+        <span>Photography <em>Through</em> Time</span>
+      </a>
+      <p>Dates are approximate: most inventions grew over years, and each sits at a widely used starting point (a first demonstration, a patent, a first product). "Impact" is a judgment for orientation, not a measurement.</p>
+      <p class="legal">© {year} João Pedro Sconetto · Code under <a href={`${REPO}/blob/main/LICENSE`} {...ext}>GPL-3.0</a> · Images public domain</p>
+    </div>
+
+    <nav aria-labelledby="ft-explore">
+      <h2 id="ft-explore">Explore</h2>
+      <ul>{NAV.filter(([h]) => h !== '/sources/').map(([href, label]) => <li><a href={url(href)}>{label}</a></li>)}</ul>
+    </nav>
+
+    <nav aria-labelledby="ft-project">
+      <h2 id="ft-project">Project</h2>
+      <ul>
+        <li><a href={url('/about/')}>About this site</a></li>
+        <li><a href={url('/sources/')}>Sources &amp; method</a></li>
+        <li>
+          <a class="ico" href={REPO} {...ext}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.78 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14 0 1.54-.01 2.79-.01 3.17 0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+            Source code
+          </a>
+        </li>
+        <li><a href={`${REPO}/issues`} {...ext}>Report a correction</a></li>
+      </ul>
+    </nav>
+
+    <div class="credits">
+      <h2>Credits &amp; support</h2>
+      <p>Inspired by <a href={INSPIRATION.repo} {...ext}><i>Politics Through Time</i></a> by <a href={INSPIRATION.profile} {...ext}>{INSPIRATION.author}</a>, a star-chart timeline of political ideas. This site shares its ideas, not its code.</p>
+      <p>Free, with no ads or tracking. If it is useful to you, you can help keep it running.</p>
+      <a class="support" href={KO_FI} {...ext}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 8h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Zm12 2h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5v2M12 3.5v2"/></svg>
+        Support on Ko-fi
+      </a>
+    </div>
   </div>
 </footer>
 <style>
-  .site-foot { border-top: 1px solid var(--rule-soft); padding-block: 22px 40px; font-size: 12.5px; color: var(--muted); }
-  .site-foot p { max-width: 92ch; margin: 0 0 6px; }
+  .site-foot { border-top: 1px solid var(--rule); background: var(--panel); padding-block: 36px 40px; margin-top: 48px; font-size: 13px; color: var(--muted); }
+  .cols { display: grid; gap: 28px 40px; grid-template-columns: minmax(0, 1.5fr) minmax(0, .8fr) minmax(0, .9fr) minmax(0, 1.3fr); }
+  @media (max-width: 960px) { .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  /* phones: the two link lists sit side by side; the blurb and credits span the width */
+  @media (max-width: 520px) { .cols { gap: 24px 20px; } .about, .credits { grid-column: 1 / -1; } }
+  .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); border: 0; font: 400 18px/1 var(--font-display); }
+  .brand em { color: var(--accent); }
+  .brand svg { color: var(--accent); flex: none; }
+  p { margin: 12px 0 0; line-height: 1.55; max-width: 60ch; }
+  .legal { font: 400 11.5px/1.5 var(--font-mono); }
+  h2 { margin: 2px 0 12px; font: 500 10.5px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink); }
+  .credits p:first-of-type { margin-top: 0; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  a { color: var(--ink-2); }
+  ul a { border: 0; display: inline-flex; align-items: center; gap: 6px; }
+  ul a:hover, ul a:focus-visible { color: var(--accent); }
+  .ico svg { width: 15px; height: 15px; flex: none; }
+  .support { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 8px 14px; border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); font-weight: 500; font-size: 13.5px; text-decoration: none; }
+  .support svg { width: 18px; height: 18px; flex: none; }
+  .support:hover, .support:focus-visible { background: var(--accent); color: var(--panel); }
 </style>

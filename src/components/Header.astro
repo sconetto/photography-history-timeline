@@ -1,10 +1,7 @@
 ---
 import PalettePicker from './PalettePicker.astro';
 const path = Astro.url.pathname;
-const nav = [
-  ['/', 'Timeline'], ['/entries/', 'Entries'], ['/makers/', 'Makers'], ['/formats/', 'Formats'],
-  ['/physics/', 'How it works'], ['/landmarks/', 'Landmarks'], ['/glossary/', 'Glossary'], ['/sources/', 'Sources'],
-] as const;
+import { NAV as nav } from '../lib/nav';
 const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 ---
 <header class="site-head">
