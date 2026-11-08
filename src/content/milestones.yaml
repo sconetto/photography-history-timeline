@@ -4,6 +4,12 @@ boulevard-du-temple:
   when: "1838"
   note: "Daguerre's view of a Paris boulevard needed minutes of exposure, so the moving traffic vanished. A man having his boots polished stood still long enough to appear."
   entry: daguerreotype
+  image:
+    src: ../assets/img/boulevard-du-temple.jpg
+    alt: "A daguerreotype of a Paris boulevard seen from above: trees, rooftops and an empty street, with a tiny figure having his boots polished at lower left."
+    credit: "Louis Daguerre, 1838"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:Boulevard_du_Temple_by_Daguerre.jpg
 world-photography-day:
   year: 1839.6
   label: "The daguerreotype is given to the world"
@@ -15,17 +21,35 @@ cornelius:
   label: "Robert Cornelius's self-portrait"
   when: "Late 1839"
   note: "In Philadelphia, Cornelius sat in front of his own camera for several minutes. It is the earliest surviving photographic self-portrait, and one of the first American portraits."
+  image:
+    src: ../assets/img/cornelius.jpg
+    alt: "A pale, slightly blurred young man with tousled hair and folded arms, looking past the camera."
+    credit: "Robert Cornelius, 1839. Library of Congress"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:RobertCornelius.jpg
 muybridge:
   year: 1878
   label: "The Horse in Motion"
   when: "1878"
   note: "Eadweard Muybridge's row of cameras, fired by trip wires, showed that a galloping horse lifts all four hooves off the ground at once, which no painter had ever drawn."
   entry: gelatin-dry-plate
+  image:
+    src: ../assets/img/horse-in-motion.jpg
+    alt: "Twelve small silhouette frames of a galloping horse and rider in three rows, printed on a mounted card."
+    credit: "Eadweard Muybridge, 1878. Library of Congress"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:The_Horse_in_Motion.jpg
 earthrise:
   year: 1968
   label: "Earthrise"
   when: "24 December 1968"
   note: "Bill Anders photographed the Earth rising over the Moon from Apollo 8 with a Hasselblad and colour film. It became one of the most reproduced photographs ever made."
+  image:
+    src: ../assets/img/earthrise.jpg
+    alt: "The Earth, half lit and blue and white, rising above the grey horizon of the Moon against black space."
+    credit: "William Anders, Apollo 8, 1968. NASA"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:NASA-Apollo8-Dec24-Earthrise.jpg
 kodak-bankruptcy:
   year: 2012
   label: "Kodak files for bankruptcy"
@@ -37,42 +61,84 @@ drowned-man:
   label: "Bayard's Self-Portrait as a Drowned Man"
   when: "18 October 1840"
   note: "Hippolyte Bayard, who had his own paper process, staged himself as a suicide in protest that France had honoured Daguerre and ignored him. It is often called the first staged photograph."
+  image:
+    src: ../assets/img/drowned-man.jpg
+    alt: "A shirtless man slumped against a wall with eyes closed, hands folded, a straw hat beside him."
+    credit: "Hippolyte Bayard, 1840. Société française de photographie"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:Hippolyte_Bayard_-_Drownedman_1840.jpg
 atkins:
   year: 1843
   label: "Anna Atkins's cyanotype book of algae"
   when: "1843"
   note: "Atkins laid British seaweeds on cyanotype paper to make Photographs of British Algae: Cyanotype Impressions, issued in parts from 1843. It is often called the first book illustrated with photographs."
   entry: cyanotype
+  image:
+    src: ../assets/img/atkins-algae.jpg
+    alt: "A white, branching seaweed silhouette on deep Prussian-blue paper, with a handwritten Latin name below."
+    credit: "Anna Atkins, from Photographs of British Algae, 1843–53"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:Anna_Atkins_algae_cyanotype.jpg
 pencil-of-nature:
   year: 1844
   label: "The Pencil of Nature"
   when: "1844–46"
   note: "Talbot published his calotypes in six parts with an explanatory text: the first commercially published book illustrated with photographs, and an early argument for what photography could do."
   entry: calotype
+  image:
+    src: ../assets/img/open-door.jpg
+    alt: "A broom leaning in the open doorway of a stone building, with a lantern hanging on the wall beside it."
+    credit: "William Henry Fox Talbot, The Open Door, 1844. Los Angeles County Museum of Art"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:The_Open_Door_LACMA_M.85.300.1.jpg
 fenton-crimea:
   year: 1855
   label: "Fenton photographs the Crimean War"
   when: "1855"
   note: "Roger Fenton spent months in the Crimea with a horse-drawn darkroom van. Slow wet plates meant no action, but The Valley of the Shadow of Death, a road strewn with cannonballs, became one of the first famous war photographs."
   entry: wet-collodion
+  image:
+    src: ../assets/img/valley-shadow-death.jpg
+    alt: "A barren valley road strewn with cannonballs, between bare grey hillsides."
+    credit: "Roger Fenton, 1855"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:Valley_of_the_Shadow_of_Death.jpg
 nadar-aerial:
   year: 1858
   label: "Nadar's photographs from a balloon"
   when: "1858"
   note: "The Paris photographer Nadar took the first aerial photographs from a tethered balloon above Petit-Bicêtre. None survive; the oldest surviving aerial photograph is James Wallace Black's view of Boston, 1860."
   entry: wet-collodion
+  image:
+    src: ../assets/img/boston-aerial.jpg
+    alt: "Rooftops, church spires and streets of Boston seen from high above, in brown tones."
+    credit: "James Wallace Black, Boston, as the Eagle and the Wild Goose See It, 1860. The Metropolitan Museum of Art"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:Boston,_as_the_Eagle_and_the_Wild_Goose_See_It.jpg
 shantytown:
   year: 1880.2
   label: "A Scene in Shantytown: the first halftone in a newspaper"
   when: "4 March 1880"
   note: "The New York Daily Graphic printed a photograph of shacks in Manhattan as a halftone, using a coarse screen. It took another two decades before halftones were common in newspapers."
   entry: halftone
+  image:
+    src: ../assets/img/shantytown.jpg
+    alt: "Wooden shacks on a rocky slope with apartment blocks behind, printed as a coarse halftone in a newspaper."
+    credit: "The Daily Graphic, New York, 4 March 1880"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:A_Scene_in_Shantytown,_New_York_(1880).png
 riis:
   year: 1890
   label: "How the Other Half Lives"
   when: "1890"
   note: "Jacob Riis used flash powder to photograph New York's tenements at night, and published the pictures as a book. It helped bring about housing reform and is a founding work of documentary photography."
   entry: flash-powder
+  image:
+    src: ../assets/img/bandits-roost.jpg
+    alt: "Men in bowler hats and caps standing in a narrow tenement alley lined with wooden stairs and washing."
+    credit: "Jacob Riis, Bandits' Roost, about 1888"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:Jacob_Riis_-_Bandits%27_Roost.jpg
 life-magazine:
   year: 1936.9
   label: "The first issue of LIFE"
@@ -85,12 +151,24 @@ earth-from-space:
   when: "24 October 1946"
   note: "A 35mm movie camera on a captured V-2 rocket launched from White Sands, New Mexico, filmed the Earth from about 105 km up. The film survived in a steel cassette when the rocket crashed."
   entry: cine-35mm
+  image:
+    src: ../assets/img/first-photo-from-space.jpg
+    alt: "A grainy black-and-white view of the curved Earth with clouds, seen from high above against a black sky."
+    credit: "U.S. Army / Applied Physics Laboratory, White Sands, 24 October 1946"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:First_photo_from_space.jpg
 apollo-11:
   year: 1969.5
   label: "Hasselblads on the Moon"
   when: "20 July 1969"
   note: "Neil Armstrong and Buzz Aldrin photographed the Apollo 11 landing with modified Hasselblad cameras. Most pictures of an astronaut on the Moon from that mission show Aldrin, because Armstrong held the camera."
   entry: hasselblad-1600f
+  image:
+    src: ../assets/img/aldrin-apollo-11.jpg
+    alt: "An astronaut in a white spacesuit standing on the grey lunar surface, his gold visor reflecting the photographer."
+    credit: "Neil Armstrong, Apollo 11, 1969. NASA"
+    license: Public domain
+    source: https://commons.wikimedia.org/wiki/File:Aldrin_Apollo_11_original.jpg
 instagram:
   year: 2010.8
   label: "Instagram is launched"
