@@ -3,7 +3,7 @@ name: "Rollei"
 country: Germany
 founded: 1920
 ended: 2015
-fate: "Went through several insolvencies and owners from 1981; the last Braunschweig successor closed in 2015."
+fate: "Changed owners several times from 1981; Franke & Heidecke went insolvent in 2009, and its Braunschweig successor DHW Fototechnik closed in 2015."
 wiki: Rollei
 refs: []
 ---

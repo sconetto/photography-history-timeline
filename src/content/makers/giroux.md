@@ -2,8 +2,8 @@
 name: "Giroux"
 country: France
 founded: 1799
-ended: 1867
-fate: "A Paris shop for fine goods; its camera business lasted only a few years after 1839."
+ended: 1885
+fate: "A Paris shop for fine goods, run by the Giroux family until 1867 and by others until it closed in 1885; its camera business lasted only a few years after 1839."
 wiki: Alphonse_Giroux
 refs: []
 ---

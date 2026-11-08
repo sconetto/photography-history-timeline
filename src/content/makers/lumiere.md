@@ -2,10 +2,10 @@
 name: "Lumière"
 country: France
 founded: 1882
-ended: 1961
-fate: "Merged with Ilford’s French business in 1961; the Lumière name faded from film boxes."
+ended: 1982
+fate: "Taken over by the Swiss chemical group Ciba in the early 1960s; Ciba also came to own Ilford, and in 1982 the Lyon business was renamed Ilford France."
 links:
-  - { to: ilford, year: 1961, kind: merged, note: "Lumière-Ilford" }
+  - { to: ilford, year: 1982, kind: renamed, note: "Became Ilford France" }
 wiki: Auguste_and_Louis_Lumière
 refs: []
 ---
