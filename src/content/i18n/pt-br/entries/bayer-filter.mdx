@@ -1,0 +1,27 @@
+---
+title: "O filtro de Bayer"
+label: "Filtro de Bayer"
+ds: "1976"
+date: "1975 (depositada); 20 de julho de 1976 (patente americana 3.971.065)"
+summary: "O tabuleiro de xadrez de filtros vermelhos, verdes e azuis de Bryce Bayer, com o dobro de verdes, permite que um único sensor registre a cor. Quase toda câmera digital e todo celular o usam."
+today: "Usado em quase todo sensor de câmera digital e de celular; um software reconstrói a cor completa em cada pixel."
+people: [["Bryce E. Bayer", "1929–2012", "inventor"]]
+moments: [["1975", "Bayer deposita na Kodak sua patente de 'matriz de imagem colorida'"], ["1976", "Concedida a patente americana 3.971.065"], ["Anos 2000", "Vira o filtro de cor padrão dos sensores de câmeras e celulares"]]
+specs: [["Padrão", "2 × 2 repetido: um vermelho, dois verdes, um azul"], ["Por que dois verdes", "A nitidez que o olho percebe depende sobretudo do verde"]]
+---
+
+## Como começou
+
+Um sensor eletrônico mede só quanta luz cai em cada pixel, não a cor dela. Bryce Bayer, cientista da Kodak, procurou um jeito de obter cor de um único sensor, em vez de três. Patenteou sua resposta em 1976.
+
+## Como funciona
+
+Um mosaico de filtros minúsculos fica sobre os pixels: em cada bloco 2 × 2, um vermelho, dois verdes e um azul. O verde aparece duas vezes porque a visão humana tira a maior parte da sua noção de detalhe da parte verde do espectro. Cada pixel registra uma cor; um software estima as duas cores que faltam em cada pixel a partir dos vizinhos, uma etapa chamada demosaicização. É o princípio da [[g:cfa|matriz de filtros de cor]] do [[autochrome|autocromo]], tornado regular. Veja [[p:silver|como a luz vira imagem]].
+
+## Por que importou
+
+O padrão Bayer tornou as câmeras coloridas de sensor único simples e baratas, das primeiras câmeras digitais para consumidores a bilhões de celulares. Os arquivos raw guardam o mosaico não processado, e é por isso que os conversores raw os "demosaicizam".
+
+## Limites e o que veio depois
+
+Cada cor é amostrada só em parte dos pixels, o que pode causar cores falsas em padrões finos e perde um pouco de luz nos filtros. Há alternativas, como o arranjo X-Trans da Fujifilm, os sensores empilhados Foveon e os modos de deslocamento de pixel, mas o Bayer continua sendo o padrão.

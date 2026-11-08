@@ -11,3 +11,5 @@ hrc:
   label: "Harry Ransom Center, Universidade do Texas em Austin: a coleção Gernsheim e o heliógrafo de Niépce"
 loc:
   label: "Biblioteca do Congresso dos EUA, Divisão de Impressos e Fotografias"
+gernsheim: {}   # a book title: kept in the original
+rosenblum: {}   # a book title: kept in the original
