@@ -129,7 +129,7 @@ for (const pal of PALETTES) for (const mode of ['day', 'night']) {
   });
 }
 
-for (const path of ['/', '/entries/', '/entries/daguerreotype/', '/makers/', '/formats/', '/physics/', '/glossary/', '/landmarks/', '/sources/']) {
+for (const path of ['/', '/entries/', '/entries/daguerreotype/', '/makers/', '/makers/sony/', '/formats/', '/physics/', '/glossary/', '/landmarks/', '/sources/', '/search/']) {
   test(`no serious axe violations on ${path}`, async ({ page }) => {
     await page.goto(path);
     const { violations } = await new AxeBuilder({ page }).analyze();
@@ -157,5 +157,64 @@ test.describe('touch', () => {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBeLessThanOrEqual(375);
     }
+  });
+});
+
+test.describe('phase 2 views', () => {
+  test('search finds Kodachrome, with a result type', async ({ page }) => {
+    await page.goto('/search/');
+    await page.locator('#search input').fill('Kodachrome');
+    const first = page.locator('.pagefind-ui__result').first();
+    await expect(first).toBeVisible();
+    await expect(page.locator('.pagefind-ui__result-link[href="/entries/kodachrome/"]')).toBeVisible();
+    await expect(page.locator('.pagefind-ui__filter-panel')).toContainText('Entry');
+  });
+
+  test('"/" opens search from any page', async ({ page }) => {
+    await page.goto('/makers/');
+    await page.keyboard.press('/');
+    await expect(page).toHaveURL(/\/search\/$/);
+  });
+
+  test('makers chart draws every maker, its entries and merger links', async ({ page }) => {
+    await page.goto('/makers/');
+    const rows = page.locator('svg.mk .row');
+    expect(await rows.count()).toBeGreaterThan(20);
+    await expect(page.locator('svg.mk .link[data-from="konica"][data-to="konica-minolta"]')).toHaveCount(1);
+    await expect(page.locator('svg.mk .link[data-from="konica-minolta"][data-to="sony"]')).toHaveCount(1);
+    await page.locator('svg.mk .row[data-id="nikon"] a.pdot').first().click();
+    await expect(page).toHaveURL(/\/entries\/.+\/$/);
+  });
+
+  test('maker page shows its lineage in both directions', async ({ page }) => {
+    await page.goto('/makers/sony/');
+    await expect(page.locator('aside')).toContainText('Took over business of');
+    await expect(page.locator('aside')).toContainText('Konica Minolta');
+    await page.goto('/makers/minolta/');
+    await expect(page.locator('aside')).toContainText('Merged into');
+  });
+
+  test('formats overlay zooms to the selected format and the calculator updates', async ({ page }) => {
+    await page.goto('/formats/');
+    const vb = () => page.locator('#ov').getAttribute('viewBox');
+    const before = await vb();
+    await page.selectOption('#fmt', '8x10');
+    await expect.poll(async () => Number((await vb())!.split(' ')[2])).toBeGreaterThan(250);
+    expect(await vb()).not.toBe(before);
+    await expect(page.locator('#focal')).toHaveValue('325');
+    await expect(page.locator('#out')).toContainText('normal lens');
+    await page.locator('#focal').fill('50');
+    await page.selectOption('#fmt', 'aps-c-canon');
+    await expect(page.locator('#out')).toContainText('81 mm');
+    await expect(page.locator('#focal')).toHaveValue('50');
+  });
+
+  test('glossary filter narrows terms and shows where each is used', async ({ page }) => {
+    await page.goto('/glossary/');
+    await page.locator('#gl-q').fill('crop');
+    await expect(page.locator('.gl > div:visible')).toHaveCount(1);
+    await expect(page.locator('#crop-factor .used a').first()).toBeVisible();
+    await page.locator('#gl-q').fill('zzzz');
+    await expect(page.locator('#gl-none')).toBeVisible();
   });
 });
