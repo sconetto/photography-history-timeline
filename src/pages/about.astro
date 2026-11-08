@@ -1,12 +1,174 @@
 ---
 import Base from '../layouts/Base.astro';
+import { content } from '../lib/content';
 import { url } from '../lib/url';
+import { REPO, KO_FI, INSPIRATION } from '../lib/nav';
+
+const { entries, makers, physics, milestones, glossary } = await content();
+const ext = { rel: 'noopener', target: '_blank' } as const;
+const e = (id: string) => url(`/entries/${id}/`);
+
+/** The story, chapter by chapter; each chapter's dot wears the colour of the family it mostly belongs to. */
+const chapters = [
+  { when: 'c. 400 BCE – 1604', title: 'A hole in the wall' },
+  { when: '1717 – 1841', title: 'Silver that remembers light' },
+  { when: '1843 – 1844', title: 'The first photographic books' },
+  { when: '1871 – 1900', title: 'A camera for everyone' },
+  { when: '1878 – 1925', title: 'Pictures that move' },
+  { when: '1861 – 1935', title: 'The world in colour' },
+  { when: '1969 – now', title: 'From silver to silicon' },
+] as const;
+
+const explore = [
+  ['/', 'The timeline', `All ${entries.length} entries as a star chart. Hover a star for a summary, click it for the full story, and follow the lines to see what built on what.`],
+  ['/entries/', 'Entries', 'Every invention, process, camera and format, with its people, dates, specs and sources.'],
+  ['/makers/', 'Makers', `${makers.length} companies, from Voigtländer in 1756 to DJI, with their mergers, renamings and fates.`],
+  ['/formats/', 'Formats', 'From 8×10 inch plates to a phone sensor, drawn to scale, with crop factors and an equivalence calculator.'],
+  ['/physics/', 'How it works', `${physics.length} short primers on light, lenses, exposure, silver, colour and sensors, each with something to play with.`],
+  ['/landmarks/', 'Landmarks', `${milestones.length} photographs and moments that changed how we see, from a Paris boulevard in 1838 to Earthrise.`],
+  ['/glossary/', 'Glossary', `${glossary.length} terms, from aperture to zoom lens, in plain words.`],
+] as const;
+
+const creatorLinks = [
+  ['https://github.com/sconetto', 'GitHub'],
+  ['https://www.linkedin.com/in/sconetto', 'LinkedIn'],
+  ['https://sconetto.me', 'Website'],
+  ['https://blog.sconetto.me', 'Blog'],
+  ['https://photos.sconetto.me', 'Photos'],
+] as const;
 ---
-<Base title="About" description="About Photography Through Time.">
-  <p class="eyebrow">About</p>
-  <h1 class="page-title">About this site</h1>
+<Base title="About" description="Why Photography Through Time exists, the story it tells, and who made it.">
+  <header class="hero">
+    <p class="eyebrow">About</p>
+    <h1 class="page-title">About this site</h1>
+    <p class="lede">A hole in a wall, a few grains of silver, and two thousand years of curiosity. This is the story of how we learned to keep light, told so that you might fall in love with photography a little more.</p>
+  </header>
+
   <div class="prose">
-    <p>Photography Through Time is a knowledge base for photographers: how photography came to be, from the camera obscura to computational photography, and how it works. The <a href={url('/')}>timeline</a> shows every entry and how they connect; each entry has its own page with the story, the physics, the makers and the sources.</p>
-    <p>It was inspired by <i>Politics Through Time</i>, a star-chart timeline of political ideas. The code here is original.</p>
+    <h2>Why this exists</h2>
+    <p>Every photograph you take stands on a long chain of ideas. The phone in your pocket uses the same principle a Chinese philosopher described around 400 BCE. Its sensor counts light the way Einstein explained in 1905. The "full frame" its sensor is measured against comes from a German engineer who loaded movie film into a small camera around 1913. Most of that story is scattered across old books, museum archives and company histories, and most photographers never get to hear it.</p>
+    <p>Photography Through Time puts it in one place. It is free and open to anyone: a place to learn, to look things up, and to get lost following one invention to the next. If you leave knowing a little more about your camera, and loving it a little more, it has done its job.</p>
   </div>
+
+  <section class="story" aria-labelledby="story-h">
+    <h2 id="story-h" class="sec">The story it tells</h2>
+    <ol class="chapters">
+      <li style="--c: var(--f-optics)">
+        <p class="when">{chapters[0].when}</p>
+        <h3>{chapters[0].title}</h3>
+        <p>It starts in a dark room. Light through a small hole paints an upside-down picture of the world outside: the <a href={e('camera-obscura')}>camera obscura</a>, noticed by Mozi in China and by Aristotle in Greece. Around 1011–21, in Cairo, Ibn al-Haytham worked out why in his <a href={e('book-of-optics')}><i>Book of Optics</i></a>. <a href={e('spectacle-lenses')}>Spectacle lenses</a> came next, and by 1604 <a href={e('kepler-optics')}>Kepler</a> had given the dark room its name. Artists traced its images for two centuries, but nobody could keep them.</p>
+      </li>
+      <li style="--c: var(--f-chem)">
+        <p class="when">{chapters[1].when}</p>
+        <h3>{chapters[1].title}</h3>
+        <p>Then chemistry joined in. In 1717 Johann Schulze saw <a href={e('silver-salts')}>silver salts</a> darken in light. <a href={e('wedgwood-davy')}>Wedgwood and Davy</a> made images in 1802 but could not stop them fading. Around 1826 Nicéphore Niépce fixed the view from his window after an exposure of many hours: the oldest surviving camera photograph, made by <a href={e('heliography')}>heliography</a>. In Brazil, <a href={e('hercules-florence')}>Hércules Florence</a> invented his own process and called it <i>photographie</i>. In 1839 the <a href={e('daguerreotype')}>daguerreotype</a> was given to the world, and Talbot's paper negatives soon followed as the <a href={e('calotype')}>calotype</a>.</p>
+      </li>
+      <li style="--c: var(--f-sharing)">
+        <p class="when">{chapters[2].when}</p>
+        <h3>{chapters[2].title}</h3>
+        <p>Photography soon moved into books. In 1843 the botanist Anna Atkins began issuing <a href={url('/landmarks/#atkins')}>her algae in blue</a>, printed as <a href={e('cyanotype')}>cyanotypes</a>. In 1844 Talbot published <a href={url('/landmarks/#pencil-of-nature')}><i>The Pencil of Nature</i></a>, the first commercially published book illustrated with photographs. Pictures could now be copied, bound and shared, and they still are, from <a href={e('carte-de-visite')}>cartes de visite</a> to <a href={e('online-sharing')}>online albums</a>.</p>
+      </li>
+      <li style="--c: var(--f-cameras)">
+        <p class="when">{chapters[3].when}</p>
+        <h3>{chapters[3].title}</h3>
+        <p>Early photographers carried darkrooms on their backs. <a href={e('gelatin-dry-plate')}>Dry plates</a> ended that, and <a href={e('roll-film')}>roll film</a> made cameras small. In 1888 the <a href={e('kodak-camera')}>Kodak</a> promised "You press the button, we do the rest". In 1900 the <a href={e('brownie')}>Brownie</a> cost one dollar. From then on, anyone could be a photographer.</p>
+      </li>
+      <li style="--c: var(--f-formats)">
+        <p class="when">{chapters[4].when}</p>
+        <h3>{chapters[4].title}</h3>
+        <p>In 1878 Eadweard Muybridge <a href={url('/landmarks/#muybridge')}>froze a galloping horse</a> in a row of pictures, and soon the pictures moved. Edison's workshop slit film to <a href={e('cine-35mm')}>35mm</a>, and in 1895 the Lumière brothers filled a Paris café with moving images. Cinema and still photography have shared their film ever since. Oskar Barnack loaded cine film into a small camera, doubled the frame to 36 × 24 mm, and the <a href={e('leica-i')}>Leica I</a> of 1925 set the <a href={e('format-135')}>"full frame"</a> that digital cameras still measure themselves against.</p>
+      </li>
+      <li style="--c: var(--f-colour)">
+        <p class="when">{chapters[5].when}</p>
+        <h3>{chapters[5].title}</h3>
+        <p>In 1861 James Clerk Maxwell showed a <a href={e('maxwell-colour')}>tartan ribbon in colour</a> using three black-and-white photographs. The Lumières' <a href={e('autochrome')}>Autochrome</a> made colour practical in 1907, with grains of dyed potato starch, and <a href={e('kodachrome')}>Kodachrome</a> brought it to everyone in 1935.</p>
+      </li>
+      <li style="--c: var(--f-digital)">
+        <p class="when">{chapters[6].when}</p>
+        <h3>{chapters[6].title}</h3>
+        <p>The <a href={e('ccd')}>CCD</a> of 1969 turned light into numbers, and in 1975 Steven Sasson built the <a href={e('digital-camera-sasson')}>first digital camera</a>, at Kodak of all places. The <a href={e('bayer-filter')}>Bayer filter</a> gave sensors colour, and <a href={e('cmos-sensor')}>CMOS</a> made them cheap. In 2007 the <a href={e('iphone')}>iPhone</a> put a camera in nearly every pocket, and <a href={e('computational-photography')}>computational photography</a> now merges many frames into one. Meanwhile <a href={e('film-revival')}>film is back</a>, loved for its own sake.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="prose">
+    <h2>The physics underneath</h2>
+    <p>Behind every step is a little science, and you don't need maths to enjoy it. Why a smaller <a href={url('/physics/pinhole/')}>pinhole</a> gives a sharper picture only up to a point. Why each <a href={url('/physics/aperture/')}>f-stop</a> halves the light. How a crystal of <a href={url('/physics/silver/')}>silver</a> remembers a few photons until the developer multiplies that mark millions of times. How a <a href={url('/physics/sensors/')}>sensor</a> sees colour through a mosaic of filters. Each <a href={url('/physics/')}>primer</a> has a small interactive model to try.</p>
+  </div>
+
+  <section aria-labelledby="explore-h">
+    <h2 id="explore-h" class="sec">Find your way around</h2>
+    <ul class="explore">
+      {explore.map(([href, title, text]) => <li><a href={url(href)}><span class="t">{title} →</span><span class="d">{text}</span></a></li>)}
+    </ul>
+  </section>
+
+  <div class="prose">
+    <h2>How it is made</h2>
+    <p>The text is written fresh from museum collections, original papers and patents, and the standard histories by Josef Maria Eder and Beaumont Newhall. Each entry lists its sources, and every link is checked. Dates and "impact" are explained on <a href={url('/sources/')}>Sources &amp; method</a>. If you spot a mistake, please <a href={`${REPO}/issues`} {...ext}>report a correction</a>.</p>
+    <p>The photographs are all public domain. The cameras are drawn as simple silhouettes. The site has no ads, no tracking and no accounts, and its <a href={REPO} {...ext}>source code</a> is open under the GPL-3.0.</p>
+    <p>The star-chart idea comes from <a href={INSPIRATION.repo} {...ext}><i>Politics Through Time</i></a> by <a href={INSPIRATION.profile} {...ext}>{INSPIRATION.author}</a>, a timeline of political ideas. Photography Through Time borrows the idea, not the code.</p>
+  </div>
+
+  <section class="creator" aria-labelledby="creator-h">
+    <h2 id="creator-h" class="sec">About the author</h2>
+    <div class="card">
+      <p class="name">João Pedro Sconetto</p>
+      <p class="role">Software Engineer, Manager and Photographer 🇧🇷</p>
+      <p class="loc">Brasília, Brazil</p>
+      <p class="bio">Brazilian software engineer passionate about technology, open source, and good stories. When not coding, he is photographing the city, watching F1 and endurance racing, or enjoying a specialty coffee. He believes good software solves real problems for real people, and that sharing knowledge is the best way to grow. This site brings two of those loves together: photography, and sharing what he has learned about it.</p>
+      <ul class="links">
+        {creatorLinks.map(([href, label]) => <li><a href={href} {...ext}>{label}</a></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="support" aria-labelledby="support-h">
+    <h2 id="support-h">Support the project</h2>
+    <p>Photography Through Time is free and will stay that way. If it taught you something or made you look at your camera differently, consider buying a virtual coffee on Ko-fi. It helps keep the site running and the story growing.</p>
+    <a class="kofi" href={KO_FI} {...ext}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 8h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Zm12 2h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5v2M12 3.5v2"/></svg>
+      Buy me a coffee on Ko-fi
+    </a>
+  </section>
 </Base>
+
+<style>
+  .hero { max-width: 70ch; }
+  .lede { font: 400 clamp(19px, 2.2vw, 23px)/1.45 var(--font-display); color: var(--ink-2); margin: 6px 0 8px; }
+  .sec { font: 400 clamp(24px, 3vw, 30px)/1.15 var(--font-display); margin: 1.6em 0 0.7em; }
+  section { max-width: 860px; }
+
+  /* the story: a film strip of chapters, each marked with its family colour */
+  .chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: ch; }
+  .chapters li { position: relative; padding: 4px 0 26px 34px; counter-increment: ch; }
+  .chapters li::before { content: ''; position: absolute; left: 6px; top: 12px; bottom: -6px; width: 2px; background: var(--rule); }
+  .chapters li:last-child::before { display: none; }
+  .chapters li::after { content: ''; position: absolute; left: 0; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px var(--paper); }
+  .when { margin: 0; font: 500 11px/1.4 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .when::before { content: counter(ch, decimal-leading-zero) ' · '; color: var(--ink-2); }
+  .chapters h3 { margin: 4px 0 6px; font: 400 22px/1.2 var(--font-display); }
+  .chapters p:not(.when) { margin: 0; color: var(--ink-2); max-width: 70ch; }
+
+  .explore { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .explore a { display: grid; align-content: start; gap: 6px; height: 100%; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); text-decoration: none; border-bottom-width: 1px; transition: border-color .15s; }
+  .explore a:hover { border-color: var(--accent); }
+  .explore .t { color: var(--ink); font-weight: 500; }
+  .explore .d { color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+
+  .card { border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); padding: 22px 24px; }
+  .card p { margin: 0; }
+  .name { font: 400 24px/1.2 var(--font-display); color: var(--ink); }
+  .role, .loc { font-size: 13.5px; color: var(--muted); margin-top: 4px !important; }
+  .bio { margin-top: 14px !important; color: var(--ink-2); max-width: 70ch; }
+  .links { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .links a { display: inline-block; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .links a:hover { border-color: var(--accent); color: var(--accent); }
+
+  .support { margin-top: 40px; padding: 26px 24px; border: 1px solid var(--accent-soft); border-radius: 14px; background: color-mix(in srgb, var(--accent) 7%, var(--panel)); text-align: center; }
+  .support h2 { margin: 0; font: 400 26px/1.2 var(--font-display); }
+  .support p { margin: 10px auto 0; max-width: 58ch; color: var(--ink-2); }
+  .kofi { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 10px 18px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent); color: var(--paper); font-weight: 500; text-decoration: none; }
+  .kofi:hover { filter: brightness(1.08); }
+  .kofi svg { width: 18px; height: 18px; }
+</style>
