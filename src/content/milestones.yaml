@@ -31,3 +31,75 @@ kodak-bankruptcy:
   label: "Kodak files for bankruptcy"
   when: "19 January 2012"
   note: "The company that built the first digital camera in 1975 filed for Chapter 11 protection after film sales collapsed. It emerged in 2013 as a much smaller firm."
+
+drowned-man:
+  year: 1840.8
+  label: "Bayard's Self-Portrait as a Drowned Man"
+  when: "18 October 1840"
+  note: "Hippolyte Bayard, who had his own paper process, staged himself as a suicide in protest that France had honoured Daguerre and ignored him. It is often called the first staged photograph."
+atkins:
+  year: 1843
+  label: "Anna Atkins's cyanotype book of algae"
+  when: "1843"
+  note: "Atkins laid British seaweeds on cyanotype paper to make Photographs of British Algae: Cyanotype Impressions, issued in parts from 1843. It is often called the first book illustrated with photographs."
+  entry: cyanotype
+pencil-of-nature:
+  year: 1844
+  label: "The Pencil of Nature"
+  when: "1844–46"
+  note: "Talbot published his calotypes in six parts with an explanatory text: the first commercially published book illustrated with photographs, and an early argument for what photography could do."
+  entry: calotype
+fenton-crimea:
+  year: 1855
+  label: "Fenton photographs the Crimean War"
+  when: "1855"
+  note: "Roger Fenton spent months in the Crimea with a horse-drawn darkroom van. Slow wet plates meant no action, but The Valley of the Shadow of Death, a road strewn with cannonballs, became one of the first famous war photographs."
+  entry: wet-collodion
+nadar-aerial:
+  year: 1858
+  label: "Nadar's photographs from a balloon"
+  when: "1858"
+  note: "The Paris photographer Nadar took the first aerial photographs from a tethered balloon above Petit-Bicêtre. None survive; the oldest surviving aerial photograph is James Wallace Black's view of Boston, 1860."
+  entry: wet-collodion
+shantytown:
+  year: 1880.2
+  label: "A Scene in Shantytown: the first halftone in a newspaper"
+  when: "4 March 1880"
+  note: "The New York Daily Graphic printed a photograph of shacks in Manhattan as a halftone, using a coarse screen. It took another two decades before halftones were common in newspapers."
+  entry: halftone
+riis:
+  year: 1890
+  label: "How the Other Half Lives"
+  when: "1890"
+  note: "Jacob Riis used flash powder to photograph New York's tenements at night, and published the pictures as a book. It helped bring about housing reform and is a founding work of documentary photography."
+  entry: flash-powder
+life-magazine:
+  year: 1936.9
+  label: "The first issue of LIFE"
+  when: "23 November 1936"
+  note: "Henry Luce relaunched LIFE as a weekly picture magazine, with Margaret Bourke-White's photograph of the Fort Peck Dam on the cover. Picture magazines defined photojournalism for decades."
+  entry: format-135
+earth-from-space:
+  year: 1946.8
+  label: "The first photograph of Earth from space"
+  when: "24 October 1946"
+  note: "A 35mm movie camera on a captured V-2 rocket launched from White Sands, New Mexico, filmed the Earth from about 105 km up. The film survived in a steel cassette when the rocket crashed."
+  entry: cine-35mm
+apollo-11:
+  year: 1969.5
+  label: "Hasselblads on the Moon"
+  when: "20 July 1969"
+  note: "Neil Armstrong and Buzz Aldrin photographed the Apollo 11 landing with modified Hasselblad cameras. Most pictures of an astronaut on the Moon from that mission show Aldrin, because Armstrong held the camera."
+  entry: hasselblad-1600f
+instagram:
+  year: 2010.8
+  label: "Instagram is launched"
+  when: "6 October 2010"
+  note: "A free iPhone app for square photos with filters gained a million users in two months. It made sharing photographs the main way many people use them."
+  entry: online-sharing
+ai-image-debate:
+  year: 2023.3
+  label: "An AI image wins a photography prize"
+  when: "April 2023"
+  note: "Boris Eldagsen revealed that his prize-winning entry to the Sony World Photography Awards was made with AI, and declined the prize to start a debate on what counts as a photograph."
+  entry: generative-ai
