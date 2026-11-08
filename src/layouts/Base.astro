@@ -36,8 +36,9 @@ const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d:
     <script is:inline>
       // Set the theme before first paint (no flash). Storage may be unavailable.
       (function () {
-        var t = null;
-        try { t = localStorage.getItem('ptt-theme'); } catch (e) {}
+        var t = null, p = null;
+        try { t = localStorage.getItem('ptt-theme'); p = localStorage.getItem('ptt-palette'); } catch (e) {}
+        document.documentElement.setAttribute('data-palette', /^(kodachrome|print|cyanotype|platinum)$/.test(p || '') ? p : 'kodachrome');
         if (t === 'day') document.documentElement.setAttribute('data-theme', 'light');
         else if (t === 'night') document.documentElement.setAttribute('data-theme', 'dark');
       })();

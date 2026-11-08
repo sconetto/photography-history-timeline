@@ -1,46 +1,113 @@
-/* Day = the print: warm baryta paper, silver-grey ink. Night = the darkroom: warm black, safelight amber.
-   Family colours are the dataviz categorical set in fixed order, validated against --panel in both themes
-   (light: contrast WARN on aqua/yellow/magenta → every star carries a text label and a list view exists). */
+/* Four palettes, each named after a photographic process, each with a day and a night theme.
+   <html data-palette="kodachrome|print|cyanotype|platinum"> picks the palette (Kodachrome when absent);
+   data-theme="light|dark" forces a mode, otherwise prefers-color-scheme decides.
+   Generated from one table, so every palette defines the same tokens. All text tokens pass WCAG AA on --panel.
+   Family colours are the dataviz categorical set in fixed order, shared by every palette and validated against
+   each palette's --panel in both modes (light: contrast WARN on aqua/yellow/magenta → every star has a text label
+   and a list view exists). */
 :root {
   color-scheme: light;
-  --paper: #f3eee4;
-  --paper-glow: #fffdf8;
-  --panel: #fbf8f1;
-  --raised: #ffffff;
-  --band: #e9e2d4;
-  --ink: #1d1a16;
-  --ink-2: #4a443b;
-  --muted: #6c6457;
-  --rule: #d6cdbd;
-  --rule-soft: #e7e0d2;
-  --era: rgba(29, 26, 22, 0.035);
-  --accent: #a5461a;
-  --accent-soft: rgba(165, 70, 26, 0.12);
-  --accent-span: rgba(165, 70, 26, 0.2);
-  --shadow: rgba(40, 30, 18, 0.16);
   --f-optics: #2a78d6; --f-chem: #eb6834; --f-colour: #1baf7a; --f-cameras: #eda100;
   --f-formats: #e87ba4; --f-control: #008300; --f-digital: #6250d6; --f-sharing: #e34948;
   --font-display: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
   --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
 }
+
+/* Kodachrome: day */
+:root, :root[data-palette="kodachrome"] {
+  --paper: #f6f3ea; --paper-glow: #fffdf7; --panel: #fffdf6; --raised: #ffffff; --band: #f6c344;
+  --ink: #161616; --ink-2: #3d3b37; --muted: #66625a; --rule: #ddd5c2; --rule-soft: #ebe5d6;
+  --era: rgba(22, 22, 22, 0.035); --accent: #b5121b; --accent-soft: rgba(181, 18, 27, 0.12);
+  --accent-span: rgba(181, 18, 27, 0.2); --shadow: rgba(30, 25, 10, 0.16);
+}
+
+/* Print & Darkroom: day */
+:root[data-palette="print"] {
+  --paper: #f3eee4; --paper-glow: #fffdf8; --panel: #fbf8f1; --raised: #ffffff; --band: #e9e2d4;
+  --ink: #1d1a16; --ink-2: #4a443b; --muted: #6c6457; --rule: #d6cdbd; --rule-soft: #e7e0d2;
+  --era: rgba(29, 26, 22, 0.035); --accent: #a5461a; --accent-soft: rgba(165, 70, 26, 0.12);
+  --accent-span: rgba(165, 70, 26, 0.2); --shadow: rgba(40, 30, 18, 0.16);
+}
+
+/* Cyanotype: day */
+:root[data-palette="cyanotype"] {
+  --paper: #e8eef2; --paper-glow: #f8fbfd; --panel: #f5f8fa; --raised: #ffffff; --band: #dae4eb;
+  --ink: #0f2233; --ink-2: #33495d; --muted: #566b7d; --rule: #c3d1dc; --rule-soft: #dde6ec;
+  --era: rgba(15, 34, 51, 0.035); --accent: #1d4f91; --accent-soft: rgba(29, 79, 145, 0.12);
+  --accent-span: rgba(29, 79, 145, 0.2); --shadow: rgba(15, 34, 51, 0.14);
+}
+
+/* Platinum & Selenium: day */
+:root[data-palette="platinum"] {
+  --paper: #eceae6; --paper-glow: #fbfbfa; --panel: #f8f7f5; --raised: #ffffff; --band: #e1dfdb;
+  --ink: #1c1b1d; --ink-2: #44424a; --muted: #67646b; --rule: #d2cfca; --rule-soft: #e3e1dd;
+  --era: rgba(28, 27, 29, 0.035); --accent: #7a2e4a; --accent-soft: rgba(122, 46, 74, 0.12);
+  --accent-span: rgba(122, 46, 74, 0.2); --shadow: rgba(20, 20, 24, 0.14);
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
+    --f-optics: #3987e5; --f-chem: #d95926; --f-colour: #199e70; --f-cameras: #c98500;
+    --f-formats: #d55181; --f-control: #008300; --f-digital: #9085e9; --f-sharing: #e66767;
+  }
+  /* Kodachrome: night */
+  :root:not([data-palette]):not([data-theme="light"]), :root[data-palette="kodachrome"]:not([data-theme="light"]) {
+    --paper: #0f0f0e; --paper-glow: #1c1a14; --panel: #1a1917; --raised: #24231f; --band: #3a2f0c;
+    --ink: #f1eee6; --ink-2: #c2bdb2; --muted: #928d83; --rule: #34322e; --rule-soft: #26241f;
+    --era: rgba(241, 238, 230, 0.025); --accent: #ffc233; --accent-soft: rgba(255, 194, 51, 0.14);
+    --accent-span: rgba(255, 194, 51, 0.22); --shadow: rgba(0, 0, 0, 0.6);
+  }
+  /* Print & Darkroom: night */
+  :root[data-palette="print"]:not([data-theme="light"]) {
     --paper: #0f0c0a; --paper-glow: #1d1611; --panel: #1a1612; --raised: #241e18; --band: #221c16;
     --ink: #efe7da; --ink-2: #c6bba9; --muted: #978c7c; --rule: #3a3129; --rule-soft: #2a231d;
     --era: rgba(239, 231, 218, 0.025); --accent: #ff8a3d; --accent-soft: rgba(255, 138, 61, 0.14);
     --accent-span: rgba(255, 138, 61, 0.22); --shadow: rgba(0, 0, 0, 0.6);
-    --f-optics: #3987e5; --f-chem: #d95926; --f-colour: #199e70; --f-cameras: #c98500;
-    --f-formats: #d55181; --f-control: #008300; --f-digital: #9085e9; --f-sharing: #e66767;
+  }
+  /* Cyanotype: night */
+  :root[data-palette="cyanotype"]:not([data-theme="light"]) {
+    --paper: #08121c; --paper-glow: #0f2031; --panel: #0f1b27; --raised: #16263a; --band: #152536;
+    --ink: #e3edf5; --ink-2: #aabdcc; --muted: #7d93a6; --rule: #263a4e; --rule-soft: #1a2a3a;
+    --era: rgba(227, 237, 245, 0.025); --accent: #7ab8f5; --accent-soft: rgba(122, 184, 245, 0.14);
+    --accent-span: rgba(122, 184, 245, 0.22); --shadow: rgba(0, 0, 0, 0.6);
+  }
+  /* Platinum & Selenium: night */
+  :root[data-palette="platinum"]:not([data-theme="light"]) {
+    --paper: #0e0e10; --paper-glow: #1a1a1e; --panel: #18181b; --raised: #222226; --band: #212125;
+    --ink: #ececee; --ink-2: #b9b7be; --muted: #8d8a93; --rule: #323238; --rule-soft: #242428;
+    --era: rgba(236, 236, 238, 0.025); --accent: #e48aa8; --accent-soft: rgba(228, 138, 168, 0.14);
+    --accent-span: rgba(228, 138, 168, 0.22); --shadow: rgba(0, 0, 0, 0.6);
   }
 }
+
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --f-optics: #3987e5; --f-chem: #d95926; --f-colour: #199e70; --f-cameras: #c98500;
+  --f-formats: #d55181; --f-control: #008300; --f-digital: #9085e9; --f-sharing: #e66767;
+}
+:root:not([data-palette])[data-theme="dark"], :root[data-palette="kodachrome"][data-theme="dark"] {
+  --paper: #0f0f0e; --paper-glow: #1c1a14; --panel: #1a1917; --raised: #24231f; --band: #3a2f0c;
+  --ink: #f1eee6; --ink-2: #c2bdb2; --muted: #928d83; --rule: #34322e; --rule-soft: #26241f;
+  --era: rgba(241, 238, 230, 0.025); --accent: #ffc233; --accent-soft: rgba(255, 194, 51, 0.14);
+  --accent-span: rgba(255, 194, 51, 0.22); --shadow: rgba(0, 0, 0, 0.6);
+}
+:root[data-palette="print"][data-theme="dark"] {
   --paper: #0f0c0a; --paper-glow: #1d1611; --panel: #1a1612; --raised: #241e18; --band: #221c16;
   --ink: #efe7da; --ink-2: #c6bba9; --muted: #978c7c; --rule: #3a3129; --rule-soft: #2a231d;
   --era: rgba(239, 231, 218, 0.025); --accent: #ff8a3d; --accent-soft: rgba(255, 138, 61, 0.14);
   --accent-span: rgba(255, 138, 61, 0.22); --shadow: rgba(0, 0, 0, 0.6);
-  --f-optics: #3987e5; --f-chem: #d95926; --f-colour: #199e70; --f-cameras: #c98500;
-  --f-formats: #d55181; --f-control: #008300; --f-digital: #9085e9; --f-sharing: #e66767;
+}
+:root[data-palette="cyanotype"][data-theme="dark"] {
+  --paper: #08121c; --paper-glow: #0f2031; --panel: #0f1b27; --raised: #16263a; --band: #152536;
+  --ink: #e3edf5; --ink-2: #aabdcc; --muted: #7d93a6; --rule: #263a4e; --rule-soft: #1a2a3a;
+  --era: rgba(227, 237, 245, 0.025); --accent: #7ab8f5; --accent-soft: rgba(122, 184, 245, 0.14);
+  --accent-span: rgba(122, 184, 245, 0.22); --shadow: rgba(0, 0, 0, 0.6);
+}
+:root[data-palette="platinum"][data-theme="dark"] {
+  --paper: #0e0e10; --paper-glow: #1a1a1e; --panel: #18181b; --raised: #222226; --band: #212125;
+  --ink: #ececee; --ink-2: #b9b7be; --muted: #8d8a93; --rule: #323238; --rule-soft: #242428;
+  --era: rgba(236, 236, 238, 0.025); --accent: #e48aa8; --accent-soft: rgba(228, 138, 168, 0.14);
+  --accent-span: rgba(228, 138, 168, 0.22); --shadow: rgba(0, 0, 0, 0.6);
 }

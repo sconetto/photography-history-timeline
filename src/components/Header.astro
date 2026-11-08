@@ -1,5 +1,6 @@
 ---
 import ThemeSwitch from './ThemeSwitch.astro';
+import PalettePicker from './PalettePicker.astro';
 const path = Astro.url.pathname;
 const nav = [
   ['/', 'Timeline'], ['/entries/', 'Entries'], ['/makers/', 'Makers'], ['/formats/', 'Formats'],
@@ -19,10 +20,11 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
       </ul>
     </nav>
     <div class="tools">
-      <a class="search-link" href="/search/" aria-label="Search">
+      <a class="search-link" href="/search/">
         <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="10.8" y1="10.8" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <span>Search</span>
+        <span class="lbl">Search</span>
       </a>
+      <PalettePicker />
       <ThemeSwitch />
     </div>
   </div>
@@ -38,7 +40,7 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
   nav a { display: inline-block; padding: 6px 9px; border-radius: 999px; border: 0; color: var(--ink-2); font-size: 13.5px; }
   nav a:hover { color: var(--ink); background: var(--rule-soft); }
   nav a[aria-current="page"] { color: var(--ink); background: var(--band); }
-  .tools { display: flex; align-items: center; gap: 10px; }
+  .tools { display: flex; align-items: center; gap: 8px; }
   .search-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 11px; font-size: 13px; }
   .search-link:hover { color: var(--ink); border-color: var(--muted); }
   @media (max-width: 900px) {
@@ -46,6 +48,10 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
     nav ul { flex-wrap: nowrap; }
     nav a { white-space: nowrap; }
     .tools { margin-left: auto; }
-    .search-link span { display: none; }
+  }
+  /* keep brand, nav and tools on one row on laptop widths: tools go icon-only (labels stay for screen readers) */
+  @media (max-width: 1520px) {
+    .search-link { padding: 7px 9px; }
+    .search-link .lbl, .tools :global(.cur-name) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   }
 </style>

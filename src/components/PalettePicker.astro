@@ -1,0 +1,72 @@
+---
+/** Colour palette picker. The palette is set on <html data-palette> before first paint (see Base.astro). */
+export const PALETTES = [
+  { id: 'kodachrome', name: 'Kodachrome', note: 'Film-box yellow and red', day: ['#f6f3ea', '#f6c344', '#b5121b'], night: ['#1a1917', '#3a2f0c', '#ffc233'] },
+  { id: 'print', name: 'Print & Darkroom', note: 'Baryta paper, amber safelight', day: ['#f3eee4', '#e9e2d4', '#a5461a'], night: ['#1a1612', '#221c16', '#ff8a3d'] },
+  { id: 'cyanotype', name: 'Cyanotype', note: 'Prussian blue on rag paper', day: ['#f5f8fa', '#dae4eb', '#1d4f91'], night: ['#0f1b27', '#152536', '#7ab8f5'] },
+  { id: 'platinum', name: 'Platinum & Selenium', note: 'Silver grey, selenium plum', day: ['#f8f7f5', '#e1dfdb', '#7a2e4a'], night: ['#18181b', '#212125', '#e48aa8'] },
+] as const;
+---
+<details class="palette">
+  <summary>
+    <span class="visually-hidden">Colour palette: </span>
+    <span class="cur" aria-hidden="true"><i style="background: var(--band)"></i><i style="background: var(--accent)"></i></span>
+    <span class="cur-name">Kodachrome</span>
+    <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+  </summary>
+  <fieldset>
+    <legend>Palette</legend>
+    {PALETTES.map((p) => (
+      <label>
+        <input type="radio" name="ptt-palette" value={p.id} checked={p.id === 'kodachrome'} />
+        {/* specimen swatches: fixed colours on purpose, showing the palette in both modes */}
+        <span class="chips" aria-hidden="true">
+          {[...p.day, ...p.night].map((c) => <i style={`background:${c}`}></i>)}
+        </span>
+        <span class="txt"><b>{p.name}</b><small>{p.note}</small></span>
+      </label>
+    ))}
+  </fieldset>
+</details>
+<script>
+  const root = document.documentElement;
+  const box = document.querySelector<HTMLDetailsElement>('details.palette')!;
+  const name = box.querySelector<HTMLElement>('.cur-name')!;
+  const radios = box.querySelectorAll<HTMLInputElement>('input[name="ptt-palette"]');
+  function apply(id: string, persist: boolean) {
+    const r = [...radios].find((x) => x.value === id) ?? radios[0];
+    r.checked = true;
+    root.setAttribute('data-palette', r.value);
+    name.textContent = r.closest('label')!.querySelector('b')!.textContent;
+    if (persist) { try { localStorage.setItem('ptt-palette', r.value); } catch { /* storage unavailable */ } }
+    document.dispatchEvent(new CustomEvent('ptt:theme'));
+  }
+  apply(root.getAttribute('data-palette') || 'kodachrome', false);
+  radios.forEach((r) => r.addEventListener('change', () => apply(r.value, true)));
+  // close on a pointer pick (keyboard users keep arrowing through the radios), outside click and Esc
+  box.addEventListener('click', (e) => { if ((e as PointerEvent).detail > 0 && (e.target as Element).closest('label')) box.open = false; });
+  document.addEventListener('click', (e) => { if (box.open && !box.contains(e.target as Node)) box.open = false; });
+  box.addEventListener('keydown', (e) => { if (e.key === 'Escape' && box.open) { box.open = false; box.querySelector('summary')!.focus(); } });
+</script>
+<style>
+  .palette { position: relative; }
+  summary { list-style: none; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; border: 1px solid var(--rule); border-radius: 999px; padding: 5px 10px 5px 7px; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+  summary::-webkit-details-marker { display: none; }
+  summary:hover, .palette[open] summary { color: var(--ink); border-color: var(--muted); }
+  summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cur { display: inline-flex; }
+  .cur i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--rule); }
+  .cur i + i { margin-left: -4px; }
+  fieldset { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; margin: 0; width: 272px; display: grid; gap: 2px; padding: 8px; background: var(--raised); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 12px 32px var(--shadow); }
+  legend { float: left; font: 500 10px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding: 4px 6px 8px; }
+  label { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; cursor: pointer; position: relative; }
+  label:hover { background: var(--rule-soft); }
+  label:has(input:checked) { background: var(--accent-soft); }
+  label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
+  input { position: absolute; opacity: 0; pointer-events: none; }
+  .chips { display: grid; grid-template-columns: repeat(3, 10px); grid-template-rows: 10px 10px; gap: 2px; padding: 3px; border-radius: 5px; border: 1px solid var(--rule); }
+  .chips i { border-radius: 2px; }
+  .txt { display: grid; gap: 1px; min-width: 0; }
+  .txt b { font-weight: 500; font-size: 13px; color: var(--ink); }
+  .txt small { font-size: 11.5px; color: var(--muted); }
+</style>
