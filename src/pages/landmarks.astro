@@ -4,19 +4,20 @@ import Base from '../layouts/Base.astro';
 import { content } from '../lib/content';
 import { url } from '../lib/url';
 const { milestones, entryById } = await content();
+const firstImg = milestones.findIndex((m) => m.data.image);
 ---
 <Base title="Landmarks" description="Landmark photographs and turning points in photography's history.">
   <p class="eyebrow">Turning points</p>
   <h1 class="page-title">Landmarks</h1>
   <p class="dek">The diamonds under the timeline: photographs and events that changed what photography could do or mean.</p>
   <ol class="lm">
-    {milestones.map((m) => {
+    {milestones.map((m, i) => {
       const e = m.data.entry ? entryById.get(m.data.entry.id) : undefined;
       return (
         <li id={m.id}>
           {m.data.image && (
             <figure>
-              <div class="mat"><Image src={m.data.image.src} alt={m.data.image.alt} widths={[400, 720, 1080]} sizes="(max-width: 820px) 100vw, 400px" loading="lazy" /></div>
+              <div class="mat"><Image src={m.data.image.src} alt={m.data.image.alt} widths={[400, 720, 1080]} sizes="(max-width: 820px) calc(100vw - 32px), 400px" loading={i === firstImg ? 'eager' : 'lazy'} fetchpriority={i === firstImg ? 'high' : undefined} /></div>
               <figcaption>{m.data.image.credit} · {m.data.image.license} · <a href={m.data.image.source} rel="noopener">source ↗</a></figcaption>
             </figure>
           )}

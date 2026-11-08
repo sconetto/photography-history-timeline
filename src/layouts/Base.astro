@@ -6,6 +6,10 @@ import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-sans/600.css';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
+// preloaded so the first paint already uses them: a late swap moved the header and title (CLS 0.24)
+import fontDisplay from '@fontsource/bodoni-moda/files/bodoni-moda-latin-400-normal.woff2?url';
+import fontDisplayItalic from '@fontsource/bodoni-moda/files/bodoni-moda-latin-400-italic.woff2?url';
+import fontBody from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2?url';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import Header from '../components/Header.astro';
@@ -31,6 +35,9 @@ const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d:
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <link rel="preload" href={fontDisplay} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontDisplayItalic} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontBody} as="font" type="font/woff2" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />

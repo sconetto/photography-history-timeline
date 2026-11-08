@@ -14,6 +14,9 @@ export async function getStaticPaths() {
 }
 interface Props { entry: Entry; prev?: Entry; next?: Entry }
 const { entry, prev, next } = Astro.props;
+// the hero is capped at min(56vh, 520px) tall, so a portrait photo shows far narrower than the column
+const heroAspect = entry.data.image ? entry.data.image.src.width / entry.data.image.src.height : 1;
+const heroSizes = `min(calc(100vw - 32px), 860px, calc(56vh * ${heroAspect.toFixed(3)}), ${Math.round(520 * heroAspect)}px)`;
 const d = entry.data;
 const { Content } = await render(entry);
 const { entryById, makerById, primerById, familyById, children } = await content();
@@ -40,7 +43,7 @@ const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
 
     {d.image && (
       <figure class="hero">
-        <div class="mat"><Image src={d.image.src} alt={d.image.alt} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 900px" /></div>
+        <div class="mat"><Image src={d.image.src} alt={d.image.alt} widths={[400, 640, 960, 1400]} sizes={heroSizes} loading="eager" fetchpriority="high" /></div>
         <figcaption>{d.image.credit} · {d.image.license} · <a href={d.image.source} rel="noopener">source ↗</a></figcaption>
       </figure>
     )}
