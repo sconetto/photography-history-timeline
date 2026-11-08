@@ -8,6 +8,9 @@ const link = z.tuple([z.string().min(1), https]);
 const year = z.number().int().min(-1000).max(2100);
 
 const FAMILIES = ['optics', 'chem', 'colour', 'cameras', 'formats', 'control', 'digital', 'sharing'] as const;
+/** merged: both became a new company · acquired: bought outright · sold: sold its camera/film business ·
+ *  renamed: same company, new name · stake: took a controlling stake, company carries on · revived: a new company restarted the product */
+export const MAKER_LINKS = ['merged', 'acquired', 'sold', 'renamed', 'stake', 'revived'] as const;
 export const COUNTRIES = ['Japan', 'USA', 'Germany', 'France', 'UK', 'Sweden', 'USSR', 'China', 'South Korea', 'Denmark', 'Austria', 'Netherlands'] as const;
 
 const imageSchema = (image: () => z.ZodType) =>
@@ -64,7 +67,13 @@ const makers = defineCollection({
     founded: year,
     ended: year.optional(),
     fate: z.string(),
-    successor: reference('makers').optional(),
+    // corporate lineage, drawn as connectors on the makers chart: this company → another, in a given year
+    links: z.array(z.object({
+      to: reference('makers'),
+      year,
+      kind: z.enum(MAKER_LINKS),
+      note: z.string().optional(),
+    })).default([]),
     wiki: z.string(),
     refs: z.array(link).default([]),
   }),

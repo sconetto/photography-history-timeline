@@ -19,7 +19,7 @@ export interface VEntry {
   body?: string;
   urls: string[];
 }
-export interface VMaker { id: string; founded: number; ended?: number; urls: string[] }
+export interface VMaker { id: string; founded: number; ended?: number; urls: string[]; links?: { to: string; year: number; kind: string }[] }
 export interface VInput { entries: VEntry[]; makers: VMaker[]; otherUrls: { where: string; url: string }[] }
 
 const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -48,8 +48,19 @@ export function validate({ entries, makers, otherUrls }: VInput): string[] {
   const cycle = findCycle(entries);
   if (cycle.length) problems.push(`lineage cycle: ${cycle.join(' → ')}`);
 
+  const makerIds = new Map(makers.map((m) => [m.id, m]));
   for (const m of makers) {
     if (m.ended != null && m.ended < m.founded) problems.push(`maker ${m.id}: ended before it was founded`);
+    for (const l of m.links ?? []) {
+      const t = makerIds.get(l.to);
+      if (!t) { problems.push(`maker ${m.id}: link to unknown maker "${l.to}"`); continue; }
+      if (l.to === m.id) problems.push(`maker ${m.id}: links to itself`);
+      if (l.year < m.founded || (m.ended != null && l.year > m.ended)) problems.push(`maker ${m.id}: ${l.kind} link in ${l.year} falls outside its life (${m.founded}–${m.ended ?? 'today'})`);
+      if (t.founded > l.year) problems.push(`maker ${m.id}: ${l.kind} → ${l.to} in ${l.year}, but ${l.to} was founded in ${t.founded}`);
+      if (t.ended != null && t.ended < l.year) problems.push(`maker ${m.id}: ${l.kind} → ${l.to} in ${l.year}, but ${l.to} ended in ${t.ended}`);
+      // a company that merged, was bought, sold out or renamed has left: its bar must stop at that year
+      if (['merged', 'acquired', 'renamed'].includes(l.kind) && m.ended !== l.year) problems.push(`maker ${m.id}: ${l.kind} in ${l.year}, so "ended" should be ${l.year}`);
+    }
     for (const u of m.urls) { const b = blocked(u); if (b) problems.push(`maker ${m.id}: link to blocked domain (${b}): ${u}`); }
   }
   for (const { where, url } of otherUrls) { const b = blocked(url); if (b) problems.push(`${where}: link to blocked domain (${b}): ${url}`); }

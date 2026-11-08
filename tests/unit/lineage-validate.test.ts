@@ -45,6 +45,19 @@ describe('validate', () => {
     const p = validate({ entries: [entry('a', 1800, [], { urls: ['https://morepdf.online/x'] })], makers: [], otherUrls: [] });
     expect(p.join()).toMatch(/blocked domain/);
   });
+  it('checks maker links: target exists, dates fit, and a merger ends the company', () => {
+    const ok = validate({ entries: [], otherUrls: [], makers: [
+      { id: 'konica', founded: 1873, ended: 2003, urls: [], links: [{ to: 'km', year: 2003, kind: 'merged' }] },
+      { id: 'km', founded: 2003, urls: [] }] });
+    expect(ok).toEqual([]);
+    const bad = validate({ entries: [], otherUrls: [], makers: [
+      { id: 'a', founded: 1900, urls: [], links: [{ to: 'ghost', year: 1950, kind: 'sold' }, { to: 'b', year: 1950, kind: 'merged' }] },
+      { id: 'b', founded: 1960, urls: [] }] }).join('\n');
+    expect(bad).toMatch(/unknown maker "ghost"/);
+    expect(bad).toMatch(/b was founded in 1960/);
+    expect(bad).toMatch(/"ended" should be 1950/);
+  });
+
   it('rejects makers that end before they start', () => {
     expect(validate({ entries: [], makers: [{ id: 'm', founded: 1950, ended: 1900, urls: [] }], otherUrls: [] }).join()).toMatch(/ended before/);
   });
