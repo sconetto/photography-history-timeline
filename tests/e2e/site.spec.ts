@@ -254,3 +254,123 @@ test.describe('phase 2 views', () => {
     await expect(page.locator('#gl-none')).toBeVisible();
   });
 });
+
+test.describe('timeline zoom', () => {
+  const readout = async (page: Page) => {
+    const t = (await page.locator('.nav-range').textContent()) ?? '';
+    const m = /^(.+?) – (.+?) · ([\d.]+)×$/.exec(t);
+    const yr = (s: string) => (s === 'today' ? new Date().getFullYear() : s.endsWith('BCE') ? -parseInt(s) : parseInt(s));
+    expect(m, t).not.toBeNull();
+    return { a: yr(m![1]), b: yr(m![2]), k: Number(m![3]) };
+  };
+  const chartW = (page: Page) => page.locator('#chart').evaluate((s) => Number(s.getAttribute('width')));
+  const chartH = (page: Page) => page.locator('#chart').evaluate((s) => Number(s.getAttribute('height')));
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => sessionStorage.clear());
+    await page.goto('/');
+    await expect(page.locator('.nav-range')).toContainText('1×');
+  });
+
+  test('zoom in widens the chart, narrows the window and keeps the centre', async ({ page }) => {
+    const w1 = await chartW(page), r1 = await readout(page);
+    const win1 = (await page.locator('.ov-win').boundingBox())!;
+    await page.locator('.nav-in').click();
+    await expect(page.locator('.nav-range')).toContainText('2×');
+    expect(await chartW(page)).toBeGreaterThan(w1 * 1.8);
+    expect((await page.locator('.ov-win').boundingBox())!.width).toBeLessThan(win1.width * 0.6);
+    const r2 = await readout(page);
+    expect(r2.a).toBeGreaterThan(r1.a);
+    expect(r2.b).toBeLessThan(r1.b);
+    await page.locator('.nav-all').click();
+    await expect(page.locator('.nav-range')).toContainText('· 1×');
+  });
+
+  test('jumping to an era fits it and makes the chart no taller', async ({ page }) => {
+    const h1 = await chartH(page);
+    await page.locator('#nav-era').selectOption({ label: 'Dry plate & snapshot (1880–1925)' });
+    await expect.poll(async () => (await readout(page)).k).toBeGreaterThan(3);
+    await page.waitForTimeout(700);
+    const r = await readout(page);
+    expect(r.a).toBeGreaterThanOrEqual(1860); expect(r.a).toBeLessThanOrEqual(1882);
+    expect(r.b).toBeGreaterThanOrEqual(1923); expect(r.b).toBeLessThanOrEqual(1945);
+    expect(await chartH(page)).toBeLessThan(h1);
+    const inView = await page.evaluate(() => {
+      const sc = document.querySelector('#scroller')!.getBoundingClientRect();
+      const d = document.querySelector('#chart a.item[data-id="kodak-camera"] circle.dot')!.getBoundingClientRect();
+      return d.left >= sc.left && d.right <= sc.right;
+    });
+    expect(inView).toBe(true);
+  });
+
+  test('brushing the overview zooms to that range; dragging the window pans', async ({ page }) => {
+    const ov = (await page.locator('.ov').boundingBox())!;
+    const y = ov.y + 30;
+    await page.mouse.move(ov.x + ov.width * 0.6, y);
+    await page.mouse.down();
+    await page.mouse.move(ov.x + ov.width * 0.7, y, { steps: 6 });
+    await page.mouse.up();
+    await expect.poll(async () => (await readout(page)).k).toBeGreaterThan(4);
+    await page.waitForTimeout(700);
+    const sl = await page.locator('#scroller').evaluate((s) => s.scrollLeft);
+    const win = (await page.locator('.ov-win').boundingBox())!;
+    await page.mouse.move(win.x + win.width / 2, win.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(win.x + win.width / 2 - 80, win.y + 20, { steps: 6 });
+    await page.mouse.up();
+    expect(await page.locator('#scroller').evaluate((s) => s.scrollLeft)).toBeLessThan(sl - 200);
+  });
+
+  test('keyboard: the window pans and the edges resize', async ({ page }) => {
+    await page.locator('.nav-in').click();
+    await page.waitForTimeout(700);
+    const sl = await page.locator('#scroller').evaluate((s) => s.scrollLeft);
+    await page.locator('.ov-win').focus();
+    await page.keyboard.press('PageDown');
+    await expect.poll(() => page.locator('#scroller').evaluate((s) => s.scrollLeft)).toBeGreaterThan(sl + 100);
+    const before = await page.locator('.ov-h.l').getAttribute('aria-valuetext');
+    await page.locator('.ov-h.l').focus();
+    await page.keyboard.press('Shift+ArrowRight');
+    await expect.poll(() => page.locator('.ov-h.l').getAttribute('aria-valuetext')).not.toBe(before);
+    await expect(page.locator('.ov-win')).toHaveAttribute('aria-valuetext', /^Showing .+ to .+$/);
+  });
+
+  test('ctrl + wheel over the chart zooms around the pointer', async ({ page }) => {
+    const box = (await page.locator('#scroller').boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.7, box.y + 200);
+    await page.keyboard.down('Control');
+    await page.mouse.wheel(0, -400);
+    await page.keyboard.up('Control');
+    await expect.poll(async () => (await readout(page)).k).toBeGreaterThan(2);
+  });
+
+  test('the range survives opening an entry and going back', async ({ page }) => {
+    await page.locator('#nav-era').selectOption({ label: 'Dry plate & snapshot (1880–1925)' });
+    await page.waitForTimeout(900);
+    const r = await readout(page);
+    await page.locator('#chart a.item[data-id="kodak-camera"]').click();
+    await expect(page).toHaveURL(/\/entries\/kodak-camera\/$/);
+    await page.goBack();
+    await expect(page.locator('.nav-range')).toContainText('×');
+    await page.waitForTimeout(400);
+    const back = await readout(page);
+    expect(back.k).toBeCloseTo(r.k, 0);
+    expect(Math.abs(back.a - r.a)).toBeLessThanOrEqual(3);
+  });
+});
+
+test.describe('timeline zoom on a phone', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 800 } });
+  test('the navigator sticks to the screen and the page never scrolls sideways', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#chart a.item[data-id="nikon-f"]').scrollIntoViewIfNeeded();
+    const nav = (await page.locator('#nav').boundingBox())!;
+    expect(nav.y + nav.height).toBeLessThanOrEqual(801);
+    expect(nav.y).toBeGreaterThan(400);
+    const sl = await page.locator('#scroller').evaluate((s) => s.scrollLeft);
+    await page.locator('.ov-win').focus();
+    await page.keyboard.press('End');
+    await expect.poll(() => page.locator('#scroller').evaluate((s) => s.scrollLeft)).toBeGreaterThan(sl);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  });
+});
