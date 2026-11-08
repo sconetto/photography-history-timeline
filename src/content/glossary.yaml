@@ -40,3 +40,90 @@ pixel:
 exposure:
   term: exposure
   def: "The total light that reaches the film or sensor, set by the aperture, the shutter time and the light itself."
+shutter-speed:
+  term: shutter speed
+  def: "How long the shutter lets light reach the film or sensor, such as 1/125 second. Halving it halves the light and freezes faster movement."
+focal-plane-shutter:
+  term: focal-plane shutter
+  def: "A shutter of two curtains just in front of the film or sensor. The gap between them sweeps across the frame, so lenses need no shutter of their own."
+leaf-shutter:
+  term: leaf shutter
+  def: "A shutter of thin blades inside the lens that open from the centre and close again. It is quiet and syncs with flash at any speed."
+iso:
+  term: ISO
+  def: "The standard scale of sensitivity for film and sensors. Doubling the ISO number means half as much light is needed for the same exposure."
+stop:
+  term: stop
+  def: "A doubling or halving of light. Opening the aperture one stop, slowing the shutter one stop or doubling the ISO all give one stop more exposure."
+ev:
+  term: exposure value (EV)
+  def: "One number for every pairing of aperture and shutter speed that gives the same exposure. EV 15 is about sunny daylight at ISO 100; each step is one stop."
+depth-of-field:
+  term: depth of field
+  def: "The range of distances that look sharp in a photograph. It gets deeper with a smaller aperture, a shorter lens, a smaller format or a more distant subject."
+focal-length:
+  term: focal length
+  def: "The distance from a lens to the image it forms of something far away, in millimetres. Longer focal lengths magnify more and see a narrower angle."
+angle-of-view:
+  term: angle of view
+  def: "How wide a scene a lens takes in on a given format. It depends on both the focal length and the size of the film or sensor."
+dynamic-range:
+  term: dynamic range
+  def: "The span between the darkest and brightest tones a film or sensor can record with detail, usually given in stops."
+grain:
+  term: grain
+  def: "The visible clumps of silver or dye in a film image. Faster films have larger crystals, so they show more grain."
+developer:
+  term: developer
+  def: "A chemical bath that turns the latent image into visible metallic silver by reducing the exposed silver halide crystals."
+orthochromatic:
+  term: orthochromatic
+  def: "Sensitive to blue and green light but not red. Early plates and many films were orthochromatic, so red lips and skies came out wrong."
+panchromatic:
+  term: panchromatic
+  def: "Sensitive to all visible colours, including red, so a black-and-white print shows tones close to how the eye sees them."
+reversal-film:
+  term: reversal film
+  def: "Film processed to give a positive image on the film itself, such as a slide, instead of a negative to print from."
+colour-temperature:
+  term: colour temperature
+  def: "The colour of light described as the temperature of a glowing body, in kelvin: candlelight is about 1,900 K, daylight about 5,500 K, shade bluer still."
+white-balance:
+  term: white balance
+  def: "Correcting for the colour of the light so that white things look white. Digital cameras do it in processing; film needed filters or a different film."
+raw:
+  term: raw file
+  def: "The sensor's readings saved almost untouched, before demosaicing, white balance and compression, so they can be processed later with more latitude."
+demosaicing:
+  term: demosaicing
+  def: "Working out a full colour for every pixel from a sensor whose pixels each see only red, green or blue through a colour filter array."
+noise:
+  term: noise
+  def: "Random speckle in a digital image. Most comes from the uneven arrival of photons (shot noise), so it is worst where little light falls."
+megapixel:
+  term: megapixel
+  def: "One million pixels. A sensor's megapixel count measures how many points it samples, not how sharp or good its pictures are."
+pentaprism:
+  term: pentaprism
+  def: "A five-sided glass prism above an SLR's focusing screen that turns the image right way up and right way round for eye-level viewing."
+lens-mount:
+  term: lens mount
+  def: "The fitting that joins interchangeable lenses to a camera body. A maker's mount often outlives many generations of cameras."
+zoom-lens:
+  term: zoom lens
+  def: "A lens whose focal length can change while the image stays in focus, by moving groups of elements inside it."
+aberration:
+  term: aberration
+  def: "Any way a lens fails to bring light to a perfect point: blur at the edges, colour fringes, curved or distorted lines. Lens design is the art of cancelling them."
+diffraction:
+  term: diffraction
+  def: "The spreading of light as it passes an edge. It sets a limit on sharpness at very small apertures, and on how fine a pinhole image can be."
+reciprocity-failure:
+  term: reciprocity failure
+  def: "Film's loss of sensitivity in very long or very short exposures, so that halving the light and doubling the time no longer gives the same result."
+contact-print:
+  term: contact print
+  def: "A print made by laying the negative directly on the paper, so the print is exactly the size of the negative."
+enlarger:
+  term: enlarger
+  def: "A projector that throws the image of a negative onto paper at a larger size. It let small negatives make big prints."
