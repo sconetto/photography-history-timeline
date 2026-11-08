@@ -53,19 +53,67 @@ const rowY = new Map(rows.map((r) => [r.m.id, r.y]));
 const ticks: number[] = [];
 for (const t of [1840, 1860, 1880, 1900, 1920, 1940, 1960, 1970, 1980, 1990, 2000, 2010, 2020]) if (X(now) - X(t) > 72 && (!ticks.length || X(t) - X(ticks.at(-1)!) > 40)) ticks.push(t);
 const famName = new Map(families.map((f) => [f.id, f.data.name]));
-const conn = makers.flatMap((m) => linksOf(m).map((l) => ({ from: m, ...l })));
 const f1 = (n: number) => Math.round(n * 10) / 10;
+const span = (m: Maker) => `${m.data.founded}–${m.data.ended ?? 'today'}`;
+const BAR = 6;
+
+// ---- connectors: one per (target, year, kind), so two companies merging into one share a trunk
+const KIND: Record<string, { label: string; short: string }> = {
+  merged: { label: 'Merger', short: 'merged' }, acquired: { label: 'Takeover', short: 'bought' },
+  sold: { label: 'Business sold', short: 'sold' }, renamed: { label: 'New name', short: 'renamed' },
+  stake: { label: 'Controlling stake', short: 'stake' }, revived: { label: 'Revival', short: 'revived' },
+};
+const list = (names: string[]) => names.length < 2 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+type Conn = { to: Maker; year: number; kind: string; from: Maker[]; notes: string[] };
+const groups = new Map<string, Conn>();
+for (const m of makers) for (const l of linksOf(m)) {
+  const key = `${l.to}|${l.year}|${l.kind}`;
+  const g = groups.get(key) ?? groups.set(key, { to: makerById.get(l.to)!, year: l.year, kind: l.kind, from: [], notes: [] }).get(key)!;
+  g.from.push(m);
+  if (l.note) g.notes.push(l.note);
+}
+const sentence = (c: Conn) => {
+  const A = list(c.from.map((m) => shortName(m.data.name))), B = shortName(c.to.data.name), a0 = c.from[0];
+  switch (c.kind) {
+    case 'merged': return c.from.length > 1 ? `${A} merged to form ${B}.` : `${A} merged into ${B}.`;
+    case 'acquired': return `${B} bought ${A}${a0.data.ended === c.year ? ', which ended as a separate company' : ''}.`;
+    case 'sold': return `${A} sold its business to ${B}${a0.data.ended === c.year ? ' and left photography' : ''}.`;
+    case 'renamed': return `${A} was renamed ${B}.`;
+    case 'stake': return `${B} took a controlling stake in ${A}, which carried on${a0.data.ended ? ` until ${a0.data.ended}` : ' under its own name'}.`;
+    case 'revived': return `${B} revived what ${A} had stopped making.`;
+    default: return '';
+  }
+};
+const conns = [...groups.values()].map((c) => {
+  const x = X(c.year), yb = rowY.get(c.to.id)!;
+  const ys = c.from.map((m) => rowY.get(m.id)!);
+  const far = ys.reduce((a, b) => (Math.abs(b - yb) > Math.abs(a - yb) ? b : a));
+  const dir = yb > far ? 1 : -1;
+  return {
+    ...c, x, yb, ys, dir,
+    trunk: `M${f1(x)} ${far} V${f1(yb - dir * (BAR / 2 + 3))}`,
+    labelY: yb - dir * (ROW / 2) + 3.5,
+    tip: {
+      k: `${c.year} · ${KIND[c.kind].label}`,
+      t: `${list(c.from.map((m) => shortName(m.data.name)))} → ${shortName(c.to.data.name)}`,
+      b: sentence(c),
+      n: c.notes.join(' · '),
+      m: [...c.from, c.to].map((m) => `${shortName(m.data.name)} ${span(m)}`).join(' · '),
+      go: `Open ${shortName(c.to.data.name)}`,
+    },
+  };
+});
 ---
 <Base title="Makers" description="The companies behind photography, from Voigtländer and Kodak to Canon, Nikon, Sony and DJI: lifespans by country, with mergers, takeovers and successors." wide>
   <p class="eyebrow">Companies</p>
   <h1 class="page-title">Makers</h1>
-  <p class="dek">Who built photography's cameras, lenses and film, grouped by country. Each bar runs from a company's founding to today, or to the year it left photography. Dots are its entries on the timeline. Curved lines show where one company merged into, was bought by, or handed its cameras to another.</p>
+  <p class="dek">Who built photography's cameras, lenses and film, grouped by country. Each bar runs from a company's founding to today, or to the year it left photography. Dots are its entries on the timeline. Arrows show where one company merged into, was bought by, or handed its business to another; hover or tap any of them for the story.</p>
 
   <div class="legend" aria-hidden="true">
-    <span><svg width="34" height="10"><line x1="2" y1="5" x2="32" y2="5" class="bar" /></svg>Lifespan</span>
-    <span><svg width="34" height="10"><line x1="2" y1="5" x2="26" y2="5" class="bar" /><line x1="27" y1="1" x2="27" y2="9" class="cap" /></svg>Left photography</span>
-    {Object.entries(LINK_TEXT).filter(([k]) => conn.some((c) => c.kind === k)).map(([k, t]) => (
-      <span><svg width="34" height="10"><line x1="2" y1="5" x2="32" y2="5" class={`lk lk-${k}`} /></svg>{t.out.replace(/ (by|to|into)$/, '').toLowerCase().replace(/^./, (c) => c.toUpperCase())}</span>
+    <span><svg width="30" height="10"><line x1="3" y1="5" x2="27" y2="5" class="bar" /></svg>Lifespan</span>
+    <span><svg width="30" height="10"><line x1="3" y1="5" x2="22" y2="5" class="bar" /><line x1="25" y1="0" x2="25" y2="10" class="cap" /></svg>Left photography</span>
+    {Object.keys(KIND).filter((k) => conns.some((c) => c.kind === k)).map((k) => (
+      <span><svg width="16" height="22" viewBox="0 0 16 22"><circle cx="8" cy="4" r="3" class="node" /><path d="M8 4 V15" class={`trunk k-${k}`} /><path d="M4 14 L8 20 L12 14 Z" class="head" /></svg>{KIND[k].label}</span>
     ))}
     <span><svg width="14" height="10"><circle cx="7" cy="5" r="4.5" class="dot-key" /></svg>Entry on the timeline, coloured by family</span>
   </div>
@@ -79,44 +127,49 @@ const f1 = (n: number) => Math.round(n * 10) / 10;
       </g>
       {heads.map((h) => <text class="country" x="12" y={h.y}>{h.name}</text>)}
       {rows.map(({ m, y }) => {
-        const d = m.data, end = d.ended ?? now, list = makerEntries.get(m.id) ?? [];
+        const d = m.data, end = d.ended ?? now, ents = [...(makerEntries.get(m.id) ?? [])].sort((a, b) => a.data.year - b.data.year);
+        // dots for entries a year or two apart would hide each other: keep each at least 11 units from the last
+        const dotX: number[] = [];
+        ents.forEach((e, i) => dotX.push(Math.max(X(e.data.year), i ? dotX[i - 1] + 11 : -Infinity)));
+        const barTip = { k: `${d.country} · ${d.ended ? `${d.founded}–${d.ended}` : `since ${d.founded}`}`, t: d.name, b: d.fate, m: ents.length ? `${ents.length} ${ents.length === 1 ? 'entry' : 'entries'} on the timeline` : '', go: 'Open the maker' };
         return (
           <g class="row" data-id={m.id}>
             <rect class="band" x="4" y={y - ROW / 2 + 1} width={W - 8} height={ROW - 2} rx="6" />
-            <a href={url(`/makers/${m.id}/`)} class="nm">
-              <text x="14" y={y + 4.5}>{shortName(d.name)}</text>
-            </a>
+            <a href={url(`/makers/${m.id}/`)} class="nm"><text x="14" y={y + 4.5}>{shortName(d.name)}</text></a>
             <text class="yrs" x={LABEL} y={y + 4} text-anchor="end">{d.founded}–{d.ended ?? ''}</text>
             <line class="bar" x1={X(d.founded)} x2={X(end)} y1={y} y2={y} />
-            {d.ended ? <line class="cap" x1={X(end)} x2={X(end)} y1={y - 6} y2={y + 6} /> : <path class="tip" d={`M${f1(X(end) + 2)} ${y - 4} l5 4 -5 4`} />}
-            {d.founded < Y0 && <text class="early" x={X0 + 4} y={y - 6}>← {d.founded}</text>}
-            {list.map((e) => (
-              <a href={url(`/entries/${e.id}/`)} class="pdot">
-                <title>{`${e.data.label}, ${e.data.ds} · ${famName.get(e.data.fam)}`}</title>
-                <circle cx={X(e.data.year)} cy={y} r="5.5" style={`fill: var(--f-${e.data.fam})`} />
+            {d.ended ? <line class="cap" x1={X(end)} x2={X(end)} y1={y - 7} y2={y + 7} /> : <path class="tip-arrow" d={`M${f1(X(end) + 3)} ${y - 4} l5 4 -5 4`} />}
+            {d.founded < Y0 && <text class="early" x={X0 + 4} y={y - 7}>← {d.founded}</text>}
+            <a href={url(`/makers/${m.id}/`)} class="bar-link" tabindex="-1" aria-hidden="true" data-tip={JSON.stringify(barTip)}>
+              <rect class="bar-hit" x={X(d.founded) - 4} y={y - 8} width={X(end) - X(d.founded) + 8} height="16" />
+            </a>
+            {ents.map((e, i) => (
+              <a href={url(`/entries/${e.id}/`)} class="pdot" aria-label={`${e.data.label}, ${e.data.ds}`}
+                data-tip={JSON.stringify({ k: `${e.data.ds} · ${famName.get(e.data.fam)}`, t: e.data.title, b: e.data.summary, go: 'Open the entry' })}>
+                <circle cx={f1(dotX[i])} cy={y} r="5.5" style={`fill: var(--f-${e.data.fam})`} />
               </a>
             ))}
           </g>
         );
       })}
       <g class="links">
-        {conn.map((c) => {
-          const x = X(c.year), ya = rowY.get(c.from.id)!, yb = rowY.get(c.to)!;
-          const dir = yb > ya ? 1 : -1, bend = 16 + Math.min(40, Math.abs(yb - ya) / 8);
-          return (
-            <g class={`link lk-${c.kind}`} data-from={c.from.id} data-to={c.to}>
-              <title>{`${shortName(c.from.data.name)}: ${LINK_TEXT[c.kind].out.toLowerCase()} ${shortName(makerById.get(c.to)!.data.name)}, ${c.year}${c.note ? ` (${c.note})` : ''}`}</title>
-              <path class={`lk lk-${c.kind}`} d={`M${f1(x)} ${ya} C${f1(x + bend)} ${ya + dir * 8} ${f1(x + bend)} ${yb - dir * 8} ${f1(x + 3)} ${yb - dir * 4}`} />
-              <circle class="lk-from" cx={x} cy={ya} r="3" />
-              <path class="lk-head" d={`M${f1(x + 3)} ${yb - dir * 4} l-6 ${-dir * 3} M${f1(x + 3)} ${yb - dir * 4} l${2} ${-dir * 7}`} />
-              <path class="lk-hit" d={`M${f1(x)} ${ya} C${f1(x + bend)} ${ya + dir * 8} ${f1(x + bend)} ${yb - dir * 8} ${f1(x + 3)} ${yb - dir * 4}`} />
-            </g>
-          );
-        })}
+        {conns.map((c) => (
+          <a href={url(`/makers/${c.to.id}/`)} class={`link k-${c.kind}`} data-from={c.from.map((m) => m.id).join(' ')} data-to={c.to.id}
+            aria-label={`${KIND[c.kind].short} ${c.year}: ${c.tip.b}`} data-tip={JSON.stringify(c.tip)}>
+            <path class="hit" d={c.trunk} />
+            <path class={`trunk k-${c.kind}`} d={c.trunk} />
+            <path class="head" d={`M${f1(c.x - 4.5)} ${f1(c.yb - c.dir * (BAR / 2 + 9))} L${f1(c.x)} ${f1(c.yb - c.dir * (BAR / 2 + 2))} L${f1(c.x + 4.5)} ${f1(c.yb - c.dir * (BAR / 2 + 9))} Z`} />
+            {c.ys.map((y) => <circle class="node" cx={c.x} cy={y} r="3.6" />)}
+            <text class="lk-label" x={c.x + 8} y={c.labelY}>{KIND[c.kind].short} {c.year}</text>
+          </a>
+        ))}
       </g>
     </svg>
   </div>
-  <p class="hint">Scroll sideways on small screens. Hover a line or a dot for details.</p>
+  <div id="mk-tip" class="mk-tip" role="tooltip" hidden>
+    <p class="tk"></p><p class="tt"></p><p class="tb"></p><p class="tn"></p><p class="tm"></p><p class="tg"></p>
+  </div>
+  <p class="hint">Hover a bar, a dot or an arrow for details; on touch, tap once to preview and again to open. The chart scrolls sideways on small screens.</p>
 
   <h2 class="sec">All makers</h2>
   <div class="all">
@@ -131,9 +184,55 @@ const f1 = (n: number) => Math.round(n * 10) / 10;
       </section>
     ))}
   </div>
+  <script>
+    type Tip = { k: string; t: string; b: string; n?: string; m?: string; go: string };
+    const card = document.getElementById('mk-tip')!;
+    const part = (c: string) => card.querySelector<HTMLElement>(`.${c}`)!;
+    let lastPT = 'mouse', armed: Element | null = null, shown: Element | null = null;
+    document.addEventListener('pointerdown', (e) => { lastPT = e.pointerType; }, { capture: true });
+
+    function show(el: Element, at?: { x: number; y: number }) {
+      const d = JSON.parse((el as HTMLElement).dataset.tip!) as Tip;
+      part('tk').textContent = d.k; part('tt').textContent = d.t; part('tb').textContent = d.b;
+      part('tn').textContent = d.n ?? ''; part('tn').hidden = !d.n;
+      part('tm').textContent = d.m ?? ''; part('tm').hidden = !d.m;
+      part('tg').textContent = `${lastPT === 'touch' ? 'Tap again' : 'Click'} to ${d.go.charAt(0).toLowerCase()}${d.go.slice(1)} →`;
+      card.hidden = false;
+      shown = el;
+      el.closest('svg')!.classList.add('hovering');
+      el.classList.add('hot');
+      // place above the pointer (or the element), flip below when there is no room, keep inside the viewport
+      const r = el.getBoundingClientRect();
+      const ax = at?.x ?? r.left + r.width / 2, ayTop = at ? at.y - 14 : r.top - 8, ayBot = at ? at.y + 18 : r.bottom + 8;
+      const cw = card.offsetWidth, ch = card.offsetHeight;
+      const left = Math.max(12, Math.min(innerWidth - cw - 12, ax - cw / 2));
+      const top = ayTop - ch > 8 ? ayTop - ch : Math.min(innerHeight - ch - 8, ayBot);
+      card.style.left = `${left}px`; card.style.top = `${top}px`;
+    }
+    function hide() {
+      card.hidden = true;
+      shown?.classList.remove('hot'); shown?.closest('svg')?.classList.remove('hovering');
+      shown = null;
+    }
+    document.querySelectorAll<SVGElement>('svg.mk [data-tip]').forEach((el) => {
+      el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') show(el, { x: e.clientX, y: e.clientY }); });
+      el.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' && shown === el) show(el, { x: e.clientX, y: e.clientY }); });
+      el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') hide(); });
+      el.addEventListener('focus', () => show(el));
+      el.addEventListener('blur', hide);
+      el.addEventListener('click', (e) => {
+        if (lastPT !== 'touch' || armed === el) return; // mouse, keyboard, or a second tap: follow the link
+        e.preventDefault(); armed = el; show(el);
+      });
+    });
+    document.addEventListener('click', (e) => { if (lastPT === 'touch' && !(e.target as Element).closest?.('svg.mk [data-tip]')) { armed = null; hide(); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
+    document.querySelector('.chart-wrap')!.addEventListener('scroll', hide, { passive: true });
+    addEventListener('scroll', () => { if (lastPT !== 'touch') hide(); }, { passive: true });
+  </script>
 </Base>
 <style>
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 12px; }
+  .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 12px; }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .legend svg { overflow: visible; }
   .dot-key { fill: var(--f-cameras); }
@@ -144,28 +243,52 @@ const f1 = (n: number) => Math.round(n * 10) / 10;
   .grid .now { stroke: var(--accent); stroke-dasharray: 2 3; opacity: .7; }
   .grid .now-t { font: 500 9.5px/1 var(--font-mono); letter-spacing: .12em; fill: var(--accent); }
   .country { font: 500 10.5px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; fill: var(--muted); }
-  .band { fill: transparent; }
+  .band { fill: transparent; transition: fill .15s; }
   .row:hover .band, .row:focus-within .band { fill: var(--rule-soft); }
   .nm text { font-size: 13.5px; fill: var(--ink); }
   .nm:hover text, .nm:focus-visible text { fill: var(--accent); text-decoration: underline; }
   .nm:focus-visible { outline: none; }
   .yrs { font: 400 10.5px/1 var(--font-mono); fill: var(--muted); }
   .bar, .legend .bar { stroke: var(--ink-2); stroke-opacity: .42; stroke-width: 6; stroke-linecap: round; }
-  .cap, .legend .cap { stroke: var(--ink-2); stroke-width: 1.6; }
-  .tip { fill: none; stroke: var(--ink-2); stroke-opacity: .6; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .cap, .legend .cap { stroke: var(--ink-2); stroke-width: 1.6; stroke-linecap: round; }
+  .tip-arrow { fill: none; stroke: var(--ink-2); stroke-opacity: .6; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
   .early { font: 400 9.5px/1 var(--font-mono); fill: var(--muted); }
-  .pdot circle { stroke: var(--panel); stroke-width: 2; }
-  .pdot:hover circle, .pdot:focus-visible circle { stroke: var(--ink); }
-  .lk { fill: none; stroke: var(--accent); stroke-width: 1.6; }
-  .legend .lk { stroke-width: 1.8; }
-  .lk-sold { stroke-dasharray: 6 3.5; }
-  .lk-stake { stroke-dasharray: 1.5 3; stroke-linecap: round; }
-  .lk-revived { stroke-dasharray: 7 3 1.5 3; }
-  .lk-renamed { stroke: var(--ink-2); }
-  .lk-from { fill: var(--accent); }
-  .lk-head { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; }
-  .lk-hit { fill: none; stroke: transparent; stroke-width: 12; }
-  .link:hover .lk, .link:hover .lk-head { stroke-width: 2.6; }
+  .bar-hit { fill: transparent; }
+  .bar-link:hover ~ .bar, .row:has(.bar-link:hover) .bar { stroke-opacity: .7; }
+  .pdot { cursor: pointer; }
+  .pdot circle { stroke: var(--panel); stroke-width: 2; transition: r .12s; }
+  .pdot.hot circle, .pdot:focus-visible circle { stroke: var(--ink); r: 7; }
+  .pdot:focus-visible, .link:focus-visible { outline: none; }
+
+  /* connectors: a straight drop from the old company's bar to the new one, a node where it leaves, an arrowhead where it lands */
+  .trunk, .legend .trunk { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; }
+  .k-sold.trunk { stroke-dasharray: 5 3.5; }
+  .k-stake.trunk { stroke-dasharray: 0.1 3.6; stroke-width: 2.2; }
+  .k-revived.trunk { stroke-dasharray: 6 3 0.1 3; }
+  .k-renamed.trunk { stroke: var(--ink-2); }
+  .head, .legend .head { fill: var(--accent); }
+  .node, .legend .node { fill: var(--accent); stroke: var(--panel); stroke-width: 2; }
+  .hit { fill: none; stroke: transparent; stroke-width: 16; }
+  .link { cursor: pointer; }
+  .lk-label { font: 500 9.5px/1 var(--font-mono); fill: var(--accent); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; opacity: .85; }
+  .link.hot .trunk, .link:focus-visible .trunk { stroke-width: 2.6; }
+  .link.hot .lk-label, .link:focus-visible .lk-label { opacity: 1; }
+  .link.hot .node, .link:focus-visible .node { r: 5; }
+  /* while one thing is hovered, quieten the other connectors */
+  .mk.hovering .link:not(.hot) { opacity: .35; }
+  .link { transition: opacity .15s; }
+
+  .mk-tip { position: fixed; z-index: 50; width: min(320px, calc(100vw - 24px)); background: var(--raised); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; box-shadow: 0 12px 32px var(--shadow); pointer-events: none; display: grid; gap: 4px; }
+  .mk-tip[hidden] { display: none; }
+  .mk-tip p { margin: 0; }
+  .mk-tip .tk { font: 500 10.5px/1.3 var(--font-mono); letter-spacing: .06em; color: var(--accent); }
+  .mk-tip .tt { font: 400 18px/1.2 var(--font-display); color: var(--ink); }
+  .mk-tip .tb { font-size: 13.5px; color: var(--ink-2); }
+  .mk-tip .tn { font-size: 12.5px; color: var(--ink-2); font-style: italic; }
+  .mk-tip .tm { font: 400 11px/1.4 var(--font-mono); color: var(--muted); }
+  .mk-tip .tg { font: 500 11px/1 var(--font-mono); color: var(--accent); margin-top: 4px; }
+  @media (prefers-reduced-motion: reduce) { .band, .link, .pdot circle { transition: none; } }
+
   .hint { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
   .sec { font: 400 30px/1.1 var(--font-display); margin: 44px 0 12px; }
   .all { columns: 3 300px; column-gap: 32px; }
