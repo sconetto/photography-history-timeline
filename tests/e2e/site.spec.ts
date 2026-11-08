@@ -108,7 +108,7 @@ test('palette defaults to Kodachrome and persists across reloads', async ({ page
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'kodachrome');
   await page.locator('details.palette summary').click();
-  await page.getByText('Cyanotype', { exact: true }).click();
+  await page.locator('details.palette').getByText('Cyanotype', { exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'cyanotype');
   await expect(page.locator('details.palette')).not.toHaveAttribute('open', '');
   await page.reload();
