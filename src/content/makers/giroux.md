@@ -1,0 +1,10 @@
+---
+name: "Giroux"
+country: France
+founded: 1799
+ended: 1867
+fate: "A Paris shop for fine goods; its camera business lasted only a few years after 1839."
+wiki: Alphonse_Giroux
+refs: []
+---
+Alphonse Giroux ran a Paris shop selling art supplies, furniture and luxury goods. In 1839 a contract with Louis Daguerre, a relative by marriage, made it the first company to sell a camera: the [[giroux-camera|Giroux daguerreotype camera]], sold as a complete kit.

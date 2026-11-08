@@ -1,0 +1,38 @@
+---
+title: "JPEG compression"
+label: "JPEG"
+fam: digital
+kind: standard
+year: 1992
+ds: "1992"
+date: "1992 (ITU T.81)"
+side: invention
+impact: xl
+status: inuse
+summary: "A standard for compressing photographs to a tenth of their size or less, by discarding detail the eye barely sees. It made storing and sending pictures practical."
+today: "The most common image format in the world; newer formats such as HEIF and AVIF compete with it."
+parents: [{ id: first-digital-image, kind: built }]
+makers: []
+primers: []
+people: []
+moments: [["1986", "Joint Photographic Experts Group formed"], ["1992", "Standard approved"], ["1990s", "Web browsers and digital cameras adopt it"]]
+specs: [["Method", "Discrete cosine transform on 8 × 8 blocks"], ["Ratio", "Typically 10:1 with little visible loss"], ["Colour", "8 bits per channel"]]
+wiki: JPEG
+refs: []
+---
+
+## How it began
+
+Digital pictures were huge for 1980s disks and modems. The Joint Photographic Experts Group, set up by standards bodies, worked from 1986 on a common way to compress photos. The standard was approved in 1992.
+
+## How it works
+
+The image is split into 8×8 pixel blocks. Each block is turned into a set of frequencies, and fine detail and colour, which the eye notices least, are stored with less precision or dropped. The rest is packed tightly.
+
+## Why it mattered
+
+Pictures shrank enough to fit on memory cards and travel over the internet. Digital cameras, the web, email and phones all rely on it.
+
+## Limits and what replaced it
+
+Each save loses some detail, and heavy compression shows blocks. Photographers who want everything use [[raw-dng|raw files]].

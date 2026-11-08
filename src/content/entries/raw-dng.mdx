@@ -1,0 +1,38 @@
+---
+title: "Raw files and DNG"
+label: "Raw / DNG"
+fam: digital
+kind: standard
+year: 2004
+ds: "2004"
+date: "September 2004 (Adobe DNG)"
+side: invention
+impact: m
+status: inuse
+summary: "Raw files keep the sensor’s data before processing, so photographers can decide on white balance and tones later. Adobe’s DNG offered an open format for them."
+today: "Every serious camera, and many phones, can save raw; DNG is used by many phones and some cameras."
+parents: [{ id: jpeg, kind: replaced }, { id: bayer-filter, kind: built }]
+makers: []
+primers: []
+people: []
+moments: [["1990s", "Professional digital cameras save raw data in their own formats"], ["2003", "Adobe Camera Raw"], ["2004", "DNG published"], ["2016", "Phones begin to save raw DNG"]]
+specs: [["Content", "Unprocessed sensor values, often 12–14 bits"], ["Processing", "Demosaicing, white balance, tone curve, done later"]]
+wiki: Raw_image_format
+refs: []
+---
+
+## How it began
+
+Cameras turn sensor data into a [[jpeg|JPEG]] using fixed settings. Professional cameras could save the unprocessed data, the [[g:raw|raw]] file, in formats specific to each maker. In 2004 Adobe published DNG, an open format for raw data.
+
+## How it works
+
+The raw file holds the values from every photosite under the [[bayer-filter|Bayer filter]], usually 12 or 14 bits each. Software does the [[g:demosaicing|demosaicing]], sets the [[g:white-balance|white balance]] and applies a tone curve, and the photographer can redo these at any time.
+
+## Why it mattered
+
+Raw editing became the digital darkroom: more room to correct exposure and colour, without losing quality. DNG was intended to keep files readable when makers dropped formats.
+
+## Limits and what replaced it
+
+Files are large and need processing. Most makers still use their own formats; phones mix raw data with [[computational-photography|computational processing]].
