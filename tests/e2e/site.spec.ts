@@ -72,6 +72,31 @@ test('theme persists across reloads', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
+test('palette defaults to Kodachrome and persists across reloads', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'kodachrome');
+  await page.locator('details.palette summary').click();
+  await page.getByText('Cyanotype', { exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'cyanotype');
+  await expect(page.locator('details.palette')).not.toHaveAttribute('open', '');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'cyanotype');
+  await expect(page.locator('details.palette .cur-name')).toHaveText('Cyanotype');
+});
+
+const PALETTES = ['kodachrome', 'print', 'cyanotype', 'platinum'];
+for (const pal of PALETTES) for (const mode of ['day', 'night']) {
+  test(`no serious axe violations: ${pal} ${mode}`, async ({ page }) => {
+    await page.addInitScript(([p, m]) => { localStorage.setItem('ptt-palette', p); localStorage.setItem('ptt-theme', m); }, [pal, mode]);
+    for (const path of ['/', '/entries/daguerreotype/']) {
+      await page.goto(path);
+      const { violations } = await new AxeBuilder({ page }).analyze();
+      const serious = violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
+      expect(serious.map((v) => `${path} ${v.id}: ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')}`)).toEqual([]);
+    }
+  });
+}
+
 for (const path of ['/', '/entries/', '/entries/daguerreotype/', '/makers/', '/formats/', '/physics/', '/glossary/', '/landmarks/', '/sources/']) {
   test(`no serious axe violations on ${path}`, async ({ page }) => {
     await page.goto(path);
