@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import FrameToScale from '../../components/FrameToScale.astro';
+import CameraSilhouette from '../../components/CameraSilhouette.astro';
 import ExposureBar from '../../components/ExposureBar.astro';
 import { content, SIDE_TEXT, IMPACT_TEXT, STATUS_TEXT, KIND_UP, KIND_DOWN, WIKI, type Entry } from '../../lib/content';
 import { url } from '../../lib/url';
@@ -39,7 +40,7 @@ const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
 
     {d.image && (
       <figure class="hero">
-        <Image src={d.image.src} alt={d.image.alt} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 900px" />
+        <div class="mat"><Image src={d.image.src} alt={d.image.alt} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 900px" /></div>
         <figcaption>{d.image.credit} · {d.image.license} · <a href={d.image.source} rel="noopener">source ↗</a></figcaption>
       </figure>
     )}
@@ -59,6 +60,7 @@ const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
       </div>
 
       <aside class="side" aria-label="Key facts">
+        {d.cameraType && <section class="box"><p class="kicker">Camera type</p><CameraSilhouette type={d.cameraType} /></section>}
         {d.specs.length > 0 && (
           <section class="box">
             <p class="kicker">Spec card</p>
@@ -111,7 +113,9 @@ const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
   .when-big { font: 500 14px/1.4 var(--font-mono); color: var(--accent); margin: 0 0 14px; }
   .lead { font-size: 19px; line-height: 1.55; max-width: 62ch; color: var(--ink); margin: 0; }
   .hero { margin: 26px 0 0; max-width: 900px; }
-  .hero :global(img) { border-radius: 12px; display: block; width: 100%; height: auto; }
+  /* a print on a mat: whole picture shown, never taller than about half the screen */
+  .hero .mat { display: flex; justify-content: center; padding: clamp(10px, 2vw, 18px); border-radius: 12px; background: color-mix(in srgb, var(--ink) 8%, var(--paper)); }
+  .hero :global(img) { display: block; width: auto; max-width: 100%; height: auto; max-height: min(56vh, 520px); object-fit: contain; box-shadow: 0 1px 4px rgb(0 0 0 / .25); }
   .hero figcaption { font-size: 12px; color: var(--muted); margin-top: 8px; }
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 40px; margin-top: 18px; }
   @media (max-width: 900px) { .cols { grid-template-columns: minmax(0, 1fr); } }
