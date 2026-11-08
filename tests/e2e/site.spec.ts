@@ -431,3 +431,31 @@ test.describe('physics widgets', () => {
     await expect(page).toHaveURL(/\/physics\/sensors\/$/);
   });
 });
+
+test.describe('images and camera silhouettes', () => {
+  test('landmarks show credited public-domain photographs', async ({ page }) => {
+    await page.goto('/landmarks/');
+    const figs = page.locator('.lm figure');
+    expect(await figs.count()).toBeGreaterThanOrEqual(13);
+    const first = page.locator('#boulevard-du-temple figure');
+    await expect(first.locator('img')).toHaveAttribute('alt', /boulevard/i);
+    await expect(first.locator('figcaption')).toContainText('Public domain');
+    await expect(first.getByRole('link', { name: /source/ })).toHaveAttribute('href', /^https:\/\/commons\.wikimedia\.org\//);
+    expect(await first.locator('img').evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+  });
+
+  test('an entry hero image fits the screen', async ({ page }) => {
+    await page.goto('/entries/autochrome/');
+    const img = page.locator('.hero img');
+    await expect(img).toBeVisible();
+    expect((await img.boundingBox())!.height).toBeLessThanOrEqual(560);
+  });
+
+  test('camera entries show their silhouette on the page and in the hover card', async ({ page }) => {
+    await page.goto('/entries/rolleiflex/');
+    await expect(page.locator('.camsil figcaption')).toHaveText('Twin-lens reflex (TLR)');
+    await page.goto('/');
+    await page.locator('a[href$="/entries/nikon-f/"]').first().focus();
+    await expect(page.locator('.card .cam-thumb svg')).toBeVisible();
+  });
+});
