@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import { content, STATUS_TEXT, SIDE_TEXT } from '../../lib/content';
+import { url } from '../../lib/url';
+const { entries, families } = await content();
+const famName = new Map(families.map((f) => [f.id, f.data.name]));
+---
+<Base title="All entries" description="Every discovery, camera, format and process on the timeline, by family and date.">
+  <p class="eyebrow">Index</p>
+  <h1 class="page-title">All entries</h1>
+  <p class="dek">{entries.length} entries, oldest first. Filter by family, or open the <a href={url('/')}>timeline</a> to see how they connect.</p>
+  <div class="chips" role="group" aria-label="Filter by family">
+    <button type="button" class="chip" data-fam="all" aria-pressed="true">All</button>
+    {families.map((f) => <button type="button" class="chip" data-fam={f.id} aria-pressed="false"><span class="sw" style={`background: var(--f-${f.id})`} />{f.data.name}</button>)}
+  </div>
+  <ol class="cards">
+    {entries.map((e) => (
+      <li data-fam={e.data.fam}>
+        <a href={url(`/entries/${e.id}/`)}>
+          <span class="when">{e.data.ds}</span>
+          <span class="t">{e.data.title}</span>
+          <span class="s">{e.data.summary}</span>
+          <span class="m"><span class="sw" style={`background: var(--f-${e.data.fam})`} />{famName.get(e.data.fam)} · {SIDE_TEXT[e.data.side]} · {STATUS_TEXT[e.data.status]}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+  <script>
+    const chips = document.querySelectorAll<HTMLButtonElement>('.chips .chip');
+    const items = document.querySelectorAll<HTMLLIElement>('.cards li');
+    function set(fam: string) {
+      chips.forEach((c) => c.setAttribute('aria-pressed', c.dataset.fam === fam ? 'true' : 'false'));
+      items.forEach((li) => { li.hidden = fam !== 'all' && li.dataset.fam !== fam; });
+    }
+    chips.forEach((c) => c.addEventListener('click', () => { set(c.dataset.fam!); history.replaceState(null, '', c.dataset.fam === 'all' ? location.pathname : `?fam=${c.dataset.fam}`); }));
+    const q = new URLSearchParams(location.search).get('fam');
+    if (q) set(q);
+  </script>
+</Base>
+<style is:global>
+  .dek { max-width: 74ch; color: var(--ink-2); margin: 0 0 18px; }
+</style>
+<style>
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+  .cards a { display: grid; gap: 6px; height: 100%; padding: 16px 18px; border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); color: var(--ink-2); }
+  .cards a:hover { border-color: var(--muted); }
+  .when { font: 500 12px/1 var(--font-mono); color: var(--accent); }
+  .t { font: 400 21px/1.2 var(--font-display); color: var(--ink); }
+  .s { font-size: 13.5px; line-height: 1.5; }
+  .m { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); margin-top: 2px; }
+</style>

@@ -1,0 +1,146 @@
+---
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import FrameToScale from '../../components/FrameToScale.astro';
+import ExposureBar from '../../components/ExposureBar.astro';
+import { content, SIDE_TEXT, IMPACT_TEXT, STATUS_TEXT, KIND_UP, KIND_DOWN, WIKI, type Entry } from '../../lib/content';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const { entries } = await content();
+  return entries.map((entry, i) => ({ params: { id: entry.id }, props: { entry, prev: entries[i - 1], next: entries[i + 1] } }));
+}
+interface Props { entry: Entry; prev?: Entry; next?: Entry }
+const { entry, prev, next } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+const { entryById, makerById, primerById, familyById, children } = await content();
+const fam = familyById.get(d.fam)!;
+const parents = d.parents.map((p) => ({ e: entryById.get(p.id.id)!, kind: p.kind }));
+const kids = (children.get(entry.id) ?? []).map((k) => ({ e: entryById.get(k.id)!, kind: k.kind }));
+const makers = d.makers.map((m) => makerById.get(m.id)!);
+const primers = d.primers.map((p) => primerById.get(p.id)!);
+const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
+---
+<Base title={d.title} description={d.summary}>
+  <article class="entry" data-pagefind-meta={`family:${fam.data.name}`}>
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href={url(`/#${entry.id}`)}>Timeline</a> <span aria-hidden="true">›</span>
+      <a href={url(`/entries/?fam=${d.fam}`)}>{fam.data.name}</a>
+    </nav>
+    <div class="meta">
+      <span class="fam-tag"><span class="sw" style={`background: var(--f-${d.fam})`} />{fam.data.name}</span>
+      <span>{SIDE_TEXT[d.side]}</span><span>{STATUS_TEXT[d.status]}</span><span>Impact: {IMPACT_TEXT[d.impact].toLowerCase()}</span>
+    </div>
+    <h1>{d.title}</h1>
+    <p class="when-big">{d.date}</p>
+    <p class="lead">{d.summary}</p>
+
+    {d.image && (
+      <figure class="hero">
+        <Image src={d.image.src} alt={d.image.alt} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 900px" />
+        <figcaption>{d.image.credit} · {d.image.license} · <a href={d.image.source} rel="noopener">source ↗</a></figcaption>
+      </figure>
+    )}
+
+    <div class="cols">
+      <div class="body prose">
+        <Content />
+        <h2>Today</h2>
+        <p>{d.today}</p>
+        <h2 id="sources">Sources</h2>
+        <ul class="refs">
+          {d.primary && <li><span class="k">Primary source</span> <a href={d.primary[1]} rel="noopener">{d.primary[0]} ↗</a></li>}
+          {d.refs.map((r) => <li><a href={r[1]} rel="noopener">{r[0]} ↗</a></li>)}
+          <li><a href={WIKI + d.wiki} rel="noopener">Wikipedia: {wikiTitle} ↗</a></li>
+          {d.sourceNotes.map((n) => <li class="note">{n}</li>)}
+        </ul>
+      </div>
+
+      <aside class="side" aria-label="Key facts">
+        {d.specs.length > 0 && (
+          <section class="box">
+            <p class="kicker">Spec card</p>
+            <dl class="specs">{d.specs.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+            {d.frame && <FrameToScale w={d.frame[0]} h={d.frame[1]} />}
+            {d.exposure && <><p class="kicker">Typical exposure</p><ExposureBar seconds={d.exposure.seconds} note={d.exposure.note} /></>}
+          </section>
+        )}
+        {makers.length > 0 && (
+          <section class="box"><p class="kicker">Makers</p>
+            <ul class="plain">{makers.map((m) => <li><a href={url(`/makers/${m.id}/`)}>{m.data.name}</a> <span class="muted">· {m.data.country}</span></li>)}</ul>
+          </section>
+        )}
+        {d.people.length > 0 && (
+          <section class="box"><p class="kicker">Key people</p>
+            <ul class="plain people">{d.people.map(([n, y, r]) => <li><b>{n}</b>{y && <span class="yrs">{y}</span>}{r && <span class="role"> · {r}</span>}</li>)}</ul>
+          </section>
+        )}
+        {d.moments.length > 0 && (
+          <section class="box"><p class="kicker">Key moments</p>
+            <ol class="moments">{d.moments.map(([w, t]) => <li><span class="yr">{w}</span><span>{t}</span></li>)}</ol>
+          </section>
+        )}
+        <section class="box"><p class="kicker">Built on</p>
+          {parents.length ? <div class="rels">{parents.map(({ e, kind }) => <a class="chip" href={url(`/entries/${e.id}/`)}><span class="sw" style={`background: var(--f-${e.data.fam})`} />{e.data.label}<span class="k">{KIND_UP[kind]}</span></a>)}</div> : <p class="none">The start of its line on this timeline.</p>}
+          <p class="kicker">What came after</p>
+          {kids.length ? <div class="rels">{kids.map(({ e, kind }) => <a class="chip" href={url(`/entries/${e.id}/`)}><span class="sw" style={`background: var(--f-${e.data.fam})`} />{e.data.label}<span class="k">{KIND_DOWN[kind]}</span></a>)}</div> : <p class="none">Nothing later on this timeline yet.</p>}
+        </section>
+        {primers.length > 0 && (
+          <section class="box"><p class="kicker">The physics</p>
+            <ul class="plain">{primers.map((p) => <li><a href={url(`/physics/${p.id}/`)}>{p.data.title}</a></li>)}</ul>
+          </section>
+        )}
+        <a class="see" href={url(`/#${entry.id}`)}>See it on the timeline →</a>
+      </aside>
+    </div>
+
+    <nav class="pager" aria-label="Previous and next entries">
+      {prev ? <a href={url(`/entries/${prev.id}/`)}><span class="k">← Earlier · {prev.data.ds}</span>{prev.data.title}</a> : <span />}
+      {next ? <a class="r" href={url(`/entries/${next.id}/`)}><span class="k">Later · {next.data.ds} →</span>{next.data.title}</a> : <span />}
+    </nav>
+  </article>
+</Base>
+<style>
+  .crumbs { font-size: 13px; color: var(--muted); }
+  .crumbs a { color: var(--ink-2); border-bottom-color: var(--rule); }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font: 400 12px/1.3 var(--font-mono); color: var(--muted); margin-top: 18px; }
+  .fam-tag { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--rule); border-radius: 999px; padding: 4px 10px; color: var(--ink-2); font-family: var(--font-body); font-size: 12px; }
+  h1 { font: 400 clamp(34px, 5vw, 56px)/1.05 var(--font-display); margin: 14px 0 8px; text-wrap: balance; max-width: 22ch; }
+  .when-big { font: 500 14px/1.4 var(--font-mono); color: var(--accent); margin: 0 0 14px; }
+  .lead { font-size: 19px; line-height: 1.55; max-width: 62ch; color: var(--ink); margin: 0; }
+  .hero { margin: 26px 0 0; max-width: 900px; }
+  .hero :global(img) { border-radius: 12px; display: block; width: 100%; height: auto; }
+  .hero figcaption { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 40px; margin-top: 18px; }
+  @media (max-width: 900px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+  .body :global(h2) { font: 400 clamp(23px, 3vw, 28px)/1.15 var(--font-display); }
+  .body :global(p) { font-size: 16.5px; line-height: 1.65; }
+  .refs { list-style: none; padding: 0; margin: 0; display: grid; gap: 7px; font-size: 14px; }
+  .refs .k, .rels .k { color: var(--muted); font-size: 11.5px; }
+  .refs .note { color: var(--muted); font-size: 13px; }
+  .side { display: grid; gap: 14px; align-content: start; padding-top: 30px; }
+  .box { border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); padding: 4px 16px 16px; }
+  .box .kicker:first-child { margin-top: 14px; }
+  .specs { display: grid; gap: 8px; margin: 0 0 12px; }
+  .specs dt { font: 500 10px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+  .specs dd { margin: 0; font-size: 13.5px; color: var(--ink); }
+  .plain { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; font-size: 14px; color: var(--ink-2); }
+  .people b { color: var(--ink); font-weight: 600; }
+  .yrs { font: 400 11.5px/1 var(--font-mono); color: var(--muted); margin-left: 6px; }
+  .role { font-size: 13px; }
+  .muted { color: var(--muted); }
+  .moments { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .moments li { display: grid; grid-template-columns: 6.6em minmax(0, 1fr); gap: 10px; font-size: 13.5px; color: var(--ink-2); line-height: 1.45; }
+  .moments .yr { font: 500 11.5px/1.7 var(--font-mono); color: var(--accent); }
+  .rels { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rels .chip { padding: 6px 10px; font-size: 12.5px; color: var(--ink-2); }
+  .none { color: var(--muted); font-size: 13px; margin: 0; }
+  .see { justify-self: start; font: 500 13px/1 var(--font-mono); border: 1px solid var(--accent-soft); border-radius: 999px; padding: 9px 14px; }
+  .pager { display: flex; justify-content: space-between; gap: 16px; margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule-soft); }
+  .pager a { display: grid; gap: 3px; border: 0; color: var(--ink); font: 400 18px/1.25 var(--font-display); max-width: 45%; }
+  .pager a.r { text-align: right; }
+  .pager .k { font: 500 11px/1 var(--font-mono); color: var(--muted); letter-spacing: .06em; }
+  .pager a:hover { color: var(--accent); }
+</style>

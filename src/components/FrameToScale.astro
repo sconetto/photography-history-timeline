@@ -1,0 +1,26 @@
+---
+/** A frame drawn to scale inside the 36 × 24 mm full-frame outline (or outside it, if larger). */
+import { cropFactor } from '../lib/optics';
+interface Props { w: number; h: number; label?: string }
+const { w, h, label } = Astro.props;
+const maxW = Math.max(36, w), maxH = Math.max(24, h);
+const S = 150 / maxW; // px per mm
+const VW = 170, VH = Math.round(maxH * S + 26);
+const cx = VW / 2, cy = (VH - 14) / 2;
+const c = cropFactor(w, h);
+---
+<figure class="fts">
+  <svg viewBox={`0 0 ${VW} ${VH}`} width={VW} height={VH} role="img" aria-label={`${w} × ${h} mm compared with the 36 × 24 mm full frame; crop factor ${c.toFixed(2)}`}>
+    <rect class="ff" x={cx - 18 * S} y={cy - 12 * S} width={36 * S} height={24 * S} rx="2" />
+    <rect class="this" x={cx - (w / 2) * S} y={cy - (h / 2) * S} width={w * S} height={h * S} rx="2" />
+    <text class="lab" x={cx} y={VH - 3} text-anchor="middle">{label ?? `${w} × ${h} mm`} · crop {c.toFixed(2)}×</text>
+  </svg>
+  <figcaption>Dashed: 35mm full frame, 36 × 24 mm.</figcaption>
+</figure>
+<style>
+  .fts { margin: 0; }
+  .ff { fill: none; stroke: var(--muted); stroke-dasharray: 3 3; }
+  .this { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+  .lab { font: 500 10.5px/1 var(--font-mono); fill: var(--ink-2); }
+  figcaption { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+</style>

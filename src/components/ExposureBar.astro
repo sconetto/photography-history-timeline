@@ -1,0 +1,26 @@
+---
+/** Where an exposure time sits on a log scale from 1/8000 s to 1 day. */
+interface Props { seconds: number; note: string }
+const { seconds, note } = Astro.props;
+const lo = Math.log10(1 / 8000), hi = Math.log10(86400);
+const pct = ((Math.log10(seconds) - lo) / (hi - lo)) * 100;
+const marks: [number, string][] = [[1 / 1000, '1/1000 s'], [1, '1 s'], [60, '1 min'], [3600, '1 h']];
+const at = (s: number) => ((Math.log10(s) - lo) / (hi - lo)) * 100;
+---
+<div class="xb" role="img" aria-label={`Typical exposure: ${note}`}>
+  <div class="track">
+    {marks.map(([s]) => <span class="tick" style={`left: ${at(s)}%`} />)}
+    <span class="pin" style={`left: ${pct}%`} />
+  </div>
+  <div class="labels">{marks.map(([s, l]) => <span style={`left: ${at(s)}%`}>{l}</span>)}</div>
+  <p>{note}</p>
+</div>
+<style>
+  .xb { margin-top: 4px; }
+  .track { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--band), var(--rule)); }
+  .tick { position: absolute; top: -2px; width: 1px; height: 12px; background: var(--muted); opacity: .5; }
+  .pin { position: absolute; top: -4px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--panel); }
+  .labels { position: relative; height: 16px; font: 400 10px/16px var(--font-mono); color: var(--muted); }
+  .labels span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+  p { font-size: 12.5px; color: var(--ink-2); margin: 6px 0 0; }
+</style>
