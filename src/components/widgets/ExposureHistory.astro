@@ -15,7 +15,7 @@ const TICKS: [number, string][] = [[1 / 1000, '1/1000 s'], [1 / 30, '1/30 s'], [
 ---
 <figure class="wg" id="wg-exh">
   <div class="wg-head"><p class="kicker">From hours to a five-thousandth of a second</p></div>
-  <svg class="wide" viewBox={`0 0 720 ${H}`} role="img" aria-label="Typical exposure times in sunlight, from heliography (about eight hours, 1826) to a phone camera (about 1/5000 second). The table below lists every value.">
+  <svg class="wide" viewBox={`0 0 720 ${H}`} role="group" aria-label="Typical exposure times in sunlight, from heliography (about eight hours, 1826) to a phone camera (about 1/5000 second). The table below lists every value.">
     {TICKS.map(([s, t]) => (
       <g>
         <line class="ln-soft" x1={x(s)} x2={x(s)} y1={T - 8} y2={H - 26} />

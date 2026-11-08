@@ -173,6 +173,9 @@ const famName = new Map(families.map((f) => [f.id, f.data.name]));
   .chart-shell :global(.ms .gem) { fill: var(--ink-2); stroke: var(--panel); stroke-width: 1.5; transition: fill .15s; }
   .chart-shell :global(.ms .ms-hit) { fill: transparent; }
   .chart-shell :global(.ms:hover .gem), .chart-shell :global(.ms:focus-visible .gem) { fill: var(--accent); }
+  /* focus is shown by shape as well as colour: a ring around the diamond */
+  .chart-shell :global(.ms:focus-visible) { outline: none; }
+  .chart-shell :global(.ms:focus-visible .gem) { stroke: var(--ink); stroke-width: 2.5; }
   .chart-shell :global(.ms-line) { stroke: var(--muted); stroke-dasharray: 2 4; opacity: .5; }
   .chart-shell :global(.edge) { fill: none; stroke: var(--ink-2); stroke-width: 1; opacity: .2; transition: opacity .2s; }
   .chart-shell :global(.edge.enabled) { stroke-dasharray: 4 4; }
