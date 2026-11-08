@@ -3,6 +3,10 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
+  "license": "GPL-3.0-or-later",
+  "author": "João Pedro Sconetto <work@sconetto.me>",
+  "homepage": "https://ptt.sconetto.me",
+  "repository": { "type": "git", "url": "git+https://github.com/sconetto/photography-history-timeline.git" },
   "description": "Photography Through Time: an interactive star-chart timeline and knowledge base of photography's history, physics, formats and makers.",
   "engines": {
     "node": ">=22.23.4"
