@@ -1,0 +1,79 @@
+---
+/**
+ * The timeline's overview navigator: zoom buttons, an era jump, the visible range, and a mini timeline with a
+ * viewfinder window. Behaviour lives in src/scripts/timeline/navigator.ts; it sticks to the bottom of the screen
+ * while the chart is in view.
+ */
+interface Props { eras: { name: string; a: number; b: number }[]; now: number }
+const { eras, now } = Astro.props;
+const yr = (y: number) => (y < 0 ? `${-y} BCE` : y > now ? 'today' : String(y));
+---
+<div class="nav" id="nav" role="group" aria-label="Timeline zoom and overview">
+  <div class="nav-bar">
+    <div class="nav-zoom">
+      <button type="button" class="nav-out" aria-label="Zoom out"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8" /></svg></button>
+      <button type="button" class="nav-in" aria-label="Zoom in"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8M6 2v8" /></svg></button>
+      <button type="button" class="nav-all">Show all</button>
+    </div>
+    <label class="visually-hidden" for="nav-era">Zoom to an era</label>
+    <select id="nav-era" class="nav-era">
+      <option value="">Jump to era…</option>
+      <option value="all">All of time</option>
+      {eras.map((e) => <option value={`${e.a}:${e.b}`}>{e.name} ({yr(e.a)}–{yr(e.b)})</option>)}
+    </select>
+    <span class="nav-range" aria-hidden="true"></span>
+    <span class="nav-live visually-hidden" aria-live="polite"></span>
+  </div>
+  <div class="ov">
+    <svg class="ov-svg" height="74" aria-hidden="true"></svg>
+    <div class="ov-shade l" aria-hidden="true"></div>
+    <div class="ov-shade r" aria-hidden="true"></div>
+    <div class="ov-brush" hidden aria-hidden="true"></div>
+    <div class="ov-win" role="scrollbar" tabindex="0" aria-orientation="horizontal" aria-controls="scroller" aria-label="Visible part of the timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+    <span class="ov-h l" role="slider" tabindex="0" aria-label="Start of visible range" aria-valuemin={-400} aria-valuemax={now} aria-valuenow={-400}></span>
+    <span class="ov-h r" role="slider" tabindex="0" aria-label="End of visible range" aria-valuemin={-400} aria-valuemax={now} aria-valuenow={now}></span>
+  </div>
+  <p class="nav-hint">Drag across the overview to zoom into a period, or ctrl-scroll / pinch on the chart.</p>
+</div>
+
+<style>
+  .nav { position: sticky; bottom: 0; z-index: 4; background: color-mix(in srgb, var(--panel) 94%, transparent); backdrop-filter: blur(6px); border-top: 1px solid var(--rule); padding: 8px 16px 6px; }
+  .nav[hidden] { display: none; }
+  .nav-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .nav-zoom { display: inline-flex; gap: 4px; }
+  .nav-zoom button { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 28px; padding: 0 10px; border: 1px solid var(--rule); border-radius: 999px; background: var(--panel); color: var(--ink-2); font: 500 12px/1 var(--font-body); cursor: pointer; }
+  .nav-zoom button:hover:not(:disabled) { color: var(--ink); border-color: var(--muted); }
+  .nav-zoom button:disabled { opacity: .4; cursor: default; }
+  .nav-zoom svg path { stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; fill: none; }
+  .nav-era { height: 28px; width: 210px; max-width: 100%; border: 1px solid var(--rule); border-radius: 999px; padding: 0 10px; background: var(--panel); color: var(--ink-2); font: 400 12px/1 var(--font-body); }
+  .nav-range { margin-left: auto; font: 500 11.5px/1 var(--font-mono); color: var(--ink-2); white-space: nowrap; }
+  .nav button:focus-visible, .nav-era:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .ov { position: relative; height: 74px; margin-top: 6px; touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair; }
+  .ov-svg { display: block; position: absolute; inset: 0; }
+  .ov :global(.ov-era) { fill: var(--era); }
+  .ov :global(.ov-band) { fill: var(--band); stroke: var(--rule); stroke-width: .6; }
+  .ov :global(.ov-tick) { font: 400 9.5px/1 var(--font-mono); fill: var(--muted); }
+  .ov :global(.ov-dot) { stroke: var(--panel); stroke-width: .6; }
+  .ov :global(.ov-dot.dim) { opacity: .22; }
+  .ov :global(.ov-sel) { fill: none; stroke: var(--accent); stroke-width: 1.4; }
+  .ov :global(.ov-gem) { fill: var(--ink-2); }
+  .ov-shade { position: absolute; top: 0; height: 60px; background: color-mix(in srgb, var(--paper) 62%, transparent); pointer-events: none; }
+  .ov-shade.l { left: 10px; }
+  .ov-brush { position: absolute; top: 0; height: 60px; background: var(--accent-soft); border: 1px dashed var(--accent); border-radius: 4px; pointer-events: none; }
+  .ov-win { position: absolute; top: 0; height: 60px; border: 2px solid var(--accent); border-radius: 5px; cursor: grab; box-sizing: border-box; }
+  .dragging .ov-win { cursor: grabbing; }
+  .ov-win:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  /* edge handles sit beside the window (not inside it, so they aren't nested controls); the script positions them */
+  .ov-h { position: absolute; top: 0; height: 60px; width: 24px; margin-left: -12px; cursor: ew-resize; touch-action: none; z-index: 1; }
+  .ov-h::after { content: ""; position: absolute; left: 50%; top: 50%; width: 5px; height: 20px; transform: translate(-50%, -50%); border-radius: 3px; background: var(--accent); box-shadow: 0 0 0 1.5px var(--panel); }
+  .ov-h:focus-visible { outline: none; }
+  .ov-h:focus-visible::after { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--ink); }
+  .nav-hint { margin: 2px 0 0; font-size: 11.5px; color: var(--muted); }
+  @media (max-width: 560px) {
+    .nav { padding: 8px 10px 6px; }
+    .nav-range { margin-left: 0; width: 100%; order: -1; }
+    .nav-era { flex: 1; width: auto; min-width: 0; }
+    .nav-hint { display: none; }
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import TimelineNavigator from '../components/TimelineNavigator.astro';
 import { content, STATUS_TEXT, SIDE_TEXT } from '../lib/content';
 import { url } from '../lib/url';
 import type { Payload } from '../scripts/timeline/types';
@@ -92,9 +93,9 @@ const famName = new Map(families.map((f) => [f.id, f.data.name]));
       </table>
     </div>
     <div class="card" id="card" role="tooltip" hidden></div>
+    <TimelineNavigator eras={payload.eras} now={payload.now} />
     <div class="caption" id="caption">
       <span id="scale-note">Time is stretched toward the present, so the crowded last two centuries have room.</span>
-      <span class="scroll-hint">Scroll sideways to see the whole timeline.</span>
     </div>
   </section>
 
@@ -119,13 +120,19 @@ const famName = new Map(families.map((f) => [f.id, f.data.name]));
   .legend { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 16px; font-size: 12.5px; color: var(--ink-2); align-items: center; }
   .legend .item { display: inline-flex; align-items: center; gap: 8px; }
   .legend svg { flex: none; overflow: visible; }
-  .chart-shell { position: relative; margin-top: 16px; overflow: hidden; }
-  .scroller { overflow-x: auto; overscroll-behavior-x: contain; }
+  /* clip, not hidden: hidden would make the shell a scroll container and stop the navigator sticking to the screen */
+  .chart-shell { position: relative; margin-top: 16px; overflow: clip; }
+  .scroller { overflow-x: auto; overscroll-behavior-x: contain; --fl: 0px; --fr: 0px;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fl), #000 calc(100% - var(--fr)), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 var(--fl), #000 calc(100% - var(--fr)), transparent); }
+  /* fade the edge where there is more timeline to scroll to */
+  .scroller.more-l { --fl: 28px; }
+  .scroller.more-r { --fr: 28px; }
+  .scroller.can-pan { cursor: grab; }
+  .scroller.panning { cursor: grabbing; user-select: none; -webkit-user-select: none; }
   .caption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px; padding: 10px 16px 12px; border-top: 1px solid var(--rule-soft); font-size: 12px; color: var(--muted); }
-  .scroll-hint { display: none; }
-  @media (max-width: 1080px) { .scroll-hint { display: inline; } }
   /* Without JS, only the list shows. */
-  :global(html:not(.js)) #scroller, :global(html:not(.js)) .toggles, :global(html:not(.js)) #chips, :global(html:not(.js)) .legend, :global(html:not(.js)) .caption { display: none; }
+  :global(html:not(.js)) #scroller, :global(html:not(.js)) .toggles, :global(html:not(.js)) #chips, :global(html:not(.js)) .legend, :global(html:not(.js)) .caption, :global(html:not(.js)) #nav { display: none; }
 
   .listwrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 720px; }

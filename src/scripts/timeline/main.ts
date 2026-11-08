@@ -4,6 +4,9 @@
  */
 import { Chart, type Hooks } from './chart';
 import { lineage } from '../../lib/lineage';
+import { frac, yearAt } from '../../lib/scale';
+import { clampK, kForRange, scrollFor, visible, ZMAX } from '../../lib/zoom';
+import { Navigator } from './navigator';
 import type { Frame, Item, Payload } from './types';
 
 const data = JSON.parse(document.getElementById('timeline-data')!.textContent!) as Payload;
@@ -35,7 +38,12 @@ const state = {
   hoverFam: null as string | null,
   sel: null as string | null,
   armed: null as string | null, // touch: the star whose card is showing; a second tap opens it
+  zoom: { k: 1, c: 0.5 },
 };
+try {
+  const z = JSON.parse(sessionStorage.getItem('ptt-zoom') ?? 'null');
+  if (z && Number.isFinite(z.k) && Number.isFinite(z.c)) state.zoom = { k: clampK(z.k), c: Math.min(1, Math.max(0, z.c)) };
+} catch { /* storage unavailable */ }
 const savedView = load('ptt-view');
 if (savedView === 'lanes' || savedView === 'list') state.view = savedView;
 
@@ -166,43 +174,142 @@ function applyState() {
     });
   }
   timeChart.drawSpan(sel);
+  nav.redraw();
   document.querySelectorAll<HTMLButtonElement>('#chips .chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.fam === state.fam ? 'true' : 'false'));
   document.querySelectorAll<HTMLTableRowElement>('#tbody tr').forEach((tr) => { tr.hidden = state.fam !== 'all' && tr.dataset.fam !== state.fam; });
 }
 
-// ---------- drawing, scale and views ----------
-function drawTime(s = state.s) { timeChart.draw(timeChart.layout(scroller.clientWidth || shell.clientWidth, s, widths), measure); }
-function drawLanes(s = state.s) { laneChart.draw(laneChart.layout(laneScroller.clientWidth || shell.clientWidth, s, widths), measure); }
+// ---------- drawing, zoom, scale and views ----------
+// Zoom is semantic: the chart is laid out k times wider and scrolled. state.zoom.c is the axis fraction at the
+// centre of the view, kept across redraws, view switches and scale changes; it lives in sessionStorage so Back
+// from an entry page returns to the same range.
+const active = () => (state.view === 'lanes' ? { c: laneChart, sc: laneScroller } : { c: timeChart, sc: scroller });
+const vw = (sc: HTMLElement) => sc.clientWidth || shell.clientWidth;
+function layoutFor(c: Chart, sc: HTMLElement, k = state.zoom.k, s = state.s) { return c.layout(vw(sc), s, widths, k); }
+const centreFrac = (f: Frame, sc: HTMLElement) => (sc.scrollLeft + vw(sc) / 2 - f.x0) / f.mainW;
+type Place = (f: Frame, e: number) => number;
+const atCentre = (cf: number): Place => (f) => scrollFor(cf, vw(active().sc) / 2, f.x0, f.mainW);
+
+/** Draw a frame, scroll it, and bring the pinned labels, edge fades and navigator along. */
+function show(c: Chart, sc: HTMLElement, f: Frame, left: number) {
+  c.draw(f, measure);
+  sc.scrollLeft = left;
+  if (c === timeChart) timeChart.drawSpan(state.sel ? BY.get(state.sel) : undefined);
+  syncScroll();
+}
+function drawTime() { const f = layoutFor(timeChart, scroller); show(timeChart, scroller, f, atCentre(state.zoom.c)(f, 1)); }
+function drawLanes() { const f = layoutFor(laneChart, laneScroller); show(laneChart, laneScroller, f, atCentre(state.zoom.c)(f, 1)); }
 function relayout() {
   measureAll();
-  if (state.view === 'lanes') drawLanes(); else drawTime();
+  if (state.view === 'lanes') drawLanes(); else if (state.view === 'time') drawTime();
   applyState();
 }
 
 let anim = 0;
+/** Tween between two frames: widths on a log scale (zoom feels even), fractions and rows linearly. */
+function tween(c: Chart, sc: HTMLElement, A: Frame, B: Frame, place: Place, dur = 520) {
+  cancelAnimationFrame(anim);
+  if (reduced()) { show(c, sc, B, place(B, 1)); applyState(); persistZoom(); return; }
+  const fr = (f: Frame, id: string) => (f.pos[id].x - f.x0) / f.mainW;
+  const t0 = performance.now();
+  const step = (now: number) => {
+    const t = Math.min(1, (now - t0) / dur);
+    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const mainW = Math.exp(Math.log(A.mainW) + (Math.log(B.mainW) - Math.log(A.mainW)) * e);
+    const pos: Frame['pos'] = {};
+    for (const it of ORDER) {
+      const a = A.pos[it.id], b = B.pos[it.id];
+      pos[it.id] = { ...b, x: B.x0 + (fr(A, it.id) + (fr(B, it.id) - fr(A, it.id)) * e) * mainW, y: a.y + (b.y - a.y) * e, anchor: e < 0.5 ? a.anchor : b.anchor };
+    }
+    const F: Frame = {
+      ...B, mainW, W: mainW + (B.W - B.mainW), s: A.s + (B.s - A.s) * e, k: A.k + (B.k - A.k) * e, pos, H: A.H + (B.H - A.H) * e,
+      axisY: A.axisY != null && B.axisY != null ? A.axisY + (B.axisY - A.axisY) * e : B.axisY,
+    };
+    if (t < 1) { show(c, sc, F, place(F, e)); anim = requestAnimationFrame(step); }
+    else { show(c, sc, B, place(B, 1)); applyState(); persistZoom(); }
+  };
+  anim = requestAnimationFrame(step);
+}
+
+let settleTimer = 0;
+/**
+ * Change the zoom. "animate" tweens to a full re-layout; "live" (pinch, ctrl-wheel, dragging a navigator edge)
+ * only stretches x and keeps label rows, then settles the rows once the gesture pauses.
+ */
+function zoomTo(k: number, place: Place, mode: 'animate' | 'live') {
+  if (state.view === 'list') return;
+  const { c, sc } = active();
+  const A = c.frame;
+  if (!A) return;
+  k = clampK(k);
+  hideCard(); untrace(); state.armed = null;
+  state.zoom.k = k;
+  if (mode === 'live') {
+    cancelAnimationFrame(anim);
+    const F = c.rescale(A, vw(sc), k);
+    show(c, sc, F, place(F, 1));
+    clearTimeout(settleTimer);
+    settleTimer = window.setTimeout(() => {
+      const cur = c.frame!, B = layoutFor(c, sc, k), left = sc.scrollLeft;
+      tween(c, sc, cur, B, () => left, 220);
+    }, 160);
+    return;
+  }
+  clearTimeout(settleTimer);
+  tween(c, sc, A, layoutFor(c, sc, k), place);
+}
+/** Zoom keeping the axis point under viewport x px where it is. */
+function zoomAbout(k: number, px: number, mode: 'animate' | 'live') {
+  const { c, sc } = active();
+  if (!c.frame) return;
+  const f = (sc.scrollLeft + px - c.frame.x0) / c.frame.mainW;
+  zoomTo(k, (F) => scrollFor(f, px, F.x0, F.mainW), mode);
+}
+/** Zoom so the fraction range [fa, fb] fills the chart, gliding the centre there. */
+function zoomRange(fa: number, fb: number, live: boolean) {
+  const { c, sc } = active();
+  if (!c.frame) return;
+  const pad = live ? 0 : (fb - fa) * 0.03;
+  const k = kForRange(fa - pad, fb + pad, vw(sc));
+  const c0 = centreFrac(c.frame, sc), c1 = (fa + fb) / 2;
+  zoomTo(k, (F, e) => atCentre(c0 + (c1 - c0) * e)(F, e), live ? 'live' : 'animate');
+}
+const showAll = () => { const { c, sc } = active(); if (c.frame) zoomTo(1, atCentre(c.frame ? centreFrac(c.frame, sc) : 0.5), 'animate'); };
+
+function syncScroll() {
+  const { c, sc } = active();
+  const f = c.frame;
+  if (!f || state.view === 'list') return;
+  c.pin(sc.scrollLeft, vw(sc));
+  const max = sc.scrollWidth - sc.clientWidth;
+  sc.classList.toggle('more-l', sc.scrollLeft > 2);
+  sc.classList.toggle('more-r', sc.scrollLeft < max - 2);
+  sc.classList.toggle('can-pan', max > 2);
+  nav.update();
+}
+let persistTimer = 0;
+function persistZoom() {
+  const { c, sc } = active();
+  if (c.frame && state.view !== 'list') state.zoom.c = centreFrac(c.frame, sc);
+  clearTimeout(persistTimer);
+  persistTimer = window.setTimeout(() => { try { sessionStorage.setItem('ptt-zoom', JSON.stringify(state.zoom)); } catch { /* storage unavailable */ } }, 200);
+}
+
 function setScale(s: number) {
   if (s === state.s) return;
+  const prev = state.s;
   state.s = s;
   save('ptt-scale', String(s));
   syncScaleButtons();
   setNote();
-  if (state.view === 'lanes') { drawLanes(); applyState(); return; }
-  const A = timeChart.frame, B = timeChart.layout(scroller.clientWidth, s, widths);
-  if (!A || reduced() || state.view !== 'time') { timeChart.draw(B, measure); applyState(); return; }
-  cancelAnimationFrame(anim);
-  const t0 = performance.now(), dur = 650;
-  const step = (now: number) => {
-    const t = Math.min(1, (now - t0) / dur);
-    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    const pos: Frame['pos'] = {};
-    for (const it of ORDER) {
-      const a = A.pos[it.id], b = B.pos[it.id];
-      pos[it.id] = { ...b, x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e, anchor: e < 0.5 ? a.anchor : b.anchor };
-    }
-    timeChart.draw({ ...B, s: A.s + (B.s - A.s) * e, pos, axisY: A.axisY! + (B.axisY! - A.axisY!) * e, H: A.H + (B.H - A.H) * e }, measure);
-    if (t < 1) anim = requestAnimationFrame(step); else { timeChart.draw(B, measure); applyState(); }
-  };
-  anim = requestAnimationFrame(step);
+  if (state.view === 'list') return;
+  const { c, sc } = active();
+  const A = c.frame;
+  if (!A) return;
+  // keep the year at the centre of the view in the centre while the scale changes
+  const year = yearAt(centreFrac(A, sc), prev);
+  const B = layoutFor(c, sc);
+  tween(c, sc, A, B, (F) => F.x0 + frac(year, F.s) * F.mainW - vw(sc) / 2, 650);
 }
 function syncScaleButtons() {
   $<HTMLButtonElement>('#sc-stretch').setAttribute('aria-pressed', state.s === 0 ? 'true' : 'false');
@@ -216,6 +323,7 @@ function setNote() {
       : 'True to time: every century gets the same width. Photography occupies only the last sliver of the dark box’s 2,400-year story.';
 }
 function setView(v: View, persist = true) {
+  cancelAnimationFrame(anim);
   state.view = v;
   if (persist) save('ptt-view', v);
   (['time', 'lanes', 'list'] as View[]).forEach((k) => $<HTMLButtonElement>(`#v-${k}`).setAttribute('aria-pressed', k === v ? 'true' : 'false'));
@@ -223,7 +331,9 @@ function setView(v: View, persist = true) {
   laneScroller.hidden = v !== 'lanes';
   listWrap.hidden = v !== 'list';
   caption.hidden = v === 'list';
+  navEl.hidden = v === 'list';
   $<HTMLElement>('#legend').hidden = v === 'list';
+  navEl.querySelector('.ov-win')!.setAttribute('aria-controls', v === 'lanes' ? 'lanescroller' : 'scroller');
   hideCard(); untrace();
   if (v === 'time') drawTime();
   if (v === 'lanes') drawLanes();
@@ -240,6 +350,63 @@ function focusOn(id: string, smooth = true) {
     sc.scrollTo({ left: Math.max(0, p.x - sc.clientWidth / 2), behavior: smooth && !reduced() ? 'smooth' : 'auto' });
   }
 }
+
+// ---------- navigator ----------
+const navEl = $<HTMLElement>('#nav');
+const nav = new Navigator(navEl, data, ORDER, {
+  state() {
+    const { c, sc } = active();
+    const f = c.frame;
+    const [fa, fb] = f ? visible(sc.scrollLeft, vw(sc), f.x0, f.mainW) : [0, 1];
+    return { s: state.s, k: f?.k ?? state.zoom.k, fa, fb, pick: famPick(), sel: state.sel, maxK: ZMAX };
+  },
+  pan(fa, smooth) {
+    const { c, sc } = active();
+    if (!c.frame) return;
+    sc.scrollTo({ left: c.frame.x0 + fa * c.frame.mainW, behavior: smooth && !reduced() ? 'smooth' : 'auto' });
+  },
+  zoomRange,
+  zoomBy(factor) { const { sc } = active(); zoomAbout(state.zoom.k * factor, vw(sc) / 2, 'animate'); },
+  showAll,
+});
+
+// ---------- chart gestures: ctrl/⌘-wheel or pinch to zoom, drag empty space to pan ----------
+for (const sc of [scroller, laneScroller]) {
+  sc.addEventListener('scroll', () => { syncScroll(); persistZoom(); }, { passive: true });
+  sc.addEventListener('wheel', (e) => {
+    if (!e.ctrlKey && !e.metaKey) return; // plain wheel scrolls the page; sideways wheel pans natively
+    e.preventDefault();
+    const scale = e.deltaMode === 1 ? 0.05 : 0.0025;
+    zoomAbout(state.zoom.k * Math.exp(-e.deltaY * scale), e.clientX - sc.getBoundingClientRect().left, 'live');
+  }, { passive: false });
+  let drag: { x: number; left: number; id: number; moved: boolean } | null = null;
+  sc.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || (e.target as Element).closest('a')) return;
+    if (sc.scrollWidth <= sc.clientWidth + 2) return;
+    drag = { x: e.clientX, left: sc.scrollLeft, id: e.pointerId, moved: false };
+  });
+  sc.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (!drag.moved && Math.abs(e.clientX - drag.x) < 4) return;
+    if (!drag.moved) { drag.moved = true; sc.setPointerCapture(e.pointerId); sc.classList.add('panning'); }
+    sc.scrollLeft = drag.left - (e.clientX - drag.x);
+  });
+  const end = () => {
+    if (drag?.moved) sc.addEventListener('click', (ev) => { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+    drag = null;
+    sc.classList.remove('panning');
+  };
+  sc.addEventListener('pointerup', end);
+  sc.addEventListener('pointercancel', end);
+}
+// + / − / 0 while focus is anywhere in the chart (stars, navigator)
+shell.addEventListener('keydown', (e) => {
+  if (state.view === 'list' || e.ctrlKey || e.metaKey || e.altKey || (e.target as Element).closest('input, select, textarea')) return;
+  const { sc } = active();
+  if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomAbout(state.zoom.k * 2, vw(sc) / 2, 'animate'); }
+  else if (e.key === '-' || e.key === '_') { e.preventDefault(); zoomAbout(state.zoom.k / 2, vw(sc) / 2, 'animate'); }
+  else if (e.key === '0') { e.preventDefault(); showAll(); }
+});
 
 // ---------- controls ----------
 document.querySelectorAll<HTMLButtonElement>('#chips .chip').forEach((b) => {
