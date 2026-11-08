@@ -1,0 +1,38 @@
+---
+title: The Bayer filter
+label: Bayer filter
+fam: digital
+kind: technology
+year: 1976
+ds: "1976"
+date: "1975 (filed); 20 July 1976 (US patent 3,971,065)"
+side: invention
+impact: xl
+status: inuse
+summary: "Bryce Bayer's checkerboard of red, green and blue filters, with twice as many green, lets a single sensor record colour. Almost every digital camera and phone uses it."
+today: "Used in nearly every digital camera and phone sensor; software rebuilds full colour at every pixel."
+parents: [{ id: maxwell-colour, kind: built }, { id: autochrome, kind: built }, { id: ccd, kind: enabled }]
+makers: [kodak]
+people: [["Bryce E. Bayer", "1929–2012", "inventor"]]
+moments: [["1975", "Bayer files his 'colour imaging array' patent at Kodak"], ["1976", "US patent 3,971,065 granted"], ["2000s", "Becomes the standard colour filter for camera and phone sensors"]]
+specs: [["Pattern", "2 × 2 repeating: one red, two green, one blue"], ["Why two greens", "The eye's sharpness depends most on green"]]
+wiki: Bayer_filter
+refs: []
+primary: ["US Patent 3,971,065: Color imaging array (Google Patents)", "https://patents.google.com/patent/US3971065A/en"]
+---
+
+## How it began
+
+An electronic sensor measures only how much light falls on each pixel, not its colour. Bryce Bayer, a scientist at Kodak, looked for a way to get colour from a single sensor rather than three. He patented his answer in 1976.
+
+## How it works
+
+A mosaic of tiny filters sits over the pixels: in each 2 × 2 block, one red, two green and one blue. Green appears twice because human vision gets most of its sense of detail from the green part of the spectrum. Each pixel records one colour; software estimates the two missing colours at every pixel from its neighbours, a step called demosaicing. It is the [[g:cfa|colour filter array]] principle of the [[autochrome|Autochrome]], made regular. See [[p:silver|how light becomes an image]].
+
+## Why it mattered
+
+The Bayer pattern made single-sensor colour cameras simple and cheap, from the first consumer digital cameras to billions of phones. Raw files store the unprocessed mosaic, which is why raw converters "demosaic" them.
+
+## Limits and what replaced it
+
+Each colour is sampled at only part of the pixels, which can cause false colour on fine patterns and loses some light in the filters. Alternatives exist, such as Fujifilm's X-Trans layout, stacked Foveon sensors and pixel-shift modes, but Bayer remains the standard.

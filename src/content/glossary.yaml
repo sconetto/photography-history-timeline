@@ -1,0 +1,42 @@
+aperture:
+  term: aperture
+  def: "The opening that lets light through a lens. Its size, relative to the focal length, sets how much light reaches the film or sensor and how deep the zone of sharp focus is."
+f-number:
+  term: f-number
+  def: "Focal length divided by the diameter of the aperture (N = f/D). Each full stop (f/2, f/2.8, f/4…) multiplies N by about 1.41 and halves the light."
+crop-factor:
+  term: crop factor
+  def: "How much smaller a format's diagonal is than 35mm full frame (43.3 mm). Multiply focal length by it to get the full-frame lens with the same field of view."
+latent-image:
+  term: latent image
+  def: "The invisible change light makes in silver halide crystals. Development amplifies it, millions of times over, into visible metallic silver."
+fixer:
+  term: fixer
+  def: "A chemical, usually sodium thiosulfate ('hypo'), that dissolves the silver salts light has not touched, so the image no longer darkens when seen in daylight."
+emulsion:
+  term: emulsion
+  def: "The light-sensitive layer of film, plates or paper: crystals of silver halide held in a binder, gelatin since the 1870s."
+negative:
+  term: negative
+  def: "An image with tones reversed (light areas dark) from which any number of positive prints can be made. The word was coined by John Herschel in 1839."
+cfa:
+  term: colour filter array
+  def: "The mosaic of tiny red, green and blue filters over a digital sensor's pixels; most cameras use Bryce Bayer's pattern. Software then rebuilds full colour at every pixel (demosaicing)."
+rangefinder:
+  term: rangefinder
+  def: "A camera that focuses by lining up two views of the subject in a small window, separate from the lens. The Leica M and Contax are classic examples."
+slr:
+  term: SLR
+  def: "Single-lens reflex: a mirror behind the lens sends its image up to the viewfinder, and flips out of the way when the picture is taken, so you see exactly what the lens sees."
+mirrorless:
+  term: mirrorless
+  def: "An interchangeable-lens digital camera with no reflex mirror: the sensor feeds an electronic viewfinder or screen directly."
+full-frame:
+  term: full frame
+  def: "A sensor the size of a 35mm film frame, 36 × 24 mm. The name dates from the digital era, when most sensors were smaller."
+pixel:
+  term: pixel
+  def: "One picture element: on a sensor, a single light-collecting photosite; in a file, one sample of colour and brightness."
+exposure:
+  term: exposure
+  def: "The total light that reaches the film or sensor, set by the aperture, the shutter time and the light itself."

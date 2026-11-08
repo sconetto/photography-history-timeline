@@ -1,0 +1,36 @@
+---
+title: Computational photography
+label: Computational photography
+fam: digital
+kind: technology
+year: 2014
+ds: "2013–18"
+date: "2013 (Google HDR+); 2016 (portrait mode); 2018 (Night Sight)"
+range: [2013, 2018]
+side: invention
+impact: xl
+status: inuse
+summary: "Phones began to take many frames for each picture and merge them in software, reducing noise, widening dynamic range and simulating background blur. The photograph became a calculation."
+today: "Every smartphone photograph is assembled from several frames and heavily processed."
+parents: [{ id: camera-phone, kind: built }, { id: cmos-sensor, kind: enabled }]
+moments: [["2013", "Google's HDR+ merges bursts of frames on the Nexus 5"], ["2016", "Phones with two cameras simulate shallow depth of field ('portrait mode')"], ["2018", "Google's Night Sight makes handheld photos in near darkness"], ["2021", "The C2PA standard for recording an image's origin and edits is founded"]]
+specs: [["Core idea", "Align and merge many short frames"], ["Noise", "Falls with the square root of the number of frames"]]
+wiki: Computational_photography
+refs: []
+---
+
+## How it began
+
+Phone sensors are tiny, so a single exposure in dim light is noisy. Researchers, including Marc Levoy's group at Google, applied ideas from computer graphics: take a burst of frames, align them and merge them. Google's HDR+ shipped in 2013, portrait modes in 2016 and Night Sight in 2018.
+
+## How it works
+
+Random noise falls with the square root of the number of frames averaged. Sixteen frames give a quarter of the noise of one. Short frames avoid blur; merging them recovers detail in shadows and highlights. Depth from two cameras or from machine learning lets software blur the background. Learned models now help with demosaicing, sharpening, colour and zoom.
+
+## Why it mattered
+
+Software made small sensors produce images that once needed much bigger cameras, and changed what a photograph is: a computed estimate of a scene, built from many exposures. The same tools raise new questions about authenticity, now addressed by content-provenance standards such as C2PA.
+
+## Limits and what replaced it
+
+Heavy processing can look artificial, and merging can fail with fast-moving subjects. The line between correcting and inventing detail is blurred, especially with generative AI.

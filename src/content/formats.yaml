@@ -1,0 +1,6 @@
+# Frame sizes in mm (w x h). Phase 2 completes this list.
+ff:      { name: "35mm full frame", group: full, w: 36, h: 24, entry: format-135, note: "Barnack's double cine frame; the reference for crop factors." }
+aps-c:   { name: "APS-C (Nikon, Sony, Fujifilm)", group: smaller, w: 23.5, h: 15.6, entry: aps-c, note: "Crop factor about 1.5." }
+aps-c-canon: { name: "APS-C (Canon)", group: smaller, w: 22.3, h: 14.9, entry: aps-c, note: "Crop factor about 1.6." }
+aps-film: { name: "APS film, C print format", group: film-small, w: 25.1, h: 16.7, entry: aps-film, note: "The 1996 film format that gave APS-C its name." }
+cine:    { name: "35mm cine frame (silent)", group: film-small, w: 24, h: 18, entry: cine-35mm, note: "The frame Barnack doubled for the Leica." }

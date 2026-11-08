@@ -1,0 +1,9 @@
+# Order = lane order = categorical palette slot (validated with the dataviz validator, both themes).
+optics:   { name: "Optics & lenses", short: "Optics", order: 1, blurb: "How light is bent, focused and controlled: from the pinhole to computed lenses and coatings." }
+chem:     { name: "Light-sensitive chemistry", short: "Chemistry", order: 2, blurb: "Silver salts, plates and film: how light was made to leave a lasting trace." }
+colour:   { name: "Colour", short: "Colour", order: 3, blurb: "Recording the colours we see, from three-filter experiments to dye layers and filter mosaics." }
+cameras:  { name: "Cameras", short: "Cameras", order: 4, blurb: "The boxes, bodies and phones that photographers actually held." }
+formats:  { name: "Formats & sensors", short: "Formats", order: 5, blurb: "Film sizes and sensor sizes: where 35mm, full frame and APS-C come from." }
+control:  { name: "Exposure, light & focus", short: "Exposure", order: 6, blurb: "Shutters, flash, meters, autofocus and stabilisation: the tools that tamed exposure." }
+digital:  { name: "Digital imaging", short: "Digital", order: 7, blurb: "Sensors, pixels, file formats and computation: photography as data." }
+sharing:  { name: "Prints & sharing", short: "Sharing", order: 8, blurb: "How photographs reached other people: prints, cards, newspapers and networks." }

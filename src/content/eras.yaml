@@ -1,0 +1,8 @@
+before:     { name: "Before photography", short: "Before", a: -1000, b: 1826 }
+invention:  { name: "Invention", short: "Invention", a: 1826, b: 1851 }
+glass:      { name: "Glass & collodion", short: "Collodion", a: 1851, b: 1880 }
+snapshot:   { name: "Dry plate & snapshot", short: "Snapshot", a: 1880, b: 1925 }
+small:      { name: "35mm & the rangefinder", short: "35mm", a: 1925, b: 1959 }
+slr:        { name: "The Japanese SLR", short: "SLR", a: 1959, b: 1991 }
+transition: { name: "Digital transition", short: "Digital", a: 1991, b: 2007 }
+phones:     { name: "Phones & mirrorless", short: "Phones", a: 2007, b: 2100 }

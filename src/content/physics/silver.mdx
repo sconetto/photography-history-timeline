@@ -1,0 +1,25 @@
+---
+title: How light becomes an image
+short: Silver & silicon
+order: 5
+dek: "Two ways of catching photons: silver crystals that change where light lands, and silicon wells that count the electrons light sets free."
+widget: exposurehistory
+equations: [["Photon energy", "E = h c / λ"], ["Shot-noise limit", "SNR ≈ √N  (N = photons collected)"], ["Dynamic range (stops)", "DR ≈ log₂(full-well / read-noise)"]]
+refs: [["Nobel Prize in Physics 2009: summary", "https://www.nobelprize.org/prizes/physics/2009/summary/"]]
+---
+
+## Silver: the latent image
+
+A grain of silver halide, such as silver bromide, is a tiny crystal. When it absorbs a few photons, freed electrons gather at a defect and turn a few silver ions into a speck of metallic silver, too small to see. This [[g:latent-image|latent image]] is the real discovery behind the [[daguerreotype]] and the [[calotype]]: a developer can turn every grain that carries such a speck entirely into silver, amplifying the light's effect up to many millions of times. The [[hypo-fixer|fixer]] then dissolves the untouched grains.
+
+Bigger grains catch light more easily, so fast film is grainier. Over 150 years, better emulsions, development and lenses cut exposures from hours with [[heliography]] to small fractions of a second.
+
+## Silicon: counting electrons
+
+In a digital sensor, each [[g:pixel|pixel]] is a small region of silicon. A photon with enough energy frees an electron (the photoelectric effect), and the pixel stores it during the exposure. A [[ccd|CCD]] shifts the stored charges across the chip to one amplifier; a [[cmos-sensor|CMOS sensor]] measures them in every pixel. An analog-to-digital converter turns each charge into a number.
+
+Light arrives randomly, like rain, so a pixel that collects *N* photons has natural "shot noise" of about √N. More light means a cleaner image, which is why big pixels and big sensors do better in dim light and why [[computational-photography|phones merge many frames]].
+
+## Colour
+
+Silver and silicon respond only to how much light arrives, not its colour. Colour comes from filters, as in [[maxwell-colour|Maxwell's three-colour photograph]] and the [[bayer-filter|Bayer filter]], or from dye layers, as in [[kodachrome|Kodachrome]].

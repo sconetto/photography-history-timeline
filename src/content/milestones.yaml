@@ -1,0 +1,33 @@
+boulevard-du-temple:
+  year: 1838
+  label: "Boulevard du Temple: the first people in a photograph"
+  when: "1838"
+  note: "Daguerre's view of a Paris boulevard needed minutes of exposure, so the moving traffic vanished. A man having his boots polished stood still long enough to appear."
+  entry: daguerreotype
+world-photography-day:
+  year: 1839.6
+  label: "The daguerreotype is given to the world"
+  when: "19 August 1839"
+  note: "The French state bought Daguerre's process and published its details at a joint meeting of the Academies of Science and Fine Arts. The date is now kept as World Photography Day."
+  entry: daguerreotype
+cornelius:
+  year: 1839.8
+  label: "Robert Cornelius's self-portrait"
+  when: "Late 1839"
+  note: "In Philadelphia, Cornelius sat in front of his own camera for several minutes. It is the earliest surviving photographic self-portrait, and one of the first American portraits."
+muybridge:
+  year: 1878
+  label: "The Horse in Motion"
+  when: "1878"
+  note: "Eadweard Muybridge's row of cameras, fired by trip wires, showed that a galloping horse lifts all four hooves off the ground at once, which no painter had ever drawn."
+  entry: gelatin-dry-plate
+earthrise:
+  year: 1968
+  label: "Earthrise"
+  when: "24 December 1968"
+  note: "Bill Anders photographed the Earth rising over the Moon from Apollo 8 with a Hasselblad and colour film. It became one of the most reproduced photographs ever made."
+kodak-bankruptcy:
+  year: 2012
+  label: "Kodak files for bankruptcy"
+  when: "19 January 2012"
+  note: "The company that built the first digital camera in 1975 filed for Chapter 11 protection after film sales collapsed. It emerged in 2013 as a much smaller firm."

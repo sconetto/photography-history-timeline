@@ -1,0 +1,30 @@
+eder:
+  kind: book
+  label: "Josef Maria Eder, History of Photography, trans. Edward Epstean (Columbia University Press, 1945; Dover, 1978)"
+  url: "https://archive.org/details/EderHistoryPhotography"
+  note: "The standard technical history to about 1925. Cited by chapter and page."
+newhall:
+  kind: book
+  label: "Beaumont Newhall, The History of Photography: From 1839 to the Present (Museum of Modern Art)"
+  note: "Print reference. Edition to be recorded from the title page."
+mulligan:
+  kind: book
+  label: "Therese Mulligan and David Wooters (eds.), A History of Photography: From 1839 to the Present (George Eastman House Collection; Taschen)"
+gernsheim:
+  kind: book
+  label: "Helmut Gernsheim, The Origins of Photography (Thames & Hudson, 1982)"
+rosenblum:
+  kind: book
+  label: "Naomi Rosenblum, A World History of Photography (Abbeville Press)"
+wikipedia:
+  kind: web
+  label: "Wikipedia (linked on every entry)"
+  url: "https://en.wikipedia.org/"
+hrc:
+  kind: archive
+  label: "Harry Ransom Center, University of Texas at Austin: the Gernsheim collection and Niépce's heliograph"
+  url: "https://www.hrc.utexas.edu/niepce-heliograph/"
+loc:
+  kind: archive
+  label: "Library of Congress, Prints & Photographs Division"
+  url: "https://www.loc.gov/pictures/"
