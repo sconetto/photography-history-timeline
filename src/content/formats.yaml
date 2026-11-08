@@ -1,6 +1,24 @@
-# Frame sizes in mm (w x h). Phase 2 completes this list.
-ff:      { name: "35mm full frame", group: full, w: 36, h: 24, entry: format-135, note: "Barnack's double cine frame; the reference for crop factors." }
-aps-c:   { name: "APS-C (Nikon, Sony, Fujifilm)", group: smaller, w: 23.5, h: 15.6, entry: aps-c, note: "Crop factor about 1.5." }
+# Frame and sensor sizes in mm, landscape (w ≥ h). Film sizes are the usual image area; sensor sizes the common active area.
+# group: large (sheet film) · medium (120 film and digital medium format) · full (36 × 24) · smaller (digital sensors) · film-small (small film)
+8x10:        { name: "8 × 10 inch sheet film", group: large, w: 254, h: 203, note: "Contact-printed at the size of the negative: the view-camera format of Edward Weston and Ansel Adams." }
+4x5:         { name: "4 × 5 inch sheet film", group: large, w: 127, h: 102, note: "The standard of press and field cameras, from the Speed Graphic to modern view cameras." }
+6x9:         { name: "6 × 9 (120 film)", group: medium, w: 84, h: 56, note: "Folding and press cameras; eight frames on a roll of 120." }
+6x7:         { name: "6 × 7 (120 film)", group: medium, w: 70, h: 56, note: "Pentax 67 and Mamiya RB67. Nicknamed the ideal format: it enlarges to 8 × 10 inch paper with almost no cropping." }
+6x6:         { name: "6 × 6 (120 film)", group: medium, w: 56, h: 56, note: "The square of the Rolleiflex and the Hasselblad; twelve frames on a roll." }
+dmf-645:     { name: "Digital medium format, 53.4 × 40", group: medium, w: 53.4, h: 40, note: "The largest common sensor, in Phase One IQ4 backs; close to the 645 film frame." }
+645:         { name: "6 × 4.5 (120 film)", group: medium, w: 56, h: 41.5, note: "Fifteen frames on a roll; Mamiya 645 and Pentax 645." }
+dmf-44:      { name: "Digital medium format, 44 × 33", group: medium, w: 43.8, h: 32.9, note: "Fujifilm GFX and Hasselblad X: about 1.7 times the area of full frame." }
+ff:          { name: "35mm full frame", group: full, w: 36, h: 24, entry: format-135, note: "Barnack's double cine frame; the reference for crop factors." }
+aps-h:       { name: "APS-H (Canon EOS-1D)", group: smaller, w: 28.7, h: 19, note: "Canon's fast professional bodies of 2001–2012; crop factor about 1.3." }
+126:         { name: "126 (Instamatic)", group: film-small, w: 28, h: 28, note: "Kodak's 1963 drop-in cartridge: no threading, a square frame." }
+aps-film:    { name: "APS film, C print format", group: film-small, w: 25.1, h: 16.7, entry: aps-film, note: "The 1996 film format that gave APS-C its name." }
+cine:        { name: "35mm cine frame (silent)", group: film-small, w: 24, h: 18, entry: cine-35mm, note: "The frame Barnack doubled for the Leica." }
+half-frame:  { name: "Half frame (35mm)", group: film-small, w: 24, h: 18, note: "Two pictures in one 35mm frame, 72 on a roll; the 1959 Olympus Pen made it popular." }
+aps-c:       { name: "APS-C (Nikon, Sony, Fujifilm)", group: smaller, w: 23.5, h: 15.6, entry: aps-c, note: "Crop factor about 1.5." }
 aps-c-canon: { name: "APS-C (Canon)", group: smaller, w: 22.3, h: 14.9, entry: aps-c, note: "Crop factor about 1.6." }
-aps-film: { name: "APS film, C print format", group: film-small, w: 25.1, h: 16.7, entry: aps-film, note: "The 1996 film format that gave APS-C its name." }
-cine:    { name: "35mm cine frame (silent)", group: film-small, w: 24, h: 18, entry: cine-35mm, note: "The frame Barnack doubled for the Leica." }
+four-thirds: { name: "Four Thirds / Micro Four Thirds", group: smaller, w: 17.3, h: 13, note: "A 4:3 sensor with a crop factor of 2: Olympus, OM System and Panasonic." }
+110:         { name: "110 (Pocket Instamatic)", group: film-small, w: 17, h: 13, note: "Kodak's 1972 pocket cartridge, almost exactly the size of Four Thirds." }
+one-inch:    { name: "1-inch type", group: smaller, w: 13.2, h: 8.8, note: "Not an inch across: inch-type names come from the tube diameters of 1950s video cameras. Sony RX100 and many drones." }
+disc:        { name: "Disc film", group: film-small, w: 10, h: 8, note: "Kodak's 1982 disc held fifteen tiny frames; prints were grainy." }
+phone-large: { name: "Large phone sensor (1/1.3-inch type)", group: smaller, w: 9.8, h: 7.4, note: "The main camera of many recent flagship phones." }
+phone-small: { name: "Small phone sensor (1/3-inch type)", group: smaller, w: 4.8, h: 3.6, note: "Older phone cameras, and the ultra-wide or telephoto modules of today's phones." }
