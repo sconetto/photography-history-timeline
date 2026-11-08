@@ -1,0 +1,46 @@
+/* Day = the print: warm baryta paper, silver-grey ink. Night = the darkroom: warm black, safelight amber.
+   Family colours are the dataviz categorical set in fixed order, validated against --panel in both themes
+   (light: contrast WARN on aqua/yellow/magenta → every star carries a text label and a list view exists). */
+:root {
+  color-scheme: light;
+  --paper: #f3eee4;
+  --paper-glow: #fffdf8;
+  --panel: #fbf8f1;
+  --raised: #ffffff;
+  --band: #e9e2d4;
+  --ink: #1d1a16;
+  --ink-2: #4a443b;
+  --muted: #6c6457;
+  --rule: #d6cdbd;
+  --rule-soft: #e7e0d2;
+  --era: rgba(29, 26, 22, 0.035);
+  --accent: #a5461a;
+  --accent-soft: rgba(165, 70, 26, 0.12);
+  --accent-span: rgba(165, 70, 26, 0.2);
+  --shadow: rgba(40, 30, 18, 0.16);
+  --f-optics: #2a78d6; --f-chem: #eb6834; --f-colour: #1baf7a; --f-cameras: #eda100;
+  --f-formats: #e87ba4; --f-control: #008300; --f-digital: #6250d6; --f-sharing: #e34948;
+  --font-display: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0f0c0a; --paper-glow: #1d1611; --panel: #1a1612; --raised: #241e18; --band: #221c16;
+    --ink: #efe7da; --ink-2: #c6bba9; --muted: #978c7c; --rule: #3a3129; --rule-soft: #2a231d;
+    --era: rgba(239, 231, 218, 0.025); --accent: #ff8a3d; --accent-soft: rgba(255, 138, 61, 0.14);
+    --accent-span: rgba(255, 138, 61, 0.22); --shadow: rgba(0, 0, 0, 0.6);
+    --f-optics: #3987e5; --f-chem: #d95926; --f-colour: #199e70; --f-cameras: #c98500;
+    --f-formats: #d55181; --f-control: #008300; --f-digital: #9085e9; --f-sharing: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0f0c0a; --paper-glow: #1d1611; --panel: #1a1612; --raised: #241e18; --band: #221c16;
+  --ink: #efe7da; --ink-2: #c6bba9; --muted: #978c7c; --rule: #3a3129; --rule-soft: #2a231d;
+  --era: rgba(239, 231, 218, 0.025); --accent: #ff8a3d; --accent-soft: rgba(255, 138, 61, 0.14);
+  --accent-span: rgba(255, 138, 61, 0.22); --shadow: rgba(0, 0, 0, 0.6);
+  --f-optics: #3987e5; --f-chem: #d95926; --f-colour: #199e70; --f-cameras: #c98500;
+  --f-formats: #d55181; --f-control: #008300; --f-digital: #9085e9; --f-sharing: #e66767;
+}

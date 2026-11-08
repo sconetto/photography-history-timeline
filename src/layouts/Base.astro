@@ -1,0 +1,65 @@
+---
+import '@fontsource/bodoni-moda/400.css';
+import '@fontsource/bodoni-moda/400-italic.css';
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { content } from '../lib/content';
+
+interface Props { title?: string; description?: string; wide?: boolean }
+const { title, description = 'How photography came to be: an interactive timeline of its discoveries, cameras, formats and makers, with the physics of how it works.', wide = false } = Astro.props;
+const fullTitle = title ? `${title} · Photography Through Time` : 'Photography Through Time';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const { glossary } = await content();
+const gloss = Object.fromEntries(glossary.map((g) => [g.id, { t: g.data.term, d: g.data.def }]));
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <script is:inline>
+      // Set the theme before first paint (no flash). Storage may be unavailable.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('ptt-theme'); } catch (e) {}
+        if (t === 'day') document.documentElement.setAttribute('data-theme', 'light');
+        else if (t === 'night') document.documentElement.setAttribute('data-theme', 'dark');
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="visually-hidden skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" class:list={['wrap', { wide }]} data-pagefind-body>
+      <slot />
+    </main>
+    <Footer />
+    <div class="gloss-pop" id="gloss-pop" role="tooltip" hidden></div>
+    <script type="application/json" id="gloss-data" set:html={JSON.stringify(gloss)} />
+    <script>
+      import '../scripts/glossary';
+    </script>
+  </body>
+</html>
+<style is:global>
+  .skip:focus { position: fixed !important; left: 12px; top: 12px; width: auto; height: auto; clip: auto; padding: 8px 12px; background: var(--raised); z-index: 50; }
+  main { padding-block: 28px 56px; display: block; }
+  .gloss-pop { position: fixed; z-index: 40; max-width: 320px; background: var(--raised); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 12px; box-shadow: 0 10px 30px var(--shadow); font-size: 13px; line-height: 1.45; color: var(--ink-2); pointer-events: none; }
+  .gloss-pop strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
+</style>

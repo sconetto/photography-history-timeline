@@ -1,0 +1,24 @@
+<div class="seg theme" role="group" aria-label="Theme">
+  <button type="button" data-t="auto" aria-pressed="true">Auto</button>
+  <button type="button" data-t="day" aria-pressed="false">Day</button>
+  <button type="button" data-t="night" aria-pressed="false">Night</button>
+</div>
+<script>
+  const root = document.documentElement;
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.theme button');
+  function apply(t: string, persist: boolean) {
+    if (t === 'day') root.setAttribute('data-theme', 'light');
+    else if (t === 'night') root.setAttribute('data-theme', 'dark');
+    else root.removeAttribute('data-theme');
+    buttons.forEach((b) => b.setAttribute('aria-pressed', b.dataset.t === t ? 'true' : 'false'));
+    if (persist) { try { localStorage.setItem('ptt-theme', t); } catch { /* storage unavailable */ } }
+    document.dispatchEvent(new CustomEvent('ptt:theme'));
+  }
+  let saved = 'auto';
+  try { saved = localStorage.getItem('ptt-theme') || 'auto'; } catch { /* storage unavailable */ }
+  apply(saved === 'day' || saved === 'night' ? saved : 'auto', false);
+  buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.t || 'auto', true)));
+</script>
+<style>
+  .theme button { font-size: 12px; padding: 5px 10px; }
+</style>
