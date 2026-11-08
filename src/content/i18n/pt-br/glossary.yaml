@@ -1,0 +1,129 @@
+aperture:
+  term: abertura
+  def: "A abertura que deixa a luz passar por uma objetiva. O tamanho dela, em relação à distância focal, define quanta luz chega ao filme ou ao sensor e quão funda é a zona de foco nítido."
+f-number:
+  term: número f
+  def: "A distância focal dividida pelo diâmetro da abertura (N = f/D). Cada ponto inteiro (f/2, f/2,8, f/4…) multiplica N por cerca de 1,41 e corta a luz pela metade."
+crop-factor:
+  term: fator de corte
+  def: "Quanto a diagonal de um formato é menor que a do full frame de 35mm (43,3 mm). Multiplique a distância focal por ele para achar a objetiva full frame com o mesmo campo de visão."
+latent-image:
+  term: imagem latente
+  def: "A mudança invisível que a luz provoca nos cristais de haleto de prata. A revelação a amplifica, milhões de vezes, em prata metálica visível."
+fixer:
+  term: fixador
+  def: "Um produto químico, em geral o tiossulfato de sódio (o 'hipo'), que dissolve os sais de prata que a luz não atingiu, para que a imagem não escureça mais à luz do dia."
+emulsion:
+  term: emulsão
+  def: "A camada sensível à luz de filmes, chapas e papéis: cristais de haleto de prata presos num aglutinante, a gelatina desde os anos 1870."
+negative:
+  term: negativo
+  def: "Uma imagem de tons invertidos (as áreas claras ficam escuras) da qual se pode tirar qualquer número de cópias positivas. A palavra foi criada por John Herschel em 1839."
+cfa:
+  term: matriz de filtros de cor
+  def: "O mosaico de minúsculos filtros vermelhos, verdes e azuis sobre os pixels de um sensor digital; a maioria das câmeras usa o padrão de Bryce Bayer. Depois, um software reconstrói a cor completa em cada pixel (demosaicização)."
+rangefinder:
+  term: câmera telemétrica
+  def: "Uma câmera que foca alinhando duas vistas do assunto numa pequena janela, separada da objetiva. A Leica M e a Contax são exemplos clássicos."
+slr:
+  term: SLR
+  def: "Reflex monobjetiva (single-lens reflex): um espelho atrás da objetiva manda a imagem para o visor e sai do caminho na hora da foto, então você vê exatamente o que a objetiva vê."
+mirrorless:
+  term: mirrorless
+  def: "Uma câmera digital de objetivas intercambiáveis sem espelho reflex: o sensor alimenta diretamente um visor eletrônico ou a tela."
+full-frame:
+  term: full frame
+  def: "Um sensor do tamanho de um quadro de filme 35mm, 36 × 24 mm. O nome vem da era digital, quando a maioria dos sensores era menor."
+pixel:
+  term: pixel
+  def: "Um elemento de imagem: no sensor, um único fotossítio que coleta luz; no arquivo, uma amostra de cor e brilho."
+exposure:
+  term: exposição
+  def: "O total de luz que chega ao filme ou ao sensor, definido pela abertura, pelo tempo do obturador e pela própria luz."
+shutter-speed:
+  term: velocidade do obturador
+  def: "Por quanto tempo o obturador deixa a luz chegar ao filme ou ao sensor, como 1/125 de segundo. Cortar esse tempo pela metade corta a luz pela metade e congela movimentos mais rápidos."
+focal-plane-shutter:
+  term: obturador de plano focal
+  def: "Um obturador de duas cortinas logo à frente do filme ou do sensor. A fresta entre elas percorre o quadro, então as objetivas não precisam de obturador próprio."
+leaf-shutter:
+  term: obturador central
+  def: "Um obturador de lâminas finas dentro da objetiva, que se abrem a partir do centro e voltam a fechar. É silencioso e sincroniza com o flash em qualquer velocidade."
+iso:
+  term: ISO
+  def: "A escala padrão de sensibilidade de filmes e sensores. Dobrar o número ISO significa precisar de metade da luz para a mesma exposição."
+stop:
+  term: ponto
+  def: "Dobrar ou cortar pela metade a luz. Abrir o diafragma um ponto, baixar a velocidade um ponto ou dobrar o ISO dão, todos, um ponto a mais de exposição."
+ev:
+  term: valor de exposição (EV)
+  def: "Um único número para todos os pares de abertura e velocidade que dão a mesma exposição. EV 15 é mais ou menos a luz de um dia de sol com ISO 100; cada passo é um ponto."
+depth-of-field:
+  term: profundidade de campo
+  def: "A faixa de distâncias que parecem nítidas numa fotografia. Ela aumenta com uma abertura menor, uma objetiva mais curta, um formato menor ou um assunto mais distante."
+focal-length:
+  term: distância focal
+  def: "A distância da objetiva até a imagem que ela forma de algo muito distante, em milímetros. Distâncias focais maiores ampliam mais e veem um ângulo mais estreito."
+angle-of-view:
+  term: ângulo de visão
+  def: "O quanto de uma cena uma objetiva abrange num certo formato. Depende tanto da distância focal quanto do tamanho do filme ou do sensor."
+dynamic-range:
+  term: faixa dinâmica
+  def: "O intervalo entre os tons mais escuros e os mais claros que um filme ou sensor consegue registrar com detalhe, em geral medido em pontos."
+grain:
+  term: grão
+  def: "Os aglomerados visíveis de prata ou de corante numa imagem de filme. Filmes mais rápidos têm cristais maiores, então mostram mais grão."
+developer:
+  term: revelador
+  def: "Um banho químico que transforma a imagem latente em prata metálica visível, reduzindo os cristais de haleto de prata expostos."
+orthochromatic:
+  term: ortocromático
+  def: "Sensível à luz azul e verde, mas não à vermelha. As primeiras chapas e muitos filmes eram ortocromáticos, por isso lábios vermelhos e céus saíam errados."
+panchromatic:
+  term: pancromático
+  def: "Sensível a todas as cores visíveis, inclusive o vermelho, então uma cópia em preto e branco mostra tons próximos de como o olho os vê."
+reversal-film:
+  term: filme reversível
+  def: "Filme revelado para dar uma imagem positiva no próprio filme, como um slide, em vez de um negativo para copiar."
+colour-temperature:
+  term: temperatura de cor
+  def: "A cor da luz descrita como a temperatura de um corpo incandescente, em kelvin: a luz de vela tem cerca de 1.900 K, a luz do dia cerca de 5.500 K, e a sombra é mais azulada ainda."
+white-balance:
+  term: balanço de branco
+  def: "A correção da cor da luz para que as coisas brancas pareçam brancas. As câmeras digitais fazem isso no processamento; o filme exigia filtros ou outro filme."
+raw:
+  term: arquivo raw
+  def: "As leituras do sensor salvas quase intactas, antes da demosaicização, do balanço de branco e da compressão, para serem processadas depois com mais margem."
+demosaicing:
+  term: demosaicização
+  def: "Calcular uma cor completa para cada pixel a partir de um sensor cujos pixels veem, cada um, só vermelho, verde ou azul através de uma matriz de filtros de cor."
+noise:
+  term: ruído
+  def: "Pontinhos aleatórios numa imagem digital. A maior parte vem da chegada irregular dos fótons (ruído de disparo), por isso é pior onde cai pouca luz."
+megapixel:
+  term: megapixel
+  def: "Um milhão de pixels. A contagem de megapixels de um sensor mede quantos pontos ele amostra, não quão nítidas ou boas são as fotos."
+pentaprism:
+  term: pentaprisma
+  def: "Um prisma de vidro de cinco faces acima da tela de foco de uma SLR, que endireita a imagem e a desinverte para a visão na altura do olho."
+lens-mount:
+  term: encaixe de objetiva
+  def: "O acoplamento que une objetivas intercambiáveis ao corpo da câmera. O encaixe de um fabricante costuma sobreviver a muitas gerações de câmeras."
+zoom-lens:
+  term: objetiva zoom
+  def: "Uma objetiva cuja distância focal pode mudar sem a imagem sair de foco, movendo grupos de elementos dentro dela."
+aberration:
+  term: aberração
+  def: "Qualquer forma de uma objetiva falhar em levar a luz a um ponto perfeito: desfoque nas bordas, franjas coloridas, linhas curvas ou distorcidas. Projetar objetivas é a arte de cancelá-las."
+diffraction:
+  term: difração
+  def: "O espalhamento da luz quando ela passa por uma borda. Limita a nitidez em aberturas muito pequenas e o quão fina pode ser uma imagem de orifício."
+reciprocity-failure:
+  term: falha de reciprocidade
+  def: "A perda de sensibilidade do filme em exposições muito longas ou muito curtas, de modo que cortar a luz pela metade e dobrar o tempo já não dá o mesmo resultado."
+contact-print:
+  term: cópia por contato
+  def: "Uma cópia feita pondo o negativo diretamente sobre o papel, então a cópia tem exatamente o tamanho do negativo."
+enlarger:
+  term: ampliador
+  def: "Um projetor que lança a imagem de um negativo sobre o papel num tamanho maior. Permitiu tirar cópias grandes de negativos pequenos."

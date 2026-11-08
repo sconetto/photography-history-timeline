@@ -1,0 +1,22 @@
+8x10:        { name: "Filme em folha de 8 × 10 polegadas", note: "Copiado por contato no tamanho do negativo: o formato das câmeras de fole de Edward Weston e Ansel Adams." }
+4x5:         { name: "Filme em folha de 4 × 5 polegadas", note: "O padrão das câmeras de imprensa e de campo, da Speed Graphic às câmeras de fole modernas." }
+6x9:         { name: "6 × 9 (filme 120)", note: "Câmeras dobráveis e de imprensa; oito fotos num rolo de 120." }
+6x7:         { name: "6 × 7 (filme 120)", note: "Pentax 67 e Mamiya RB67. Apelidado de formato ideal: amplia para papel de 8 × 10 polegadas quase sem corte." }
+6x6:         { name: "6 × 6 (filme 120)", note: "O quadrado da Rolleiflex e da Hasselblad; doze fotos num rolo." }
+dmf-645:     { name: "Médio formato digital, 53,4 × 40", note: "O maior sensor comum, nos backs Phase One IQ4; perto do quadro 645 de filme." }
+645:         { name: "6 × 4,5 (filme 120)", note: "Quinze fotos num rolo; Mamiya 645 e Pentax 645." }
+dmf-44:      { name: "Médio formato digital, 44 × 33", note: "Fujifilm GFX e Hasselblad X: cerca de 1,7 vez a área do full frame." }
+ff:          { name: "Full frame 35mm", note: "O quadro duplo de cinema de Barnack; a referência dos fatores de corte." }
+aps-h:       { name: "APS-H (Canon EOS-1D)", note: "Os corpos profissionais rápidos da Canon de 2001 a 2012; fator de corte de cerca de 1,3." }
+126:         { name: "126 (Instamatic)", note: "O cartucho de encaixe da Kodak de 1963: sem passar o filme, num quadro quadrado." }
+aps-film:    { name: "Filme APS, formato de cópia C", note: "O formato de filme de 1996 que deu nome ao APS-C." }
+cine:        { name: "Quadro de cinema 35mm (mudo)", note: "O quadro que Barnack dobrou para a Leica." }
+half-frame:  { name: "Meio quadro (35mm)", note: "Duas fotos num quadro de 35mm, 72 por rolo; a Olympus Pen de 1959 o popularizou." }
+aps-c:       { name: "APS-C (Nikon, Sony, Fujifilm)", note: "Fator de corte de cerca de 1,5." }
+aps-c-canon: { name: "APS-C (Canon)", note: "Fator de corte de cerca de 1,6." }
+four-thirds: { name: "Four Thirds / Micro Four Thirds", note: "Um sensor 4:3 com fator de corte 2: Olympus, OM System e Panasonic." }
+110:         { name: "110 (Pocket Instamatic)", note: "O cartucho de bolso da Kodak de 1972, quase exatamente do tamanho do Four Thirds." }
+one-inch:    { name: "Tipo 1 polegada", note: "Não mede uma polegada: os nomes em polegadas vêm do diâmetro dos tubos das câmeras de vídeo dos anos 1950. Sony RX100 e muitos drones." }
+disc:        { name: "Filme Disc", note: "O disco da Kodak de 1982 tinha quinze quadros minúsculos; as cópias saíam granuladas." }
+phone-large: { name: "Sensor grande de celular (tipo 1/1,3 polegada)", note: "A câmera principal de muitos celulares topo de linha recentes." }
+phone-small: { name: "Sensor pequeno de celular (tipo 1/3 polegada)", note: "Câmeras de celulares mais antigos, e os módulos ultra-angular ou teleobjetiva dos celulares de hoje." }

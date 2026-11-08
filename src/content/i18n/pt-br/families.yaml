@@ -1,0 +1,8 @@
+optics:  { name: "Óptica e lentes", short: "Óptica", blurb: "Como a luz é desviada, focada e controlada: do orifício às lentes calculadas e aos revestimentos." }
+chem:    { name: "Química fotossensível", short: "Química", blurb: "Sais de prata, chapas e filmes: como a luz passou a deixar um rastro duradouro." }
+colour:  { name: "Cor", short: "Cor", blurb: "Registrar as cores que vemos, dos experimentos com três filtros às camadas de corante e aos mosaicos de filtros." }
+cameras: { name: "Câmeras", short: "Câmeras", blurb: "As caixas, os corpos e os celulares que os fotógrafos de fato seguraram." }
+formats: { name: "Formatos e sensores", short: "Formatos", blurb: "Tamanhos de filme e de sensor: de onde vêm o 35mm, o full frame e o APS-C." }
+control: { name: "Exposição, luz e foco", short: "Exposição", blurb: "Obturadores, flash, fotômetros, foco automático e estabilização: as ferramentas que domaram a exposição." }
+digital: { name: "Imagem digital", short: "Digital", blurb: "Sensores, pixels, formatos de arquivo e computação: a fotografia como dados." }
+sharing: { name: "Cópias e compartilhamento", short: "Cópias", blurb: "Como as fotografias chegaram a outras pessoas: cópias, cartões, jornais e redes." }

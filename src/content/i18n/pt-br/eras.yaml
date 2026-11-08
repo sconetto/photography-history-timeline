@@ -1,0 +1,8 @@
+before:     { name: "Antes da fotografia", short: "Antes" }
+invention:  { name: "Invenção", short: "Invenção" }
+glass:      { name: "Vidro e colódio", short: "Colódio" }
+snapshot:   { name: "Chapa seca e instantâneo", short: "Instantâneo" }
+small:      { name: "O 35mm e a telemétrica", short: "35mm" }
+slr:        { name: "A SLR japonesa", short: "SLR" }
+transition: { name: "Transição digital", short: "Digital" }
+phones:     { name: "Celulares e mirrorless", short: "Celulares" }

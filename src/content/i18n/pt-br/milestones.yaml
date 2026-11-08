@@ -1,0 +1,85 @@
+boulevard-du-temple:
+  label: "Boulevard du Temple: as primeiras pessoas numa fotografia"
+  when: "1838"
+  note: "A vista de Daguerre de um bulevar de Paris precisou de minutos de exposição, então o trânsito em movimento sumiu. Um homem que engraxava as botas ficou parado tempo bastante para aparecer."
+  imageAlt: "Um daguerreótipo de um bulevar de Paris visto do alto: árvores, telhados e uma rua vazia, com uma figura minúscula engraxando as botas no canto inferior esquerdo."
+world-photography-day:
+  label: "O daguerreótipo é dado ao mundo"
+  when: "19 de agosto de 1839"
+  note: "O Estado francês comprou o processo de Daguerre e publicou os detalhes numa sessão conjunta das Academias de Ciências e de Belas-Artes. A data hoje é celebrada como o Dia Mundial da Fotografia."
+cornelius:
+  label: "O autorretrato de Robert Cornelius"
+  when: "Fim de 1839"
+  note: "Na Filadélfia, Cornelius sentou-se diante da própria câmera por vários minutos. É o autorretrato fotográfico mais antigo que sobreviveu, e um dos primeiros retratos americanos."
+  imageAlt: "Um rapaz pálido, um pouco desfocado, de cabelo desgrenhado e braços cruzados, olhando para além da câmera."
+drowned-man:
+  label: "O Autorretrato como afogado, de Bayard"
+  when: "18 de outubro de 1840"
+  note: "Hippolyte Bayard, que tinha seu próprio processo em papel, encenou o próprio suicídio em protesto porque a França homenageara Daguerre e o ignorara. Costuma ser chamada de a primeira fotografia encenada."
+  imageAlt: "Um homem sem camisa recostado numa parede, de olhos fechados e mãos cruzadas, com um chapéu de palha ao lado."
+atkins:
+  label: "O livro de algas em cianotipia de Anna Atkins"
+  when: "1843"
+  note: "Atkins dispôs algas britânicas sobre papel de cianotipia para criar Photographs of British Algae: Cyanotype Impressions, publicado em partes a partir de 1843. Costuma ser chamado de o primeiro livro ilustrado com fotografias."
+  imageAlt: "A silhueta branca e ramificada de uma alga sobre papel azul-da-prússia intenso, com um nome em latim escrito à mão embaixo."
+pencil-of-nature:
+  label: "The Pencil of Nature"
+  when: "1844–46"
+  note: "Talbot publicou seus calótipos em seis partes, com um texto explicativo: o primeiro livro ilustrado com fotografias vendido comercialmente, e uma das primeiras defesas do que a fotografia podia fazer."
+  imageAlt: "Uma vassoura encostada na porta aberta de um prédio de pedra, com uma lanterna pendurada na parede ao lado."
+fenton-crimea:
+  label: "Fenton fotografa a Guerra da Crimeia"
+  when: "1855"
+  note: "Roger Fenton passou meses na Crimeia com uma carroça-laboratório puxada a cavalo. As lentas chapas úmidas não permitiam ação, mas The Valley of the Shadow of Death (O vale da sombra da morte), uma estrada coberta de balas de canhão, virou uma das primeiras fotografias de guerra famosas."
+  imageAlt: "Uma estrada num vale árido, coberta de balas de canhão, entre encostas cinzentas e nuas."
+nadar-aerial:
+  label: "As fotografias de Nadar a partir de um balão"
+  when: "1858"
+  note: "O fotógrafo parisiense Nadar fez as primeiras fotografias aéreas de um balão cativo sobre Petit-Bicêtre. Nenhuma sobreviveu; a fotografia aérea mais antiga que restou é a vista de Boston de James Wallace Black, de 1860."
+  imageAlt: "Telhados, torres de igreja e ruas de Boston vistos do alto, em tons de marrom."
+muybridge:
+  label: "The Horse in Motion (O cavalo em movimento)"
+  when: "1878"
+  note: "A fileira de câmeras de Eadweard Muybridge, disparadas por fios, mostrou que um cavalo a galope tira os quatro cascos do chão ao mesmo tempo, algo que nenhum pintor jamais tinha desenhado."
+  imageAlt: "Doze pequenos quadros em silhueta de um cavalo a galope com o cavaleiro, em três fileiras, impressos num cartão montado."
+shantytown:
+  label: "A Scene in Shantytown: a primeira meia-tinta num jornal"
+  when: "4 de março de 1880"
+  note: "O New York Daily Graphic imprimiu uma fotografia de barracos em Manhattan como meia-tinta, com uma retícula grosseira. Ainda levou duas décadas para a meia-tinta se tornar comum nos jornais."
+  imageAlt: "Barracos de madeira numa encosta rochosa com prédios de apartamentos atrás, impressos como uma meia-tinta grosseira num jornal."
+riis:
+  label: "How the Other Half Lives (Como vive a outra metade)"
+  when: "1890"
+  note: "Jacob Riis usou pó de magnésio para fotografar os cortiços de Nova York à noite e publicou as imagens em livro. Ajudou a provocar a reforma habitacional e é uma obra fundadora da fotografia documental."
+  imageAlt: "Homens de chapéu-coco e boné num beco estreito de cortiço, cheio de escadas de madeira e roupa estendida."
+life-magazine:
+  label: "O primeiro número da LIFE"
+  when: "23 de novembro de 1936"
+  note: "Henry Luce relançou a LIFE como revista semanal de fotografias, com a foto da barragem de Fort Peck, de Margaret Bourke-White, na capa. As revistas ilustradas definiram o fotojornalismo por décadas."
+earth-from-space:
+  label: "A primeira fotografia da Terra vista do espaço"
+  when: "24 de outubro de 1946"
+  note: "Uma câmera de cinema 35mm num foguete V-2 capturado, lançado de White Sands, no Novo México, filmou a Terra a cerca de 105 km de altura. O filme sobreviveu num estojo de aço quando o foguete caiu."
+  imageAlt: "Uma vista granulada em preto e branco da Terra curva, com nuvens, vista do alto contra um céu negro."
+earthrise:
+  label: "Earthrise (Nascer da Terra)"
+  when: "24 de dezembro de 1968"
+  note: "Bill Anders fotografou a Terra nascendo sobre a Lua, a bordo da Apollo 8, com uma Hasselblad e filme colorido. Virou uma das fotografias mais reproduzidas de todos os tempos."
+  imageAlt: "A Terra, metade iluminada, azul e branca, surgindo sobre o horizonte cinza da Lua contra o espaço negro."
+apollo-11:
+  label: "Hasselblads na Lua"
+  when: "20 de julho de 1969"
+  note: "Neil Armstrong e Buzz Aldrin fotografaram o pouso da Apollo 11 com câmeras Hasselblad modificadas. A maioria das fotos de um astronauta na Lua dessa missão mostra Aldrin, porque era Armstrong quem segurava a câmera."
+  imageAlt: "Um astronauta de traje espacial branco de pé na superfície cinza da Lua, com o visor dourado refletindo o fotógrafo."
+instagram:
+  label: "O lançamento do Instagram"
+  when: "6 de outubro de 2010"
+  note: "Um aplicativo gratuito de iPhone para fotos quadradas com filtros ganhou um milhão de usuários em dois meses. Fez do compartilhamento a principal forma de muita gente usar fotografias."
+kodak-bankruptcy:
+  label: "A Kodak pede recuperação judicial"
+  when: "19 de janeiro de 2012"
+  note: "A empresa que construiu a primeira câmera digital, em 1975, pediu proteção pelo Chapter 11 depois do colapso das vendas de filme. Saiu dele em 2013 como uma empresa muito menor."
+ai-image-debate:
+  label: "Uma imagem de IA ganha um prêmio de fotografia"
+  when: "Abril de 2023"
+  note: "Boris Eldagsen revelou que sua obra premiada no Sony World Photography Awards fora feita com IA, e recusou o prêmio para abrir um debate sobre o que conta como fotografia."
