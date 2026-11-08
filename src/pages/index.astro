@@ -1,0 +1,213 @@
+---
+import { getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { content, STATUS_TEXT, SIDE_TEXT } from '../lib/content';
+import { url } from '../lib/url';
+import type { Payload } from '../scripts/timeline/types';
+
+const { entries, families, eras, milestones } = await content();
+const items: Payload['items'] = await Promise.all(
+  entries.map(async (e) => {
+    const d = e.data;
+    const thumb = d.image ? (await getImage({ src: d.image.src, width: 560, format: 'webp' })).src : undefined;
+    return {
+      id: e.id, label: d.label, title: d.title, ds: d.ds, date: d.date, year: d.year, range: d.range, end: d.end,
+      fam: d.fam, side: d.side, impact: d.impact, status: d.status, summary: d.summary, today: d.today,
+      parents: d.parents.map((p) => ({ id: p.id.id, kind: p.kind })), makers: d.makers.map((m) => m.id),
+      thumb, thumbAlt: d.image?.alt, href: url(`/entries/${e.id}/`),
+    };
+  }),
+);
+const payload: Payload = {
+  items,
+  milestones: milestones.map((m) => ({ id: m.id, year: m.data.year, label: m.data.label, when: m.data.when, note: m.data.note, href: url(`/landmarks/#${m.id}`) })),
+  eras: eras.map((e) => ({ name: e.data.name, short: e.data.short, a: e.data.a, b: e.data.b })),
+  families: families.map((f) => ({ id: f.id, name: f.data.name, short: f.data.short })),
+  now: new Date().getFullYear(),
+};
+const count = (fam: string) => entries.filter((e) => e.data.fam === fam).length;
+const famName = new Map(families.map((f) => [f.id, f.data.name]));
+---
+<Base wide>
+  <header class="intro">
+    <p class="eyebrow">Light, chemistry &amp; cameras</p>
+    <h1>Photography <em>Through</em> Time</h1>
+    <p class="dek">
+      {entries.length} discoveries, cameras and formats, from the camera obscura to computational photography, on one line of time.
+      Stars <b>above the line</b> are discoveries and inventions; stars <b>below</b> are cameras, formats and products that photographers could buy.
+      Hover a star for a summary and to light up everything it built on; click it to read the full entry.
+    </p>
+  </header>
+
+  <div class="controls">
+    <div class="chips" id="chips" role="group" aria-label="Highlight a family">
+      <button type="button" class="chip" data-fam="all" aria-pressed="true">All <span class="n">{entries.length}</span></button>
+      {families.map((f) => (
+        <button type="button" class="chip" data-fam={f.id} aria-pressed="false"><span class="sw" style={`background: var(--f-${f.id})`} />{f.data.name} <span class="n">{count(f.id)}</span></button>
+      ))}
+    </div>
+    <div class="toggles">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" id="v-time" aria-pressed="true">Timeline</button>
+        <button type="button" id="v-lanes" aria-pressed="false">By family</button>
+        <button type="button" id="v-list" aria-pressed="false">List</button>
+      </div>
+      <div class="seg" role="group" aria-label="Time scale">
+        <button type="button" id="sc-stretch" aria-pressed="true">Recent stretched</button>
+        <button type="button" id="sc-true" aria-pressed="false">True to time</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend" id="legend" aria-label="How to read the chart">
+    <span class="item"><svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true"><line x1="7" y1="17" x2="7" y2="6" style="stroke:var(--muted)"/><circle cx="7" cy="5" r="4" style="fill:var(--ink)"/></svg>Above: discovery or invention</span>
+    <span class="item"><svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true"><line x1="7" y1="1" x2="7" y2="12" style="stroke:var(--muted)"/><circle cx="7" cy="13" r="4" style="fill:var(--ink)"/></svg>Below: camera, format or product</span>
+    <span class="item"><svg width="66" height="20" viewBox="0 0 66 20" aria-hidden="true"><circle cx="9" cy="10" r="9" style="fill:var(--ink)"/><circle cx="29" cy="10" r="7" style="fill:var(--ink)"/><circle cx="45" cy="10" r="5.2" style="fill:var(--ink)"/><circle cx="58" cy="10" r="3.8" style="fill:var(--ink)"/></svg>Impact: changed photography for everyone · major · significant · niche</span>
+    <span class="item"><svg width="96" height="16" viewBox="0 0 96 16" aria-hidden="true"><circle cx="8" cy="8" r="5" style="fill:var(--ink)"/><circle cx="32" cy="8" r="4" style="fill:var(--panel);stroke:var(--ink);stroke-width:2.6"/><circle cx="56" cy="8" r="4.5" style="fill:var(--panel);stroke:var(--ink-2);stroke-width:1.4"/><circle cx="84" cy="8" r="4.5" style="fill:var(--panel);stroke:var(--ink-2);stroke-width:1.4"/><circle cx="84" cy="8" r="7.5" style="fill:none;stroke:var(--ink-2);stroke-width:1;stroke-dasharray:2 2.2"/></svg>In use · niche today · obsolete · revived</span>
+    <span class="item"><svg width="88" height="10" viewBox="0 0 88 10" aria-hidden="true"><line x1="0" y1="5" x2="24" y2="5" style="stroke:var(--ink-2)"/><line x1="32" y1="5" x2="56" y2="5" style="stroke:var(--ink-2);stroke-dasharray:4 4"/><line x1="64" y1="5" x2="88" y2="5" style="stroke:var(--ink-2);stroke-dasharray:1 4;stroke-linecap:round"/></svg>Built on · made possible by · replaced</span>
+    <span class="item"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 L11 6 L6 11 L1 6Z" style="fill:var(--ink-2)"/></svg>Landmark photograph or event</span>
+  </div>
+
+  <section class="chart-shell panel" id="shell" aria-label="Timeline">
+    <div class="scroller" id="scroller">
+      <svg id="chart" role="group" aria-label="Timeline of photography: discoveries above the time band, products below"></svg>
+    </div>
+    <div class="scroller" id="lanescroller" hidden>
+      <svg id="lanes-svg" role="group" aria-label="Photography's history arranged in one lane per family"></svg>
+    </div>
+    <div class="listwrap" id="listwrap">
+      <table>
+        <thead><tr><th scope="col">Entry</th><th scope="col">When</th><th scope="col">Kind</th><th scope="col">Family</th><th scope="col">Status</th></tr></thead>
+        <tbody id="tbody">
+          {entries.map((e) => (
+            <tr data-id={e.id} data-fam={e.data.fam}>
+              <td><a href={url(`/entries/${e.id}/`)}>{e.data.title}</a></td>
+              <td class="when">{e.data.ds}</td>
+              <td>{SIDE_TEXT[e.data.side]}</td>
+              <td><span class="fam"><span class="sw" style={`background: var(--f-${e.data.fam})`} />{famName.get(e.data.fam)}</span></td>
+              <td>{STATUS_TEXT[e.data.status]}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <div class="card" id="card" role="tooltip" hidden></div>
+    <div class="caption" id="caption">
+      <span id="scale-note">Time is stretched toward the present, so the crowded last two centuries have room.</span>
+      <span class="scroll-hint">Scroll sideways to see the whole timeline.</span>
+    </div>
+  </section>
+
+  <script type="application/json" id="timeline-data" set:html={JSON.stringify(payload).replace(/</g, '\\u003c')} />
+  <script>
+    import '../scripts/timeline/main';
+  </script>
+</Base>
+
+<style>
+  .intro h1 { font: 400 clamp(40px, 6.4vw, 72px)/1 var(--font-display); margin: 14px 0 14px; letter-spacing: -0.01em; }
+  .intro h1 em { color: var(--accent); }
+  .dek { max-width: 76ch; color: var(--ink-2); margin: 0; font-size: 15.5px; }
+  .dek b { color: var(--ink); font-weight: 600; }
+  .controls { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; margin-top: 26px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .chip .n { font-family: var(--font-mono); font-size: 11px; opacity: .7; }
+  .chip[aria-pressed="true"] .sw { box-shadow: 0 0 0 2px var(--ink), 0 0 0 3px var(--paper); }
+  .toggles { display: flex; flex-wrap: wrap; gap: 10px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 16px; font-size: 12.5px; color: var(--ink-2); align-items: center; }
+  .legend .item { display: inline-flex; align-items: center; gap: 8px; }
+  .legend svg { flex: none; overflow: visible; }
+  .chart-shell { position: relative; margin-top: 16px; overflow: hidden; }
+  .scroller { overflow-x: auto; overscroll-behavior-x: contain; }
+  .caption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px; padding: 10px 16px 12px; border-top: 1px solid var(--rule-soft); font-size: 12px; color: var(--muted); }
+  .scroll-hint { display: none; }
+  @media (max-width: 1080px) { .scroll-hint { display: inline; } }
+  /* Without JS, only the list shows. */
+  :global(html:not(.js)) #scroller, :global(html:not(.js)) .toggles, :global(html:not(.js)) #chips, :global(html:not(.js)) .legend, :global(html:not(.js)) .caption { display: none; }
+
+  .listwrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 720px; }
+  th { text-align: left; font: 500 10.5px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 14px 14px 10px; border-bottom: 1px solid var(--rule); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--rule-soft); color: var(--ink-2); vertical-align: top; }
+  td:first-child a { color: var(--ink); font-weight: 500; border: 0; }
+  td:first-child a:hover { color: var(--accent); }
+  td.when { font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
+  td .fam { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+
+  .card { position: absolute; left: 0; top: 0; pointer-events: none; width: max-content; max-width: 300px; z-index: 5;
+    background: var(--raised); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 12px 11px;
+    box-shadow: 0 10px 30px var(--shadow); font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+  .card :global(.thumb) { display: block; width: 100%; height: 120px; object-fit: cover; border-radius: 7px; margin-bottom: 8px; filter: saturate(.9); }
+  .card :global(.nm) { display: block; font: 600 15px/1.25 var(--font-body); color: var(--ink); }
+  .card :global(.when) { display: block; font: 400 11px/1.4 var(--font-mono); color: var(--accent); margin: 2px 0 6px; }
+  .card :global(.s) { display: block; }
+  .card :global(.fam) { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  .card :global(.today) { display: block; margin-top: 6px; color: var(--muted); font-size: 11.5px; }
+  .card :global(.go) { display: block; margin-top: 7px; font: 500 11px/1 var(--font-mono); color: var(--accent); }
+
+  /* ---- chart ---- */
+  #chart, #lanes-svg { display: block; }
+  .chart-shell :global(.era-band) { fill: var(--era); }
+  .chart-shell :global(.era-name) { font: 500 10px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; fill: var(--muted); }
+  .chart-shell :global(.axis-band) { fill: var(--band); stroke: var(--rule); }
+  .chart-shell :global(.sprocket) { stroke: var(--rule); stroke-width: 2.4; stroke-dasharray: 3 5; opacity: .9; }
+  .chart-shell :global(.tick-label) { font: 400 10.5px/1 var(--font-mono); fill: var(--muted); }
+  .chart-shell :global(.tick) { stroke: var(--rule); }
+  .chart-shell :global(.now-mark) { fill: var(--accent); }
+  .chart-shell :global(.now-label) { font: 500 10px/1 var(--font-mono); letter-spacing: .1em; fill: var(--accent); }
+  .chart-shell :global(.span-fill) { fill: var(--accent-span); }
+  .chart-shell :global(.span-range) { fill: none; stroke: var(--accent); stroke-dasharray: 2 3; }
+  .chart-shell :global(.ms) { border: 0; outline: none; cursor: pointer; }
+  .chart-shell :global(.ms .gem) { fill: var(--ink-2); stroke: var(--panel); stroke-width: 1.5; transition: fill .15s; }
+  .chart-shell :global(.ms .ms-hit) { fill: transparent; }
+  .chart-shell :global(.ms:hover .gem), .chart-shell :global(.ms:focus-visible .gem) { fill: var(--accent); }
+  .chart-shell :global(.ms-line) { stroke: var(--muted); stroke-dasharray: 2 4; opacity: .5; }
+  .chart-shell :global(.edge) { fill: none; stroke: var(--ink-2); stroke-width: 1; opacity: .2; transition: opacity .2s; }
+  .chart-shell :global(.edge.enabled) { stroke-dasharray: 4 4; }
+  .chart-shell :global(.edge.replaced) { stroke-dasharray: 1 4; stroke-linecap: round; }
+  .chart-shell :global(.edge.hot) { stroke: var(--accent); opacity: .95; stroke-width: 1.4; }
+  .chart-shell :global(.edge.fam) { opacity: .6; }
+  .chart-shell :global(.edge.cold) { opacity: .05; }
+  .chart-shell :global(.item) { outline: none; cursor: pointer; transition: opacity .2s; }
+  .chart-shell :global(.stem) { stroke: var(--rule); }
+  .chart-shell :global(.stem), .chart-shell :global(.foot), .chart-shell :global(.halo), .chart-shell :global(.edge) { pointer-events: none; }
+  .chart-shell :global(.foot) { fill: var(--muted); }
+  .chart-shell :global(.dot) { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+  .chart-shell :global(.st-niche .dot) { fill: var(--panel); stroke: var(--ink); stroke-width: 2.6; }
+  .chart-shell :global(.st-obsolete .dot), .chart-shell :global(.st-revived .dot) { fill: var(--panel); stroke: var(--ink-2); stroke-width: 1.5; }
+  .chart-shell :global(.ring) { fill: none; stroke: none; }
+  .chart-shell :global(.st-revived .ring) { stroke: var(--ink-2); stroke-dasharray: 2 2.2; }
+  .chart-shell :global(.halo) { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: 0; }
+  .chart-shell :global(.lbl) { paint-order: stroke; stroke: var(--panel); stroke-width: 5px; stroke-linejoin: round; }
+  .chart-shell :global(.lbl .nm) { font: 500 12.5px/1 var(--font-body); fill: var(--ink); }
+  .chart-shell :global(.lbl .dt) { font: 400 10px/1 var(--font-mono); fill: var(--muted); }
+  .chart-shell :global(.hit) { fill: transparent; }
+  .chart-shell :global(.item:focus-visible .halo) { opacity: 1; stroke-dasharray: 2 2; }
+  .chart-shell :global(.item:hover .lbl .nm) { text-decoration: underline; text-decoration-color: var(--muted); }
+  .chart-shell :global(.item.dim) { opacity: .18; }
+  .chart-shell :global(.item.predim) { opacity: .4; }
+  .chart-shell :global(.item.rel .halo) { opacity: .7; }
+  .chart-shell :global(.item.sel .dot) { fill: var(--accent); stroke: var(--panel); }
+  .chart-shell :global(.item.sel.st-obsolete .dot), .chart-shell :global(.item.sel.st-revived .dot), .chart-shell :global(.item.sel.st-niche .dot) { fill: var(--panel); stroke: var(--accent); stroke-width: 2.4; }
+  .chart-shell :global(.item.sel .halo) { opacity: 1; }
+  .chart-shell :global(.item.sel .stem) { stroke: var(--accent); }
+  .chart-shell :global(.item.sel .lbl .nm) { fill: var(--accent); font-weight: 600; }
+  :global(svg.picking) :global(.item.inpick .dot) { fill: var(--pick); }
+  :global(svg.picking) :global(.item.inpick.st-obsolete .dot), :global(svg.picking) :global(.item.inpick.st-revived .dot), :global(svg.picking) :global(.item.inpick.st-niche .dot) { fill: var(--panel); stroke: var(--pick); }
+  :global(svg.picking) :global(.item.inpick .stem) { stroke: var(--pick); }
+  :global(svg.tracing) :global(.item:not(.lin)) { opacity: .14; }
+  :global(svg.tracing) :global(.item.lin) { opacity: 1; }
+  :global(svg.tracing) :global(.edge) { opacity: .03; }
+  :global(svg.tracing) :global(.edge.linedge) { opacity: .9; stroke: var(--ink); stroke-width: 1.3; }
+  .chart-shell :global(.lane-bg) { stroke: none; }
+  .chart-shell :global(.lane-title) { font: 500 10px/1 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; fill: var(--ink-2); }
+  .chart-shell :global(.lane-count) { font: 400 10px/1 var(--font-mono); fill: var(--muted); }
+  #lanes-svg :global(.dot) { fill: var(--lc); }
+  #lanes-svg :global(.st-niche .dot), #lanes-svg :global(.st-obsolete .dot), #lanes-svg :global(.st-revived .dot) { fill: var(--panel); stroke: var(--lc); stroke-width: 1.8; }
+  #lanes-svg :global(.st-niche .dot) { stroke-width: 2.8; }
+  #lanes-svg :global(.edge) { opacity: 0; }
+  #lanes-svg :global(.edge.hot) { opacity: .9; }
+  #lanes-svg.tracing :global(.edge.linedge) { opacity: .85; }
+</style>
