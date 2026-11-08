@@ -4,7 +4,7 @@ An interactive history of photography, from the camera obscura to computational 
 star-chart timeline of the discoveries, processes, cameras, formats and companies that made the
 medium, with a page for each and primers on the physics behind them.
 
-**Live site:** [ptt.sconetto.me](https://ptt.sconetto.me) (coming soon)
+**Live site:** [ptt.sconetto.me](https://ptt.sconetto.me)
 
 ![The Photography Through Time home page: a star-chart timeline of 103 entries above and below a yellow time band](docs/preview.png)
 
@@ -34,9 +34,11 @@ night modes.
 
 ## Status
 
-Work in progress. The timeline, entries, makers, formats, physics primers, landmarks, glossary and
-search are in place, with 103 entries, 35 makers and nine primers, public-domain photographs on the
-landmarks and 24 entries, and a drawing of every camera. Still to come: a fact-check pass, and launch.
+Live. The site has 103 entries, 35 makers and nine primers, with public-domain photographs on the
+landmarks and 24 entries, and a drawing of every camera. Dates, names, firsts and specs have been
+fact-checked against Eder's and Newhall's histories and the sources cited on each page. Every page is
+checked with axe in day and night modes, works by keyboard, and fits a 375px phone screen without sideways
+scrolling. Corrections are always welcome (see [Contributing](#contributing)).
 
 ## Development
 
@@ -55,6 +57,18 @@ pnpm links      # check every external link in the content
 
 Built with [Astro](https://astro.build), TypeScript, MDX and [Pagefind](https://pagefind.app), with
 no client-side UI framework.
+
+## Deployment
+
+The site is static and hosted on GitHub Pages at the custom domain `ptt.sconetto.me`.
+
+- **`.github/workflows/deploy.yml`** runs on every push to `main`: type check, unit tests and build,
+  then publishes `dist/` to Pages. Pull requests run the same checks without deploying.
+- **`.github/workflows/links.yml`** runs `pnpm links` every Monday, and on demand, so dead source
+  links show up as a failed run.
+
+The domain is a DNS `CNAME` record from `ptt` to `sconetto.github.io`, set in the repository's Pages
+settings (source: GitHub Actions) with HTTPS enforced. `public/CNAME` records the domain too.
 
 ## Content
 
