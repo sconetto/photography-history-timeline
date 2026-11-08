@@ -1,21 +1,67 @@
 ---
 import Base from '../layouts/Base.astro';
 import { content } from '../lib/content';
-const { glossary } = await content();
+import { url } from '../lib/url';
+const { glossary, glossaryUsage } = await content();
 const terms = [...glossary].sort((a, b) => a.data.term.localeCompare(b.data.term));
+const letters = [...new Set(terms.map((t) => t.data.term[0].toUpperCase()))];
 ---
 <Base title="Glossary" description="Photographic terms explained in plain words: aperture, f-number, crop factor, latent image, fixer and more.">
   <p class="eyebrow">Words</p>
   <h1 class="page-title">Glossary</h1>
-  <p class="dek">Terms used across the site. Underlined words in entries link here and show a short definition when you hover them.</p>
+  <p class="dek">{terms.length} terms used across the site. Underlined words in entries link here and show a short definition when you hover them; each term lists the pages that use it.</p>
+  <div class="tools">
+    <label class="filter"><span class="visually-hidden">Filter terms</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="10.8" y1="10.8" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="gl-q" type="search" placeholder="Filter terms" autocomplete="off" />
+    </label>
+    <nav class="az" aria-label="Jump to letter">{letters.map((l) => <a href={`#letter-${l}`}>{l}</a>)}</nav>
+  </div>
+  <p id="gl-none" class="none" hidden>No term matches. Try <a href={url('/search/')}>search</a> for the whole site.</p>
   <dl class="gl">
-    {terms.map((g) => <div id={g.id}><dt>{g.data.term}</dt><dd>{g.data.def}</dd></div>)}
+    {terms.map((g, i) => {
+      const L = g.data.term[0].toUpperCase();
+      const first = i === 0 || terms[i - 1].data.term[0].toUpperCase() !== L;
+      const used = glossaryUsage.get(g.id) ?? [];
+      return (
+        <div id={g.id} data-text={`${g.data.term} ${g.data.def}`.toLowerCase()}>
+          <dt id={first ? `letter-${L}` : undefined}>{g.data.term}</dt>
+          <dd>
+            {g.data.def}
+            {used.length > 0 && <p class="used"><span>Used in</span> {used.map((u, j) => <>{j > 0 && ' · '}<a href={url(u.href)}>{u.label}</a></>)}</p>}
+          </dd>
+        </div>
+      );
+    })}
   </dl>
+  <script>
+    const q = document.getElementById('gl-q') as HTMLInputElement;
+    const items = [...document.querySelectorAll<HTMLElement>('.gl > div')];
+    const none = document.getElementById('gl-none')!;
+    q.addEventListener('input', () => {
+      const v = q.value.trim().toLowerCase();
+      let shown = 0;
+      for (const it of items) { const ok = !v || it.dataset.text!.includes(v); it.hidden = !ok; if (ok) shown++; }
+      none.hidden = shown > 0;
+    });
+  </script>
 </Base>
 <style>
+  .tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 0 0 16px; }
+  .filter { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); border-radius: 999px; padding: 0 12px; background: var(--raised); color: var(--muted); flex: 0 1 320px; min-width: 0; }
+  .filter:focus-within { border-color: var(--accent); }
+  .filter input { border: 0; background: none; font: 400 15px/1 var(--font-body); color: var(--ink); padding: 10px 0; width: 100%; min-width: 0; outline: none; }
+  .az { display: flex; flex-wrap: wrap; gap: 2px; }
+  .az a { font: 500 12px/1 var(--font-mono); color: var(--ink-2); border: 0; padding: 6px 7px; border-radius: 6px; }
+  .az a:hover { background: var(--rule-soft); color: var(--ink); }
+  .none { color: var(--ink-2); }
   .gl { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 12px; margin: 0; }
-  .gl div { border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); padding: 14px 16px; scroll-margin-top: 90px; }
+  .gl div { position: relative; border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); padding: 14px 16px; scroll-margin-top: 90px; }
+  .gl div[hidden] { display: none; }
   .gl div:target { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  dt { font: 400 21px/1.2 var(--font-display); color: var(--ink); text-transform: none; margin-bottom: 6px; }
+  dt[id] { scroll-margin-top: 104px; }
+  dt { font: 400 21px/1.2 var(--font-display); color: var(--ink); margin-bottom: 6px; }
   dd { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+  .used { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+  .used span { font: 500 10px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; margin-right: 4px; }
 </style>
