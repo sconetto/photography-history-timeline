@@ -32,6 +32,10 @@ export function fmtNum(lang: Lang, n: number, digits = 0, minDigits = 0): string
 export function fmtYear(lang: Lang, y: number): string {
   return y < 0 ? `${-y} ${DICTS[lang]['year.bce']}` : String(Math.round(y));
 }
+/** An image licence as written in the content ("Public domain", "CC0"), in the reader's language. */
+export function fmtLicense(lang: Lang, license: string): string {
+  return /^public domain$/i.test(license) ? DICTS[lang]['license.pd'] : license;
+}
 /** "A, B and C" in the reader's language. */
 export function fmtList(lang: Lang, items: string[]): string {
   return new Intl.ListFormat(LOCALES[lang].htmlLang, { type: 'conjunction' }).format(items);

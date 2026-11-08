@@ -13,6 +13,7 @@ const ptBr = {
   'year.todayCaps': 'HOJE',
   'year.antiquity': 'Antiguidade',
   'common.source': 'fonte',
+  'license.pd': 'Domínio público',
   'common.wikipedia': 'Wikipédia',
   'common.wikipediaTitle': 'Wikipédia: {title}',
   'common.inEnglish': ' (em inglês)',

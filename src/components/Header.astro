@@ -76,10 +76,18 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
   .menu-btn[aria-expanded="true"] .l2 { opacity: 0; }
   .menu-btn[aria-expanded="true"] .l3 { transform: translateY(-4px) rotate(-45deg); }
 
-  /* laptops: tools go icon-only so brand, nav and tools share one row */
+  /* laptops: tools go icon-only so brand, nav and tools share one row. Other languages run longer than
+     English, so their nav needs that room at every width. */
   @media (max-width: 1400px) {
     .search-link { padding: 7px 9px; }
     .search-link .lbl, .tools :global(.cur-name) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  }
+  :global(html:not([lang="en"])) .search-link { padding: 7px 9px; }
+  :global(html:not([lang="en"])) .search-link .lbl, :global(html:not([lang="en"])) .tools :global(.cur-name) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* just above the fold: tighter pills so the longest language still fits on one row */
+  @media (min-width: 1141px) and (max-width: 1260px) {
+    nav ul { gap: 0; }
+    nav a { padding: 6px 6px; font-size: 13px; }
   }
   /* tablets and phones: the nav folds into a Menu button (only when JS can open it again) */
   @media (max-width: 1140px) {

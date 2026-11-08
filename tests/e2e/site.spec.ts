@@ -73,17 +73,26 @@ test('theme persists across reloads', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
-test('header stays on one row at every width', async ({ page }) => {
-  await page.goto('/entries/');
-  for (const width of [1920, 1440, 1280, 1141, 1140, 1024, 768, 560, 375, 320]) {
+for (const path of ['/entries/', '/pt-br/entries/']) test(`header stays on one row, without overlaps, at every width: ${path}`, async ({ page }) => {
+  await page.goto(path);
+  for (const width of [1920, 1440, 1401, 1400, 1280, 1141, 1140, 1024, 768, 560, 375, 320]) {
     await page.setViewportSize({ width, height: 800 });
     const r = await page.evaluate(() => {
       const kids = [...document.querySelectorAll('.site-head .row > *')].filter((e) => getComputedStyle(e).display !== 'none');
       const mids = kids.map((e) => { const b = e.getBoundingClientRect(); return b.top + b.height / 2; });
-      return { spread: Math.max(...mids) - Math.min(...mids), scrollW: document.documentElement.scrollWidth };
+      // nothing visible in the bar may overlap anything else (the nav can shrink below its content)
+      const els = [...document.querySelectorAll('.site-head .row .brand, .site-head .row nav > ul > li, .site-head .row .tools > *')].filter((e) => e.getClientRects().length && getComputedStyle(e).display !== 'none');
+      const box = els.map((e) => e.getBoundingClientRect());
+      const hits: string[] = [];
+      for (let i = 0; i < els.length; i++) for (let j = i + 1; j < els.length; j++) {
+        const a = box[i], b = box[j];
+        if (a.right > b.left + 0.5 && b.right > a.left + 0.5 && a.bottom > b.top + 0.5 && b.bottom > a.top + 0.5) hits.push(`${els[i].textContent!.trim().slice(0, 12)} × ${els[j].textContent!.trim().slice(0, 12)}`);
+      }
+      return { spread: Math.max(...mids) - Math.min(...mids), scrollW: document.documentElement.scrollWidth, hits };
     });
     expect(r.spread, `header rows at ${width}px`).toBeLessThan(6);
     expect(r.scrollW, `page width at ${width}px`).toBeLessThanOrEqual(width);
+    expect(r.hits, `overlaps at ${width}px`).toEqual([]);
   }
 });
 

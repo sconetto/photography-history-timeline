@@ -15,6 +15,7 @@ const en = {
   'year.todayCaps': 'TODAY',
   'year.antiquity': 'antiquity',
   'common.source': 'source',
+  'license.pd': 'Public domain',
   'common.wikipedia': 'Wikipedia',
   'common.wikipediaTitle': 'Wikipedia: {title}',
   'common.inEnglish': '',

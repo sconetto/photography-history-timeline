@@ -7,7 +7,7 @@ import CameraSilhouette from '../../../components/CameraSilhouette.astro';
 import ExposureBar from '../../../components/ExposureBar.astro';
 import { content, wikiHref, type Entry } from '../../../lib/content';
 import { url } from '../../../lib/url';
-import { useT, langPaths, type Lang } from '../../../i18n';
+import { useT, langPaths, type Lang, fmtLicense } from '../../../i18n';
 
 export async function getStaticPaths() {
   return (await Promise.all(langPaths().map(async ({ params, props: { lang } }) => {
@@ -48,7 +48,7 @@ const wikiTitle = decodeURIComponent(d.wiki).replace(/_/g, ' ');
     {d.image && (
       <figure class="hero">
         <div class="mat"><Image src={d.image.src} alt={d.image.alt} widths={[400, 640, 960, 1400]} sizes={heroSizes} loading="eager" fetchpriority="high" /></div>
-        <figcaption>{d.image.credit} · {d.image.license} · <a href={d.image.source} rel="noopener">{t('common.source')} ↗</a></figcaption>
+        <figcaption>{d.image.credit} · {fmtLicense(lang, d.image.license)} · <a href={d.image.source} rel="noopener">{t('common.source')} ↗</a></figcaption>
       </figure>
     )}
 
