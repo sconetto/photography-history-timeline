@@ -55,6 +55,7 @@ pnpm test       # unit tests (Vitest)
 pnpm e2e        # end-to-end and accessibility tests (Playwright + axe, against pnpm preview)
 pnpm links      # check every external link in the content
 pnpm i18n:status  # list anything not yet translated, per language
+pnpm wiki:langlinks [lang] [--write]  # link translations to their own Wikipedia (see Languages)
 ```
 
 Built with [Astro](https://astro.build), TypeScript, MDX and [Pagefind](https://pagefind.app), with
@@ -121,6 +122,14 @@ English file is the source of truth, and `pnpm check` fails if another language 
 consistent. In translated text, wikilinks need a label in that language (`[[daguerreotype|daguerreótipo]]`);
 `[[g:term]]` picks up the translated glossary term by itself, and all links stay in the same language.
 
+**Wikipedia links.** A translated entry or maker can set its own `wiki:` title, and its page then
+links to that language's Wikipedia instead of the English article marked "(em inglês)".
+`pnpm wiki:langlinks pt-br` sets these only when it is sure the two are the same article. It follows the
+English article's interlanguage link (from the shared Wikidata item), and the other-language article
+must link back to the same English article. It skips redirects, disambiguation pages, and English links
+that land on a section of a broader article. Run it without flags to see what could be added, and with
+`--write` to add it. It also re-checks links already set and fails if one no longer matches.
+
 **To add a language:**
 
 1. Add it to `LANGS` and `LOCALES` in `src/i18n/locales.ts`, and to the sitemap `locales` in
@@ -129,7 +138,7 @@ consistent. In translated text, wikilinks need a label in that language (`[[dagu
    `src/i18n/index.ts`.
 3. Translate the content into `src/content/i18n/<lang>/`. Pages are generated for the new prefix
    automatically, and Pagefind builds a separate search index for it.
-4. Run `pnpm i18n:status` until it reports the language complete. The build also fails on a
+4. Run `pnpm i18n:status` until it reports the language complete, then `pnpm wiki:langlinks <lang> --write`. The build also fails on a
    translation with no English original, or an entry missing one of its sections.
 
 ## Contributing
