@@ -1,5 +1,6 @@
 ---
 fate: "Pediu recuperação judicial pelo Chapter 11 em 2012 e saiu dela em 2013 como uma empresa menor. O filme Kodak ainda é feito em Rochester."
+wiki: "Kodak"
 ---
 George Eastman, um bancário e amador entusiasmado, fundou a Eastman Dry Plate Company em Rochester, Nova York, em 1º de janeiro de 1881. Seu objetivo era tornar a fotografia "as convenient as the pencil" (tão prática quanto o lápis). Ele construiu o negócio com o filme em rolo, a [[kodak-camera|câmera Kodak]] de 1888 e a revelação barata, e a empresa virou Eastman Kodak em 1892.
 

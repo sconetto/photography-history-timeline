@@ -2,6 +2,7 @@
 fate: "Deixou as câmeras e o filme em 2006; seu negócio de SLRs foi para a Sony. Segue em equipamentos de escritório e imagem médica."
 linkNotes:
   sony: "Negócio de câmeras e SLRs, incluindo o encaixe A"
+wiki: "Konica_Minolta"
 ---
 A Konica Minolta foi formada em 2003, quando a [[m:konica|Konica]] e a [[m:minolta|Minolta]] se fundiram. Fez a primeira SLR digital com estabilização por deslocamento do sensor, a Maxxum 7D, de 2004.
 

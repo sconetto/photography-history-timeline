@@ -1,5 +1,6 @@
 ---
 fate: "Ativa. Faz objetivas fotográficas, lentes para fabricantes de celulares e óptica científica."
+wiki: "Carl_Zeiss_AG"
 ---
 Carl Zeiss abriu uma oficina em Jena em 1846. Com o físico Ernst Abbe e o químico do vidro Otto Schott, a firma fez do projeto de objetivas uma ciência: as objetivas passaram a ser calculadas e feitas com vidro de propriedades conhecidas.
 

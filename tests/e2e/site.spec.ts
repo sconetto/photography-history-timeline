@@ -521,6 +521,17 @@ test.describe('portuguese site', () => {
     expect(await g.getAttribute('href')).toMatch(/^\/pt-br\/glossary\/#/);
   });
 
+  test('Wikipedia links go to the Portuguese article when one is confirmed, else to English marked as such', async ({ page }) => {
+    await page.goto('/pt-br/entries/daguerreotype/');
+    await expect(page.locator('a[href="https://pt.wikipedia.org/wiki/Daguerreótipo"]')).toContainText('Wikipédia: Daguerreótipo');
+    await page.goto('/pt-br/entries/bayer-filter/');
+    const en = page.locator('a[href="https://en.wikipedia.org/wiki/Bayer_filter"]');
+    await expect(en).toHaveAttribute('hreflang', 'en');
+    await expect(en).toContainText('(em inglês)');
+    await page.goto('/entries/daguerreotype/');
+    await expect(page.locator('a[href="https://en.wikipedia.org/wiki/Daguerreotype"]')).toBeVisible();
+  });
+
   test('the formats calculator uses a decimal comma', async ({ page }) => {
     await page.goto('/pt-br/formats/');
     await page.selectOption('#fmt', 'aps-c-canon');

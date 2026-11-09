@@ -1,5 +1,6 @@
 ---
 fate: "Ativa. Faz as câmeras da série X e GFX e o filme instantâneo Instax."
+wiki: "Fujifilm"
 ---
 A Fuji Photo Film foi fundada em 1934 para fabricar filme no Japão. Virou a principal rival da Kodak, e seu filme de slide Velvia (1990) tornou-se um padrão dos fotógrafos de paisagem.
 

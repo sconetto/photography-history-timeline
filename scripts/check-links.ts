@@ -2,7 +2,8 @@
  * pnpm links — fetch every external URL in src/content and fail on any that does not load.
  * Wikipedia article names in `wiki:` fields are checked too. Archive.org and Gutenberg pages
  * print their <title> so a human can confirm they are the right item, not a placeholder.
- * English Wikipedia articles are checked in batches through the MediaWiki API (one request per 50 titles),
+ * A translation's `wiki:` names an article on that language's Wikipedia (src/content/i18n/pt-br/… → pt.wikipedia.org).
+ * Wikipedia articles are checked in batches through the MediaWiki API (one request per 50 titles),
  * because fetching each page trips Wikipedia's rate limit (HTTP 429).
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -37,7 +38,8 @@ for (const f of files(ROOT)) {
   const text = readFileSync(f, 'utf8');
   for (const m of text.matchAll(/https?:\/\/[^\s"'<>`]+/g)) add(m[0], f);
   const wiki = /^wiki:\s*["']?([^"'\n]+?)["']?\s*$/m.exec(text);
-  if (wiki) add(`https://en.wikipedia.org/wiki/${wiki[1]}`, f);
+  const lang = /(?:^|[\\/])i18n[\\/]([a-z]+)(?:-[a-z]+)?[\\/]/.exec(path.relative(ROOT, f))?.[1] ?? 'en';
+  if (wiki) add(`https://${lang}.wikipedia.org/wiki/${wiki[1]}`, f);
 }
 
 type Result = { url: string; ok: boolean; note: string; manual?: boolean };
@@ -65,14 +67,20 @@ async function get(url: string, tries = 4): Promise<Response> {
   }
 }
 
-const WIKI = /^https:\/\/en\.wikipedia\.org\/wiki\/(.+)$/;
-/** Check English Wikipedia articles 50 at a time. Redirects and normalised titles count as found. */
-async function checkWikipedia(list: string[]): Promise<Result[]> {
+const WIKI = /^https:\/\/([a-z]+)\.wikipedia\.org\/wiki\/(.+)$/;
+/** Check Wikipedia articles 50 at a time per language. Redirects and normalised titles count as found. */
+async function checkWikipedia(all: string[]): Promise<Result[]> {
   const out: Result[] = [];
-  const title = (u: string) => decodeURIComponent(WIKI.exec(u)![1].split('#')[0]).replace(/_/g, ' ');
+  const hosts = [...new Set(all.map((u) => WIKI.exec(u)![1]))];
+  for (const host of hosts) out.push(...(await checkWikiHost(host, all.filter((u) => WIKI.exec(u)![1] === host))));
+  return out;
+}
+async function checkWikiHost(host: string, list: string[]): Promise<Result[]> {
+  const out: Result[] = [];
+  const title = (u: string) => decodeURIComponent(WIKI.exec(u)![2].split('#')[0]).replace(/_/g, ' ');
   for (let i = 0; i < list.length; i += 50) {
     const batch = list.slice(i, i + 50);
-    const api = `https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1&titles=${encodeURIComponent(batch.map(title).join('|'))}`;
+    const api = `https://${host}.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1&titles=${encodeURIComponent(batch.map(title).join('|'))}`;
     try {
       const res = await get(api);
       if (!res.ok) { for (const url of batch) out.push({ url, ok: false, note: `Wikipedia API HTTP ${res.status}` }); continue; }

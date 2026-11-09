@@ -1,5 +1,6 @@
 ---
 fate: "Ativa. A Leica Camera AG se separou dos outros negócios da Leitz nos anos 1980–90; ainda faz as telemétricas M em Wetzlar."
+wiki: "Leica_Camera"
 ---
 A história da Leica começa no Instituto Óptico fundado em Wetzlar em 1849. Ernst Leitz assumiu o controle em 1869 e construiu microscópios e óptica científica. Por volta de 1913, um de seus engenheiros, Oskar Barnack, construiu uma pequena câmera para pontas de filme de cinema 35mm. A Leitz a vendeu a partir de 1925 como Leica: *Lei*tz *Ca*mera.
 

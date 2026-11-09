@@ -1,5 +1,6 @@
 ---
 fate: "Ativa. Faz as compactas GR e, pela Ricoh Imaging, as câmeras Pentax."
+wiki: "Ricoh"
 ---
 A Ricoh começou em 1936 como Riken Kankōshi, fazendo papel fotossensível. Sua Ricohflex, de 1950, era uma reflex de duas objetivas barata que levou o médio formato a muitos amadores no Japão do pós-guerra.
 

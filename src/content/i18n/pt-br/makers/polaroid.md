@@ -2,6 +2,7 @@
 fate: "Parou de fazer filme instantâneo em 2008, depois de duas falências. O filme foi ressuscitado pelo Impossible Project."
 linkNotes:
   impossible: "Comprou a última fábrica de filme instantâneo da Polaroid, em Enschede"
+wiki: "Polaroid_Corporation"
 ---
 Edwin Land fundou a Polaroid em 1937 para fazer filtros polarizadores. Em 1947, mostrou uma câmera que revelava a própria foto em cerca de um minuto, e o Model 95 chegou às lojas em 1948.
 

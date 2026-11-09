@@ -2,6 +2,7 @@
 fate: "Entrou em concordata em 2004; uma compra pelos gestores criou a Harman Technology em 2005, que ainda faz o filme Ilford."
 linkNotes:
   harman: "Compra pelos gestores depois da concordata"
+wiki: "Ilford_Photo"
 ---
 Alfred Harman começou a fabricar [[gelatin-dry-plate|chapas secas de gelatina]] na cidade de Ilford, a leste de Londres, em 1879. A firma adotou o nome da cidade e virou a principal fabricante britânica de filme e papel fotográfico.
 

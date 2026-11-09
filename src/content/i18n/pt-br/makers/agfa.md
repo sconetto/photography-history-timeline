@@ -1,5 +1,6 @@
 ---
 fate: "Fundiu-se com a Gevaert em 1964; o negócio de filmes para consumidores, separado como AgfaPhoto em 2004, faliu em 2005."
+wiki: "AGFA"
 ---
 A Agfa começou em Berlim, em 1867, como fabricante de corantes de anilina. A partir dos anos 1890 passou aos produtos químicos fotográficos e ao filme.
 

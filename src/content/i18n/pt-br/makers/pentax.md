@@ -1,5 +1,6 @@
 ---
 fate: "Comprada pela Hoya em 2007; o negócio de câmeras foi para a Ricoh em 2011, e o nome Pentax continua lá."
+wiki: "Pentax"
 ---
 A Asahi Optical começou em Tóquio em 1919, polindo lentes de óculos. Sua Asahiflex, de 1952, foi a primeira reflex monobjetiva japonesa de 35mm, e uma versão de 1954 acrescentou um espelho de retorno instantâneo, para que o visor não ficasse mais escuro depois de cada foto.
 
