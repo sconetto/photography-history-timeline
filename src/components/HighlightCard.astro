@@ -4,7 +4,7 @@
  * drawing (the model's own, or a typical one of its type, which the caption says), else a plain kind panel.
  */
 import { Image } from 'astro:assets';
-import CameraSilhouette from './CameraSilhouette.astro';
+import { cameraDrawing } from '../lib/cameras';
 import type { Maker } from '../lib/content';
 import { url } from '../lib/url';
 import { useT, pageLang, fmtLicense, type Key } from '../i18n';
@@ -14,6 +14,8 @@ const { h } = Astro.props;
 const lang = pageLang(Astro);
 const t = useT(lang);
 const kind = t(`highlight.${h.kind}` as Key);
+// the camera drawing: this model's own when the site has one, else a typical camera of its type (and the caption says so)
+const draw = !h.image && h.cameraType ? cameraDrawing(h.entry?.id ?? h.id, h.cameraType, 1.25, 240) : null;
 ---
 <article class="hl" id={`hl-${h.id}`}>
   {h.image ? (
@@ -21,8 +23,11 @@ const kind = t(`highlight.${h.kind}` as Key);
       <div class="mat"><Image src={h.image.src} alt={h.image.alt} widths={[320, 480, 720]} sizes="(max-width: 640px) calc(100vw - 32px), 320px" loading="lazy" /></div>
       <figcaption>{h.image.credit} · {fmtLicense(lang, h.image.license)} · <a href={h.image.source} rel="noopener">{t('common.source')} ↗</a></figcaption>
     </figure>
-  ) : h.cameraType ? (
-    <div class="pic draw"><CameraSilhouette id={h.entry?.id ?? h.id} type={h.cameraType} /></div>
+  ) : draw && h.cameraType ? (
+    <figure class="pic">
+      <div class="mat art"><Fragment set:html={draw.svg} /></div>
+      <figcaption>{draw.own ? t('highlight.drawing') : t('highlight.drawingTypical', { type: t(`camera.${h.cameraType}`) })}</figcaption>
+    </figure>
   ) : (
     <div class="pic kindpanel" aria-hidden="true"><span>{kind}</span></div>
   )}
@@ -39,8 +44,9 @@ const kind = t(`highlight.${h.kind}` as Key);
   .mat { background: color-mix(in srgb, var(--ink) 6%, var(--panel)); display: grid; place-items: center; aspect-ratio: 4 / 3; }
   .mat :global(img) { width: 100%; height: 100%; object-fit: contain; }
   .pic figcaption { font-size: 11.5px; color: var(--muted); padding: 6px 14px 0; line-height: 1.4; }
-  .draw { padding: 12px 12px 0; }
-  .draw :global(figcaption) { font-size: 12px; }
+  .art { padding: 14px; box-sizing: border-box; }
+  .art :global(svg) { max-width: 100%; max-height: 100%; width: auto; height: auto; }
+  :global([data-theme="dark"]) .art { background: color-mix(in srgb, var(--ink) 30%, var(--panel)); }
   .kindpanel { display: grid; place-items: center; aspect-ratio: 4 / 3; background: color-mix(in srgb, var(--ink) 6%, var(--panel)); }
   .kindpanel span { font: 400 26px/1 var(--font-display); color: var(--ink-2); }
   .txt { padding: 12px 16px 16px; display: grid; align-content: start; gap: 6px; }

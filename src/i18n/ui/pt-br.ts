@@ -275,8 +275,8 @@ const ptBr = {
   'maker.sec.legacy': 'Legado',
   'maker.onThisPage': 'Nesta página',
   'maker.highlights': 'Destaques',
-  'maker.highlightsDek': 'Os produtos que marcaram {name}, em fotografia de arquivo ou em desenho nosso.',
-  'maker.logo': 'Logotipo de {name}, {era}',
+  'maker.highlightsDek': 'Os produtos que marcaram a empresa, em fotografia de arquivo ou em desenho nosso.',
+  'maker.logo': 'Logotipo: {name}, {era}',
   'maker.logoEra': 'Logotipo exibido: {era}',
   'highlight.camera': 'Câmera',
   'highlight.lens': 'Objetiva',
@@ -285,6 +285,8 @@ const ptBr = {
   'highlight.software': 'Software',
   'highlight.other': 'Produto',
   'highlight.onTimeline': 'Na linha do tempo →',
+  'highlight.drawing': 'Desenho desta câmera, feito para este site',
+  'highlight.drawingTypical': 'Uma câmera típica do seu tipo ({type}), desenhada para este site; não este modelo exato',
   'common.trademarks': 'Os logotipos são marcas registradas de seus donos. Aparecem só para identificar cada empresa, e só quando o Wikimedia Commons os lista como domínio público; os demais fabricantes recebem uma placa com o nome.',
 
   // ---- physics

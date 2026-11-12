@@ -5,7 +5,7 @@ import MakerLogo from '../../../components/MakerLogo.astro';
 import HighlightCard from '../../../components/HighlightCard.astro';
 import { content, wikiHref, type Maker } from '../../../lib/content';
 import { url } from '../../../lib/url';
-import { useT, langPaths, type Lang, type Key } from '../../../i18n';
+import { useT, langPaths, fmtLicense, type Lang, type Key } from '../../../i18n';
 export async function getStaticPaths() {
   return (await Promise.all(langPaths().map(async ({ params, props: { lang } }) => {
     const { makers } = await content(lang);
@@ -47,7 +47,7 @@ const lineage = [
       {list.length ? <ul>{list.map((e) => <li><a href={url(`/entries/${e.id}/`, lang)}>{e.data.label}</a> <span class="mono">{e.data.ds}</span></li>)}</ul> : <p>{t('maker.none')}</p>}
       <p class="kicker">{t('maker.sources')}</p>
       <ul>{d.refs.map((r) => <li><a href={r[1]} rel="noopener">{r[0]} ↗</a></li>)}<li><a href={wikiHref(lang, maker)} rel="noopener" hreflang={maker.wikiLocal ? undefined : 'en'}>{t('common.wikipedia')}{!maker.wikiLocal && t('common.inEnglish')} ↗</a></li></ul>
-      {d.logo && <p class="logo-era">{t('maker.logoEra', { era: d.logo.era })} · {d.logo.credit} · <a href={d.logo.source} rel="noopener">{t('common.source')} ↗</a></p>}
+      {d.logo && <p class="logo-era">{t('maker.logoEra', { era: d.logo.era })} · {d.logo.credit} · {fmtLicense(lang, d.logo.license)} · <a href={d.logo.source} rel="noopener">{t('common.source')} ↗</a></p>}
     </aside>
   </div>
   {highlights.length > 0 && (
