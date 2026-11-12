@@ -39,7 +39,10 @@ export function fmtLicense(lang: Lang, license: string): string {
 /** A logo era such as "1955–today" or "2000s–today" in the reader's language ("anos 2000–hoje"). */
 export function fmtEra(lang: Lang, era: string): string {
   if (lang === 'en') return era;
-  return era.replace(/\btoday\b/g, DICTS[lang]['year.today']).replace(/\b(\d{4})s\b/g, lang === 'pt-br' ? 'anos $1' : '$1s');
+  return era
+    .replace(/\btoday\b/g, DICTS[lang]['year.today'])
+    .replace(/\b(\d{4})s–(\d{2})s\b/g, lang === 'pt-br' ? 'anos $1–$2' : '$1s–$2s') // "1950s–60s"
+    .replace(/\b(\d{4})s\b/g, lang === 'pt-br' ? 'anos $1' : '$1s');
 }
 /** "A, B and C" in the reader's language. */
 export function fmtList(lang: Lang, items: string[]): string {

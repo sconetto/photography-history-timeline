@@ -106,5 +106,7 @@ describe('fmtEra', () => {
     expect(fmtEra('en', '2000s–today')).toBe('2000s–today');
     expect(fmtEra('pt-br', '2000s–today')).toBe('anos 2000–hoje');
     expect(fmtEra('pt-br', '1955–today')).toBe('1955–hoje');
+    expect(fmtEra('pt-br', '1950s–60s')).toBe('anos 1950–60');
+    expect(fmtEra('en', '1950s–60s')).toBe('1950s–60s');
   });
 });
