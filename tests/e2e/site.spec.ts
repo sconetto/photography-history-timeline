@@ -262,6 +262,21 @@ test.describe('phase 2 views', () => {
     }
   });
 
+  test('highlight photos keep the 4:3 frame, even tall portrait shots', async ({ page }) => {
+    // Voigtländer's Brillant and Vitessa photos are taller than they are wide
+    await page.goto('/makers/voigtlander/');
+    const frames = await page.$$eval('.hl .mat:not(.art)', (mats) => mats.map((m) => {
+      const r = m.getBoundingClientRect();
+      const img = m.querySelector('img')!.getBoundingClientRect();
+      return { ratio: r.width / r.height, inside: img.top >= r.top - 0.5 && img.bottom <= r.bottom + 0.5 };
+    }));
+    expect(frames.length).toBeGreaterThanOrEqual(5);
+    for (const f of frames) {
+      expect(f.ratio).toBeCloseTo(4 / 3, 1);
+      expect(f.inside).toBe(true);
+    }
+  });
+
   test('formats overlay zooms to the selected format and the calculator updates', async ({ page }) => {
     await page.goto('/formats/');
     const vb = () => page.locator('#ov').getAttribute('viewBox');
