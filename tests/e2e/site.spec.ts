@@ -244,7 +244,7 @@ test.describe('phase 2 views', () => {
     // SVGs that shipped without a viewBox (Ricoh, Mamiya) and the small plates of the makers list
     for (const width of [1440, 375]) {
       const page = await (await browser.newContext({ viewport: { width, height: 900 } })).newPage();
-      for (const path of ['/makers/', '/makers/sony/', '/makers/konica-minolta/', '/makers/minolta/', '/makers/om-digital/', '/makers/ricoh/', '/makers/mamiya/']) {
+      for (const path of ['/makers/', '/makers/sony/', '/makers/konica-minolta/', '/makers/minolta/', '/makers/om-digital/', '/makers/ricoh/', '/makers/mamiya/', '/makers/hoya/']) {
         await page.goto(path);
         const bad = await page.$$eval('.plate', (plates) => plates.flatMap((p) => {
           const r = p.getBoundingClientRect();
