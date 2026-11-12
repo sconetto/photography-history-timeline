@@ -239,6 +239,29 @@ test.describe('phase 2 views', () => {
     await expect(page.locator('aside')).toContainText('Merged into');
   });
 
+  test('logos and name plates stay inside their plates, centred, on desktop and phone', async ({ browser }) => {
+    // wide wordmarks (Sony), stacked marks (Konica Minolta, Minolta), a square mark (OM Digital),
+    // SVGs that shipped without a viewBox (Ricoh, Mamiya) and the small plates of the makers list
+    for (const width of [1440, 375]) {
+      const page = await (await browser.newContext({ viewport: { width, height: 900 } })).newPage();
+      for (const path of ['/makers/', '/makers/sony/', '/makers/konica-minolta/', '/makers/minolta/', '/makers/om-digital/', '/makers/ricoh/', '/makers/mamiya/']) {
+        await page.goto(path);
+        const bad = await page.$$eval('.plate', (plates) => plates.flatMap((p) => {
+          const r = p.getBoundingClientRect();
+          if (p.scrollWidth > p.clientWidth + 1 || p.scrollHeight > p.clientHeight + 1) return [`${p.textContent} overflows`];
+          const img = p.querySelector('img');
+          if (!img) return [];
+          const q = img.getBoundingClientRect();
+          const inside = q.left >= r.left && q.right <= r.right && q.top >= r.top && q.bottom <= r.bottom;
+          const centred = Math.abs((q.left - r.left) - (r.right - q.right)) <= 1 && Math.abs((q.top - r.top) - (r.bottom - q.bottom)) <= 1;
+          return inside && centred ? [] : [`${img.getAttribute('src')} ${inside ? 'off-centre' : 'outside its plate'}`];
+        }));
+        expect(bad, `${path} at ${width}px`).toEqual([]);
+      }
+      await page.context().close();
+    }
+  });
+
   test('formats overlay zooms to the selected format and the calculator updates', async ({ page }) => {
     await page.goto('/formats/');
     const vb = () => page.locator('#ov').getAttribute('viewBox');

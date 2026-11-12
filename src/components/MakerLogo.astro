@@ -14,21 +14,26 @@ const lang = pageLang(Astro);
 const t = useT(lang);
 const { name, logo } = maker.data;
 const short = name.replace(/\s*\(.*\)$/, '');
+// the small plate is a narrow list column: drop a leading article so long names wrap onto two lines
+const label = size === 'sm' ? short.replace(/^The\s+/i, '') : short;
 ---
 {logo ? (
   <span class:list={['plate', size]} title={t('maker.logo', { name: short, era: fmtEra(lang, logo.era) })}>
     <Image src={logo.src} alt={decorative ? '' : logo.alt} height={size === 'lg' ? 56 : 22} densities={[1, 2]} loading={size === 'lg' ? 'eager' : 'lazy'} />
   </span>
 ) : (
-  <span class:list={['plate', 'nameplate', size]} aria-hidden="true">{short}</span>
+  <span class:list={['plate', 'nameplate', size]} aria-hidden="true">{label}</span>
 )}
 <style>
   /* a print-white plate in every palette and mode: logos are designed for light backgrounds */
-  .plate { display: inline-grid; place-items: center; box-sizing: border-box; background: #fbfaf6; border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); border-radius: 12px; flex: none; }
+  .plate { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; background: #fbfaf6; border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); border-radius: 12px; flex: none; overflow: hidden; }
   .plate.lg { min-width: 120px; height: 84px; padding: 14px 18px; }
   .plate.sm { min-width: 56px; height: 34px; padding: 5px 8px; border-radius: 8px; }
-  .plate :global(img) { display: block; width: auto; max-width: 220px; height: 100%; object-fit: contain; }
-  .plate.sm :global(img) { max-width: 96px; }
+  /* Fit the logo inside the plate's content box whatever its shape: wide wordmarks are capped by width,
+     tall or square marks by height, and the aspect ratio always holds. Pixel caps, not percentages,
+     because a percentage height does not resolve reliably inside the plate. */
+  .plate :global(img) { display: block; flex: none; width: auto; height: auto; max-width: 220px; max-height: 56px; }
+  .plate.sm :global(img) { max-width: min(96px, 100%); max-height: 24px; }
   .nameplate { color: #1d1b17; font: 400 22px/1 var(--font-display); letter-spacing: .02em; white-space: nowrap; }
-  .nameplate.sm { font-size: 12.5px; letter-spacing: .03em; }
+  .nameplate.sm { padding-block: 3px; font-size: 12px; line-height: 1.05; letter-spacing: .02em; white-space: normal; text-align: center; overflow-wrap: anywhere; }
 </style>
