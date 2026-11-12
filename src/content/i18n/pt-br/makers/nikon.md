@@ -1,6 +1,7 @@
 ---
 fate: "Ativa. Rebatizada Nikon Corporation em 1988; faz as câmeras mirrorless de encaixe Z."
 wiki: "Nikon"
+logoAlt: "O logotipo da Nikon: a palavra Nikon em letras pretas grossas e itálicas sobre um quadrado amarelo cruzado por raios de luz brancos"
 highlights:
   nikon-f:
     note: "A SLR que fez os profissionais largarem as câmeras telemétricas. Um sistema completo de objetivas, visores e motores, ficou em produção até 1973, e seu encaixe F durou 59 anos."

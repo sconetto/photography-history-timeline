@@ -7,6 +7,13 @@ wiki: Nikon
 refs:
   - ["Nikon: corporate history", "https://www.nikon.com/company/corporate/history/"]
   - ["Canon Camera Museum: history, 1933–1936 (Nikkor lenses for the Hansa Canon)", "https://global.canon/en/c-museum/history/story01.html"]
+logo:
+  src: ../../assets/img/makers/nikon-logo.svg
+  alt: "The Nikon logo: the word Nikon in heavy black italic letters on a yellow square crossed by white rays of light"
+  credit: "Nikon Corporation"
+  license: "Public domain"
+  source: "https://commons.wikimedia.org/wiki/File:Nikon_Logo.svg"
+  era: "today"
 highlights:
   - id: nikon-f
     name: Nikon F
