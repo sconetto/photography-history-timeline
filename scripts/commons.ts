@@ -59,9 +59,13 @@ if (cmd === 'search') {
   const svg = ORIGINAL && r.mime === 'image/svg+xml';
   if (ORIGINAL && !svg) throw new Error(`--original is for SVG files; ${arg} is ${r.mime}`);
   const from = svg ? r.url : r.thumb;
-  const ext = svg ? 'svg' : (r.thumb.match(/\.(jpe?g|png|webp|gif)$/i)?.[1] ?? 'jpg').toLowerCase().replace('jpeg', 'jpg');
   const res = await fetch(from, { headers: { 'User-Agent': UA } });
   if (!res.ok) throw new Error(`${res.status} ${from}`);
+  // the extension follows what the server actually sent: a thumbnail URL may carry a query or a misleading suffix
+  const TYPES: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
+  const type = res.headers.get('content-type')?.split(';')[0].trim() ?? '';
+  const ext = svg ? 'svg' : TYPES[type];
+  if (!ext) throw new Error(`unexpected content type "${type}" for ${from}`);
   const out = `src/assets/img/${name}.${ext}`;
   await mkdir(path.dirname(out), { recursive: true });
   if (svg) {
