@@ -70,6 +70,13 @@ describe('cleanSvg', () => {
     expect(r.svg).toContain('xlink:href="#local"');
     expect(r.svg).toContain('url(#grad)');
   });
+  it('adds a viewBox so a logo scales, and refuses one it cannot size', () => {
+    const r = cleanSvg('<svg xmlns="http://www.w3.org/2000/svg" width="563" height="171px"><path d="M0 0h9z"/></svg>');
+    expect(r.problems).toEqual([]);
+    expect(r.svg).toMatch(/^<svg [^>]*viewBox="0 0 563 171">/);
+    expect(cleanSvg('<svg viewBox="0 0 4 2" width="40" height="20"/>').svg).toBe('<svg viewBox="0 0 4 2" width="40" height="20"/>\n');
+    expect(cleanSvg('<svg width="240mm" height="45mm"><path d="M0 0h9z"/></svg>').problems).toContain('has no viewBox and a width or height in units other than px, so it will not scale');
+  });
   it('refuses what it cannot clean', () => {
     expect(cleanSvg('<html><svg/></html>').problems).toContain('does not start with <svg>');
     expect(cleanSvg('<svg><iframe src="https://evil.example"></iframe></svg>').problems).toContain('still contains an embedded frame');

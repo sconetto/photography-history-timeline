@@ -288,7 +288,7 @@ const en = {
   'highlight.other': 'Product',
   'highlight.onTimeline': 'On the timeline →',
   'highlight.drawing': 'Drawing of this camera, made for this site',
-  'highlight.drawingTypical': 'A typical camera of its type ({type}), drawn for this site; not this exact model',
+  'highlight.drawingTypical': 'Drawn for this site as a typical camera of its type: {type}. Not this exact model.',
   'common.trademarks': 'Logos are trademarks of their owners. They are shown only to identify each company, and only where Wikimedia Commons lists the logo as public domain; other makers get a plain name plate.',
 
   // ---- physics
