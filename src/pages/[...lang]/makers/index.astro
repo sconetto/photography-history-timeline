@@ -1,4 +1,5 @@
 ---
+import MakerLogo from '../../../components/MakerLogo.astro';
 import Base from '../../../layouts/Base.astro';
 import { content, type Maker } from '../../../lib/content';
 import { url } from '../../../lib/url';
@@ -141,7 +142,7 @@ const conns = [...groups.values()].map((c) => {
         // dots for entries a year or two apart would hide each other: keep each at least 11 units from the last
         const dotX: number[] = [];
         ents.forEach((e, i) => dotX.push(Math.max(X(e.data.year), i ? dotX[i - 1] + 11 : -Infinity)));
-        const barTip = { k: `${t(`country.${d.country}`)} · ${d.ended ? `${d.founded}–${d.ended}` : t('makers.since', { y: d.founded })}`, t: d.name, b: d.fate, m: ents.length ? t(ents.length === 1 ? 'makers.entries.one' : 'makers.entries.many', { n: ents.length }) : '', go: t('makers.openMaker') };
+        const barTip = { k: `${t(`country.${d.country}`)} · ${d.ended ? `${d.founded}–${d.ended}` : t('makers.since', { y: d.founded })}`, t: d.name, b: d.fate, m: ents.length ? t(ents.length === 1 ? 'makers.entries.one' : 'makers.entries.many', { n: ents.length }) : '', n: d.highlights.length ? t('makers.knownFor', { list: fmtList(lang, d.highlights.slice(0, 2).map((h) => `${h.name} (${h.year})`)) }) : undefined, go: t('makers.openMaker') };
         return (
           <g class="row" data-id={m.id}>
             <rect class="band" x="4" y={y - ROW / 2 + 1} width={W - 8} height={ROW - 2} rx="6" />
@@ -188,7 +189,7 @@ const conns = [...groups.values()].map((c) => {
         <h3>{t(`country.${c}` as Key)}</h3>
         <ul>
           {byCountry.get(c)!.map((m) => (
-            <li><a href={url(`/makers/${m.id}/`, lang)}>{m.data.name}</a> <span class="mono">{m.data.founded}{m.data.ended ? `–${m.data.ended}` : '–'}</span><span class="fate">{m.data.fate}</span></li>
+            <li><MakerLogo maker={m} size="sm" decorative /><span class="who"><a href={url(`/makers/${m.id}/`, lang)}>{m.data.name}</a> <span class="mono">{m.data.founded}{m.data.ended ? `–${m.data.ended}` : '–'}</span><span class="fate">{m.data.fate}</span></span></li>
           ))}
         </ul>
       </section>
@@ -307,7 +308,8 @@ const conns = [...groups.values()].map((c) => {
   .all section { break-inside: avoid; margin-bottom: 20px; }
   .all h3 { font: 500 10.5px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
   .all ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-  .all li { font-size: 14px; color: var(--ink-2); }
+  .all li { font-size: 14px; color: var(--ink-2); display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start; }
+  .all li > :global(.plate) { width: 64px; min-width: 0; }
   .all .mono { font: 400 11.5px/1 var(--font-mono); color: var(--muted); }
   .fate { display: block; font-size: 13px; color: var(--muted); }
 </style>

@@ -1,6 +1,8 @@
 ---
 import { render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
+import MakerLogo from '../../../components/MakerLogo.astro';
+import HighlightCard from '../../../components/HighlightCard.astro';
 import { content, wikiHref, type Maker } from '../../../lib/content';
 import { url } from '../../../lib/url';
 import { useT, langPaths, type Lang, type Key } from '../../../i18n';
@@ -15,7 +17,10 @@ const { lang, maker } = Astro.props;
 const t = useT(lang);
 const d = maker.data;
 const country = t(`country.${d.country}`);
-const { Content } = await render(maker.tr ?? maker);
+const { Content, headings } = await render(maker.tr ?? maker);
+const toc = headings.filter((h) => h.depth === 2);
+const highlights = [...d.highlights].sort((a, b) => a.year - b.year);
+const short = d.name.replace(/\s*\(.*\)$/, '');
 const { makerEntries, makerById, makerIncoming } = await content(lang);
 const list = makerEntries.get(maker.id) ?? [];
 const lineage = [
@@ -25,23 +30,45 @@ const lineage = [
 ---
 <Base title={d.name} description={t('maker.desc', { name: d.name, country, y: d.founded, fate: d.fate })}>
   <p class="eyebrow"><a href={url('/makers/', lang)}>{t('makers.title')}</a> · {country}</p>
-  <h1 class="page-title">{d.name}</h1>
-  <p class="when-big">{t('maker.founded', { y: d.founded })}{d.ended ? t('maker.left', { y: d.ended }) : ''}</p>
+  <div class="head">
+    <div>
+      <h1 class="page-title">{d.name}</h1>
+      <p class="when-big">{t('maker.founded', { y: d.founded })}{d.ended ? t('maker.left', { y: d.ended }) : ''}</p>
+    </div>
+    <MakerLogo maker={maker} />
+  </div>
   <div class="cols">
     <div class="prose"><Content /></div>
     <aside class="box">
+      {toc.length > 1 && <nav class="toc" aria-label={t('maker.onThisPage')}><p class="kicker">{t('maker.onThisPage')}</p><ul>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}{highlights.length > 0 && <li><a href="#highlights">{t('maker.highlights')}</a></li>}</ul></nav>}
       <p class="kicker">{t('maker.fate')}</p><p>{d.fate}</p>
       {lineage.length > 0 && <><p class="kicker">{t('maker.lineage')}</p><ul>{lineage.map((l) => <li><span class="mono">{l.year}</span> {l.text} <a href={url(`/makers/${l.other.id}/`, lang)}>{l.other.data.name}</a>{l.note && <span class="note">{l.note}</span>}</li>)}</ul></>}
       <p class="kicker">{t('maker.onTimeline')}</p>
       {list.length ? <ul>{list.map((e) => <li><a href={url(`/entries/${e.id}/`, lang)}>{e.data.label}</a> <span class="mono">{e.data.ds}</span></li>)}</ul> : <p>{t('maker.none')}</p>}
       <p class="kicker">{t('maker.sources')}</p>
       <ul>{d.refs.map((r) => <li><a href={r[1]} rel="noopener">{r[0]} ↗</a></li>)}<li><a href={wikiHref(lang, maker)} rel="noopener" hreflang={maker.wikiLocal ? undefined : 'en'}>{t('common.wikipedia')}{!maker.wikiLocal && t('common.inEnglish')} ↗</a></li></ul>
+      {d.logo && <p class="logo-era">{t('maker.logoEra', { era: d.logo.era })} · {d.logo.credit} · <a href={d.logo.source} rel="noopener">{t('common.source')} ↗</a></p>}
     </aside>
   </div>
+  {highlights.length > 0 && (
+    <section class="hls" aria-labelledby="highlights">
+      <h2 id="highlights" class="sec">{t('maker.highlights')}</h2>
+      <p class="dek">{t('maker.highlightsDek', { name: short })}</p>
+      <div class="grid">{highlights.map((h) => <HighlightCard h={h} />)}</div>
+    </section>
+  )}
 </Base>
 <style>
   .eyebrow a { color: inherit; border: 0; }
   .when-big { font: 500 14px/1.4 var(--font-mono); color: var(--accent); margin: 0 0 18px; }
+  .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px 28px; flex-wrap: wrap; }
+  .toc ul { gap: 4px; }
+  .toc a { border: 0; }
+  .logo-era { margin-top: 14px !important; font-size: 11.5px; color: var(--muted); }
+  .hls { margin-top: 48px; }
+  .hls .dek { color: var(--ink-2); margin: 0 0 18px; max-width: 70ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+  @media (max-width: 560px) { .grid { grid-template-columns: minmax(0, 1fr); } }
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 320px); gap: 40px; }
   @media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
   .prose :global(p) { font-size: 16.5px; }

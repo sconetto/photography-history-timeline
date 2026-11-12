@@ -1,0 +1,33 @@
+---
+/**
+ * A maker's logo on a light plate (so dark logos stay visible on the night theme), or, when no public-domain
+ * logo exists, a typographic name plate in the site's own type. Logos are SVG or raster files from Wikimedia
+ * Commons, always rendered with <img>, never inlined, so nothing inside an SVG can run.
+ * `decorative` hides it from assistive tech where the maker's name is already next to it (lists, the page title).
+ */
+import { Image } from 'astro:assets';
+import type { Maker } from '../lib/content';
+import { useT, pageLang } from '../i18n';
+interface Props { maker: Maker; size?: 'lg' | 'sm'; decorative?: boolean }
+const { maker, size = 'lg', decorative = false } = Astro.props;
+const t = useT(pageLang(Astro));
+const { name, logo } = maker.data;
+const short = name.replace(/\s*\(.*\)$/, '');
+---
+{logo ? (
+  <span class:list={['plate', size]} title={t('maker.logo', { name: short, era: logo.era })}>
+    <Image src={logo.src} alt={decorative ? '' : logo.alt} height={size === 'lg' ? 56 : 22} densities={[1, 2]} loading={size === 'lg' ? 'eager' : 'lazy'} />
+  </span>
+) : (
+  <span class:list={['plate', 'nameplate', size]} aria-hidden="true">{short}</span>
+)}
+<style>
+  /* a print-white plate in every palette and mode: logos are designed for light backgrounds */
+  .plate { display: inline-grid; place-items: center; box-sizing: border-box; background: #fbfaf6; border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); border-radius: 12px; flex: none; }
+  .plate.lg { min-width: 120px; height: 84px; padding: 14px 18px; }
+  .plate.sm { min-width: 56px; height: 34px; padding: 5px 8px; border-radius: 8px; }
+  .plate :global(img) { display: block; width: auto; max-width: 220px; height: 100%; object-fit: contain; }
+  .plate.sm :global(img) { max-width: 96px; }
+  .nameplate { color: #1d1b17; font: 400 22px/1 var(--font-display); letter-spacing: .02em; white-space: nowrap; }
+  .nameplate.sm { font-size: 12.5px; letter-spacing: .03em; }
+</style>

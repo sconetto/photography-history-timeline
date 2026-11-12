@@ -15,6 +15,12 @@ const ids = (dir: string) => (existsSync(dir) ? readdirSync(dir).filter((f) => /
 /** Top-level keys of a YAML map: lines that start at column 0 with "id:". */
 const keys = (file: string) => (existsSync(file) ? [...readFileSync(file, 'utf8').matchAll(/^([A-Za-z0-9][\w-]*)\s*:/gm)].map((m) => m[1]) : []);
 
+/** The frontmatter block of a Markdown file. */
+const front = (file: string) => (existsSync(file) ? /^---\n([\s\S]*?)\n---/.exec(readFileSync(file, 'utf8'))?.[1] ?? '' : '');
+/** English highlight ids ("  - id: f-1" under highlights:) and the ids a translation covers ("  f-1:" under highlights:). */
+const enHighlights = (fm: string) => [...(/^highlights:\n((?:[ -].*\n?)*)/m.exec(fm)?.[1] ?? '').matchAll(/^\s+- id:\s*["']?([a-z0-9-]+)/gm)].map((m) => m[1]);
+const trHighlights = (fm: string) => [...(/^highlights:\n((?: .*\n?)*)/m.exec(fm)?.[1] ?? '').matchAll(/^  ([a-z0-9-]+):/gm)].map((m) => m[1]);
+
 let missingTotal = 0;
 for (const lang of readdirSync(I18N).filter((d) => !d.startsWith('.'))) {
   const missing: string[] = [];
@@ -25,6 +31,15 @@ for (const lang of readdirSync(I18N).filter((d) => !d.startsWith('.'))) {
     for (const id of all) if (!have.has(id)) missing.push(`${k}/${id}`);
     counts.push(`${k} ${all.filter((id) => have.has(id)).length}/${all.length}`);
   }
+  // makers: every English highlight needs a translated note
+  let hlAll = 0, hlHave = 0;
+  for (const id of ids(path.join(CONTENT, 'makers'))) {
+    const en = enHighlights(front(path.join(CONTENT, 'makers', `${id}.md`)));
+    const have = new Set(trHighlights(front(path.join(I18N, lang, 'makers', `${id}.md`))));
+    hlAll += en.length;
+    for (const h of en) if (have.has(h)) hlHave++; else missing.push(`makers/${id} highlight ${h}`);
+  }
+  if (hlAll) counts.push(`maker highlights ${hlHave}/${hlAll}`);
   for (const k of DATA) {
     const have = new Set(keys(path.join(I18N, lang, `${k}.yaml`)));
     const all = keys(path.join(CONTENT, `${k}.yaml`));

@@ -12,6 +12,8 @@ const FAMILIES = ['optics', 'chem', 'colour', 'cameras', 'formats', 'control', '
 /** merged: both became a new company · acquired: bought outright · sold: sold its camera/film business ·
  *  renamed: same company, new name · stake: took a controlling stake, company carries on · revived: a new company restarted the product */
 export const MAKER_LINKS = ['merged', 'acquired', 'sold', 'renamed', 'stake', 'revived'] as const;
+/** what a maker's highlight is: drives the card's kind label and whether a camera drawing can stand in for a photo */
+export const HIGHLIGHT_KINDS = ['camera', 'lens', 'film', 'meter', 'software', 'other'] as const;
 export const COUNTRIES = ['Japan', 'USA', 'Germany', 'France', 'UK', 'Sweden', 'USSR', 'China', 'South Korea', 'Denmark', 'Austria', 'Netherlands'] as const;
 
 const imageSchema = (image: () => z.ZodType) =>
@@ -60,7 +62,7 @@ const entries = defineCollection({
 
 const makers = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/makers' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     name: z.string(),
     country: z.enum(COUNTRIES),
     founded: year,
@@ -75,6 +77,20 @@ const makers = defineCollection({
     })).default([]),
     wiki: z.string(),
     refs: z.array(link).default([]),
+    // a public-domain logo (Commons PD-textlogo or PD-old), shown only to identify the company; era says which logo it is
+    logo: imageSchema(image).extend({ era: z.string().min(3) }).optional(),
+    // the products that defined the company: cameras for camera makers, films, lenses or meters for the others.
+    // Order matters: the first two are the best known (shown on the makers chart); pages sort them by year.
+    highlights: z.array(z.object({
+      id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+      name: z.string().min(2),
+      year,
+      kind: z.enum(HIGHLIGHT_KINDS),
+      cameraType: z.enum(CAMERA_TYPES).optional(),
+      entry: reference('entries').optional(),
+      note: z.string().min(40).max(260),
+      image: imageSchema(image).optional(),
+    })).default([]),
   }),
 });
 
@@ -167,6 +183,9 @@ const trMakers = defineCollection({
     fate: z.string(),
     linkNotes: z.record(z.string(), z.string()).optional(), // keyed by the target maker id
     wiki: z.string().optional(),
+    logoAlt: z.string().min(10).optional(),
+    // keyed by the English highlight id; name only when it differs (model names usually stay as they are)
+    highlights: z.record(z.string(), z.object({ name: z.string().optional(), note: z.string().min(40).max(260), alt: z.string().min(10).optional() })).optional(),
   }),
 });
 const trPhysics = defineCollection({

@@ -37,14 +37,27 @@ async function loadBase() {
   const problems = validate({
     entries: entries.map((e) => ({
       id: e.id, year: e.data.year, range: e.data.range, end: e.data.end, body: e.body,
-      parents: e.data.parents.map((p) => ({ id: p.id.id, kind: p.kind })),
+      parents: e.data.parents.map((p) => ({ id: p.id.id, kind: p.kind })), makers: e.data.makers.map((m) => m.id),
       urls: [...e.data.refs.map((r) => r[1]), ...(e.data.primary ? [e.data.primary[1]] : []), ...(e.data.image ? [e.data.image.source] : [])],
     })),
-    makers: makers.map((m) => ({ id: m.id, founded: m.data.founded, ended: m.data.ended, urls: m.data.refs.map((r) => r[1]), links: m.data.links.map((l) => ({ to: l.to.id, year: l.year, kind: l.kind })) })),
+    makers: makers.map((m) => ({
+      id: m.id, founded: m.data.founded, ended: m.data.ended, body: m.body,
+      urls: [...m.data.refs.map((r) => r[1]), ...(m.data.logo ? [m.data.logo.source] : []), ...m.data.highlights.flatMap((h) => (h.image ? [h.image.source] : []))],
+      links: m.data.links.map((l) => ({ to: l.to.id, year: l.year, kind: l.kind })),
+      highlights: m.data.highlights.map((h) => ({ id: h.id, year: h.year, entry: h.entry?.id })),
+    })),
     otherUrls: [
       ...physics.flatMap((p) => p.data.refs.map((r) => ({ where: `primer ${p.id}`, url: r[1] }))),
       ...milestones.flatMap((m) => [...m.data.refs.map((r) => ({ where: `milestone ${m.id}`, url: r[1] })), ...(m.data.image ? [{ where: `milestone ${m.id}`, url: m.data.image.source }] : [])]),
       ...sources.flatMap((s) => (s.data.url ? [{ where: `source ${s.id}`, url: s.data.url }] : [])),
+    ],
+    images: [
+      ...entries.flatMap((e) => (e.data.image ? [{ where: `entry ${e.id}`, license: e.data.image.license }] : [])),
+      ...milestones.flatMap((m) => (m.data.image ? [{ where: `milestone ${m.id}`, license: m.data.image.license }] : [])),
+      ...makers.flatMap((m) => [
+        ...(m.data.logo ? [{ where: `maker ${m.id} logo`, license: m.data.logo.license }] : []),
+        ...m.data.highlights.flatMap((h) => (h.image ? [{ where: `maker ${m.id} highlight ${h.id}`, license: h.image.license }] : [])),
+      ]),
     ],
   });
 
@@ -74,12 +87,15 @@ async function loadBase() {
     const t = useT(lang);
     const items: VTranslation[] = [
       ...[...(tr.entries.get(lang)?.values() ?? [])].map((x) => ({ where: x.id, kind: 'entry' as const, id: split(x.id).id, body: x.body })),
-      ...[...(tr.makers.get(lang)?.values() ?? [])].map((x) => ({ where: x.id, kind: 'maker' as const, id: split(x.id).id })),
+      ...[...(tr.makers.get(lang)?.values() ?? [])].map((x) => ({ where: x.id, kind: 'maker' as const, id: split(x.id).id, body: x.body, highlights: Object.keys(x.data.highlights ?? {}) })),
       ...[...(tr.physics.get(lang)?.values() ?? [])].map((x) => ({ where: x.id, kind: 'primer' as const, id: split(x.id).id })),
       ...(['families', 'eras', 'milestones', 'formats', 'glossary', 'sources'] as const).flatMap((k) =>
         [...(tr[k].get(lang)?.keys() ?? [])].map((id) => ({ where: `${lang}/${k}.yaml`, kind: 'data' as const, id }))),
     ];
-    problems.push(...validateTranslations(items, known, [t('entry.how.began'), t('entry.how.works'), t('entry.how.mattered'), t('entry.how.limits')]));
+    problems.push(...validateTranslations(items, known, [t('entry.how.began'), t('entry.how.works'), t('entry.how.mattered'), t('entry.how.limits')], {
+      highlights: new Map(makers.map((m) => [m.id, m.data.highlights.map((h) => h.id)])),
+      sections: [[t('maker.sec.beginnings')], [t('maker.sec.growth')], [t('maker.sec.made')], [t('maker.sec.today'), t('maker.sec.legacy')]],
+    }));
   }
   if (problems.length) {
     throw new Error(`Content problems, nothing built:\n  ${problems.join('\n  ')}`);
@@ -119,7 +135,15 @@ function localise(b: Base, lang: Lang) {
     const d = t.data;
     return {
       ...m, tr: t, wikiLocal: !!d.wiki, body: t.body,
-      data: { ...m.data, name: d.name ?? m.data.name, fate: d.fate, wiki: d.wiki ?? m.data.wiki, links: m.data.links.map((l) => ({ ...l, note: l.note && (d.linkNotes?.[l.to.id] ?? l.note) })) },
+      data: {
+        ...m.data, name: d.name ?? m.data.name, fate: d.fate, wiki: d.wiki ?? m.data.wiki,
+        links: m.data.links.map((l) => ({ ...l, note: l.note && (d.linkNotes?.[l.to.id] ?? l.note) })),
+        logo: m.data.logo && d.logoAlt ? { ...m.data.logo, alt: d.logoAlt } : m.data.logo,
+        highlights: m.data.highlights.map((h) => {
+          const w = d.highlights?.[h.id];
+          return w ? { ...h, name: w.name ?? h.name, note: w.note, image: h.image && w.alt ? { ...h.image, alt: w.alt } : h.image } : h;
+        }),
+      },
     };
   });
   const physics: Primer[] = b.physics.map((p) => {
