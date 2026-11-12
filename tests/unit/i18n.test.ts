@@ -9,9 +9,10 @@ describe('dictionaries', () => {
   it('pt-br has every English key and no extras', () => {
     expect(Object.keys(ptBr).sort()).toEqual(Object.keys(en).sort());
   });
-  it('pt-br keeps the same {placeholders} as English', () => {
-    const vars = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
-    for (const k of Object.keys(en) as Key[]) expect(vars(ptBr[k]), k).toEqual(vars(en[k]));
+  it('pt-br uses only {placeholders} the English string provides', () => {
+    // a translation may leave one out (e.g. to avoid gendering a company name) but never invent one
+    const vars = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
+    for (const k of Object.keys(en) as Key[]) for (const v of vars(ptBr[k])) expect(vars(en[k]), `${k}: {${v}}`).toContain(v);
   });
 });
 
@@ -96,5 +97,14 @@ describe('validateTranslations', () => {
   it('rejects a missing Portuguese section', () => {
     const p = validateTranslations([{ where: 'ccd.mdx', kind: 'entry', id: 'ccd', body: body.replace('## Como funciona', '## How it works') }], known, sections);
     expect(p).toEqual([expect.stringContaining('missing "## Como funciona"')]);
+  });
+});
+
+describe('fmtEra', () => {
+  it('translates "today" and decades for pt-br and leaves English alone', async () => {
+    const { fmtEra } = await import('../../src/i18n');
+    expect(fmtEra('en', '2000s–today')).toBe('2000s–today');
+    expect(fmtEra('pt-br', '2000s–today')).toBe('anos 2000–hoje');
+    expect(fmtEra('pt-br', '1955–today')).toBe('1955–hoje');
   });
 });
