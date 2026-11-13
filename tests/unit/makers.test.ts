@@ -4,7 +4,8 @@ import { cleanSvg } from '../../src/lib/svg';
 
 const story = (heads = ['Beginnings', 'Growth and turning points', 'What it made', 'Today']) => heads.map((h) => `## ${h}\n\ntext\n`).join('\n');
 const entries = [{ id: 'ae-1', year: 1976, parents: [], urls: [], makers: ['canon'], body: REQUIRED_SECTIONS.map((h) => `## ${h}\n\ntext\n`).join('\n') }];
-const maker = (extra: Partial<VMaker> = {}): VMaker => ({ id: 'canon', founded: 1937, urls: [], body: story(), highlights: [{ id: 'ae-1', year: 1976, entry: 'ae-1' }], ...extra });
+const filler = [{ id: 'f-1', year: 1971 }, { id: 'eos', year: 1987 }];
+const maker = (extra: Partial<VMaker> = {}): VMaker => ({ id: 'canon', founded: 1937, urls: [], body: story(), highlights: [{ id: 'ae-1', year: 1976, entry: 'ae-1' }, ...filler], ...extra });
 const run = (makers: VMaker[]) => validate({ entries, makers, otherUrls: [] });
 
 describe('maker stories and highlights', () => {
@@ -14,21 +15,24 @@ describe('maker stories and highlights', () => {
   it('accepts "Legacy" in place of "Today"', () => {
     expect(missingSections(story(['Beginnings', 'Growth and turning points', 'What it made', 'Legacy']), MAKER_SECTIONS)).toEqual([]);
   });
-  it('requires the sections once a maker has highlights', () => {
+  it('requires every section and at least three highlights', () => {
     expect(run([maker({ body: story(['Beginnings', 'What it made', 'Today']) })])).toEqual(['maker canon: missing "## Growth and turning points" section']);
-    expect(run([maker({ body: 'short story', highlights: [] })])).toEqual([]);
+    expect(run([maker({ highlights: filler })])).toEqual(['maker canon: has 2 highlights, needs at least 3']);
+    const short = run([maker({ body: 'short story', highlights: [] })]);
+    expect(short).toHaveLength(5);
+    expect(short).toContain('maker canon: has 0 highlights, needs at least 3');
   });
   it('rejects duplicate highlight ids', () => {
-    expect(run([maker({ highlights: [{ id: 'f-1', year: 1971 }, { id: 'f-1', year: 1981 }] })])).toEqual(['maker canon: highlight "f-1" appears twice']);
+    expect(run([maker({ highlights: [...filler, { id: 'f-1', year: 1981 }] })])).toEqual(['maker canon: highlight "f-1" appears twice']);
   });
   it('rejects a highlight older than the company or its predecessors', () => {
-    expect(run([maker({ highlights: [{ id: 'kwanon', year: 1934 }] })])).toEqual([expect.stringContaining('older than the company (1937)')]);
+    expect(run([maker({ highlights: [{ id: 'kwanon', year: 1934 }, ...filler] })])).toEqual([expect.stringContaining('older than the company (1937)')]);
     const pre: VMaker = { id: 'precision', founded: 1933, ended: 1937, urls: [], links: [{ to: 'canon', year: 1937, kind: 'renamed' }] };
-    expect(run([pre, maker({ highlights: [{ id: 'kwanon', year: 1934 }] })])).toEqual([]);
+    expect(run([pre, maker({ highlights: [{ id: 'kwanon', year: 1934 }, ...filler] })]).filter((p) => !p.startsWith('maker precision'))).toEqual([]);
   });
   it('checks a highlight against its entry', () => {
-    expect(run([maker({ highlights: [{ id: 'ae-1', year: 1977, entry: 'ae-1' }] })])).toEqual([expect.stringContaining('entry ae-1 is 1976')]);
-    expect(run([maker({ highlights: [{ id: 'x', year: 1976, entry: 'nope' }] })])).toEqual([expect.stringContaining('unknown entry "nope"')]);
+    expect(run([maker({ highlights: [{ id: 'ae-1', year: 1977, entry: 'ae-1' }, ...filler] })])).toEqual([expect.stringContaining('entry ae-1 is 1976')]);
+    expect(run([maker({ highlights: [{ id: 'x', year: 1976, entry: 'nope' }, ...filler] })])).toEqual([expect.stringContaining('unknown entry "nope"')]);
     expect(validate({ entries: [{ ...entries[0], makers: ['nikon'] }], makers: [maker()], otherUrls: [] })).toEqual([expect.stringContaining('does not list canon')]);
   });
   it('accepts only public-domain and CC0 images', () => {

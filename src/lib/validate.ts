@@ -7,6 +7,8 @@ import { findCycle } from './lineage';
 export const REQUIRED_SECTIONS = ['How it began', 'How it works', 'Why it mattered', 'Limits and what replaced it'];
 /** A maker's story: each slot lists the headings that may fill it (a closed company ends with "Legacy"). */
 export const MAKER_SECTIONS = [['Beginnings'], ['Growth and turning points'], ['What it made'], ['Today', 'Legacy']];
+/** Every maker page shows at least this many highlight cards. */
+export const MIN_HIGHLIGHTS = 3;
 /** The headings of a body that are missing from a list of slots, as "A" or "A / B". */
 export function missingSections(body: string | undefined, slots: string[][]): string[] {
   const has = (h: string) => new RegExp(`^##\\s+${h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm').test(body ?? '');
@@ -77,15 +79,15 @@ export function validate({ entries, makers, otherUrls, images = [] }: VInput): s
     }
     for (const u of m.urls) { const b = blocked(u); if (b) problems.push(`maker ${m.id}: link to blocked domain (${b}): ${u}`); }
   }
-  // highlights: a maker with highlights has the full story too (sections), and every highlight fits the record
+  // every maker tells the full story (sections) and has at least MIN_HIGHLIGHTS highlights, each fitting the record
   const predecessors = (id: string, seen = new Set<string>()): Set<string> => {
     for (const o of makers) for (const l of o.links ?? []) if (l.to === id && !seen.has(o.id)) { seen.add(o.id); predecessors(o.id, seen); }
     return seen;
   };
   for (const m of makers) {
     const hs = m.highlights ?? [];
-    if (!hs.length) continue;
     for (const s of missingSections(m.body, MAKER_SECTIONS)) problems.push(`maker ${m.id}: missing "## ${s}" section`);
+    if (hs.length < MIN_HIGHLIGHTS) problems.push(`maker ${m.id}: has ${hs.length} highlights, needs at least ${MIN_HIGHLIGHTS}`);
     const family = new Set([m.id, ...predecessors(m.id)]);
     const earliest = Math.min(...[...family].map((id) => makerIds.get(id)!.founded));
     const seen = new Set<string>();
@@ -125,7 +127,7 @@ export function validateTranslations(
       const tr = t.highlights ?? [];
       for (const h of tr) if (!en.includes(h)) problems.push(`${t.where}: no English highlight "${h}" to translate`);
       for (const h of en) if (!tr.includes(h)) problems.push(`${t.where}: highlight "${h}" is not translated`);
-      if (en.length) for (const s of missingSections(t.body, makers.sections)) problems.push(`${t.where}: missing "## ${s}" section`);
+      for (const s of missingSections(t.body, makers.sections)) problems.push(`${t.where}: missing "## ${s}" section`);
     }
     if (t.kind === 'entry') {
       for (const s of sections) if (!new RegExp(`^##\\s+${s}\\s*$`, 'm').test(t.body ?? '')) problems.push(`${t.where}: missing "## ${s}" section`);
