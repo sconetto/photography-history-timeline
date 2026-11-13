@@ -36,9 +36,9 @@ Em 1962 o astronauta Walter Schirra, que tinha uma 500C, convenceu a NASA a leva
 
 ## O que fabricou
 
-Por décadas a Hasselblad foi o sistema V: a série 500 e suas muitas versões, a 500EL motorizada de 1965, as grande-angulares Super Wide e, mais tarde, corpos com obturador de plano focal. O projeto modular sobreviveu ao filme para o qual foi feito. Costas digitais podiam ser encaixadas em corpos antigos, e a última câmera do sistema V, a 503CWD de 2006, vinha com uma.
+Por décadas a Hasselblad foi o sistema V: a série 500 e suas muitas versões, a 500EL motorizada de 1965, as grande-angulares Super Wide e, mais tarde, corpos com obturador de plano focal. O projeto modular sobreviveu ao filme para o qual foi feito. Backs digitais podiam ser encaixados em corpos antigos, e a última câmera do sistema V, a 503CWD de 2006, vinha com um.
 
-A Hasselblad também tentou formas novas. A XPan, de 1998, feita com a Fujifilm, era uma câmera 35mm que podia fazer panoramas largos de 24×65mm e quadros normais no mesmo rolo. Em 2002 veio a H1, uma câmera de médio formato com autofoco. A Hasselblad depois se juntou à Imacon, fabricante dinamarquesa de costas digitais e scanners, e suas câmeras H viraram digitais. Em 2016 a X1D levou um sensor maior que o [[full-frame-digital|full frame]] para um pequeno corpo mirrorless.
+A Hasselblad também tentou formas novas. A XPan, de 1998, feita com a Fujifilm, era uma câmera 35mm que podia fazer panoramas largos de 24×65mm e quadros normais no mesmo rolo. Em 2002 veio a H1, uma câmera de médio formato com autofoco. A Hasselblad depois se juntou à Imacon, fabricante dinamarquesa de backs digitais e scanners, e suas câmeras H viraram digitais. Em 2016 a X1D levou um sensor maior que o [[full-frame-digital|full frame]] para um pequeno corpo mirrorless.
 
 ## Hoje
 
