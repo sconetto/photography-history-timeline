@@ -369,7 +369,7 @@ const en = {
   'sources.p1': 'Each entry lists its own references and, where one is freely available, a primary source: the original paper, patent or manual. Every link is checked to load. Text is written fresh from these sources; nothing is copied from the books.',
   'sources.p2': '<strong>Dates.</strong> Most inventions grew over years. Each star sits at a widely used starting point (a first demonstration, a patent, a first product), and where the start is gradual or disputed the entry gives a range. Where sources disagree, the entry says so.', // HTML
   'sources.p3': '<strong>Impact</strong> ("changed photography for everyone", "major", "significant", "niche") is a judgment for orientation, not a measurement.', // HTML
-  'sources.p4': '<strong>Images</strong> are public domain only, each credited with its source.', // HTML
+  'sources.p4': '<strong>Images</strong> are public domain or CC0 only, each credited with its source.', // HTML
   'sources.p5': '',
   'sources.general': 'General sources',
 

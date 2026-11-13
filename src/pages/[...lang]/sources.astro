@@ -18,6 +18,7 @@ const list = [...sources].sort((a, b) => order[a.data.kind] - order[b.data.kind]
     <p set:html={t('sources.p3')} />
     <p set:html={t('sources.p4')} />
     {t('sources.p5') && <p set:html={t('sources.p5')} />}
+    <p>{t('common.trademarks')}</p>
     <h2>{t('sources.general')}</h2>
     <ul class="src">{list.map((s) => <li>{s.data.url ? <a href={s.data.url} rel="noopener">{s.data.label} ↗</a> : s.data.label}{s.data.note && <span class="n"> {s.data.note}</span>}</li>)}</ul>
   </div>

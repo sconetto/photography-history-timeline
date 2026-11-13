@@ -367,7 +367,7 @@ const ptBr = {
   'sources.p1': 'Cada verbete lista suas próprias referências e, quando há uma disponível gratuitamente, uma fonte primária: o artigo, a patente ou o manual original. Todos os links são verificados. O texto é escrito do zero a partir dessas fontes; nada é copiado dos livros.',
   'sources.p2': '<strong>Datas.</strong> A maioria das invenções levou anos para amadurecer. Cada estrela aparece num marco inicial bem aceito (uma primeira demonstração, uma patente, um primeiro produto) e, quando o começo é gradual ou disputado, o verbete dá um intervalo. Quando as fontes divergem, o verbete diz isso.',
   'sources.p3': 'O <strong>impacto</strong> ("mudou a fotografia para todos", "grande", "significativo", "de nicho") é uma avaliação para orientar, não uma medida.',
-  'sources.p4': 'As <strong>imagens</strong> são apenas de domínio público, cada uma creditada com sua fonte.',
+  'sources.p4': 'As <strong>imagens</strong> são apenas de domínio público ou CC0, cada uma creditada com sua fonte.',
   'sources.p5': '<strong>Tradução.</strong> O site foi escrito em inglês e traduzido para o português do Brasil. Títulos de livros e artigos ficam no idioma original, e a maioria das fontes está em inglês.',
   'sources.general': 'Fontes gerais',
 
