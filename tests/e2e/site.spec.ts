@@ -637,6 +637,28 @@ test.describe('maker stories', () => {
     });
   }
 
+  test('logo plates are one size, and logos have a similar visual weight', async ({ page }) => {
+    const plates = new Set<string>(); const areas: Record<string, number> = {};
+    for (const id of MAKER_IDS) {
+      await page.goto(`/makers/${id}/`);
+      const r = await page.locator('.plate').first().evaluate((el) => {
+        const p = el.getBoundingClientRect(); const i = el.querySelector('img')?.getBoundingClientRect();
+        return { plate: `${Math.round(p.width)}x${Math.round(p.height)}`, area: i ? i.width * i.height : 0 };
+      });
+      plates.add(r.plate);
+      if (r.area) areas[id] = r.area;
+    }
+    expect([...plates]).toEqual(['272x104']);
+    // square emblems sit at the height cap and wide wordmarks at the width cap, so allow a band, not one value
+    for (const [id, a] of Object.entries(areas)) {
+      expect(a, id).toBeGreaterThan(4500);
+      expect(a, id).toBeLessThan(9500);
+    }
+    await page.goto('/makers/');
+    const small = await page.locator('.all .plate').evaluateAll((ps) => [...new Set(ps.map((p) => `${Math.round(p.getBoundingClientRect().width)}x${Math.round(p.getBoundingClientRect().height)}`))]);
+    expect(small).toEqual(['104x44']);
+  });
+
   test('highlight cards link to their entries and stay in Portuguese', async ({ page }) => {
     await page.goto('/pt-br/makers/canon/');
     const hrefs = await page.locator('.hl .go a').evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));

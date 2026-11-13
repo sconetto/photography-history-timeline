@@ -16,24 +16,37 @@ const { name, logo } = maker.data;
 const short = name.replace(/\s*\(.*\)$/, '');
 // the small plate is a narrow list column: drop a leading article so long names wrap onto two lines
 const label = size === 'sm' ? short.replace(/^The\s+/i, '') : short;
+
+/*
+ * Every plate has the same size, and every logo inside it gets roughly the same visual weight: the logo is
+ * sized to a common area (AREA) rather than a common height, so a wide wordmark and a square emblem look
+ * alike in size, then capped to the plate's content box. Logo files are trimmed to their artwork, so the
+ * box measures the mark itself, not empty margins.
+ */
+const BOX = { lg: { w: 232, h: 72, area: 8800 }, sm: { w: 88, h: 30, area: 1530 } } as const;
+function fit(ratio: number, box: { w: number; h: number; area: number }) {
+  let h = Math.sqrt(box.area / ratio), w = h * ratio;
+  if (w > box.w) { w = box.w; h = w / ratio; }
+  if (h > box.h) { h = box.h; w = h * ratio; }
+  return { w: Math.round(w), h: Math.round(h) };
+}
+const dims = logo ? fit(logo.src.width / logo.src.height, BOX[size]) : null;
 ---
 {logo ? (
   <span class:list={['plate', size]} title={t('maker.logo', { name: short, era: fmtEra(lang, logo.era) })}>
-    <Image src={logo.src} alt={decorative ? '' : logo.alt} height={size === 'lg' ? 56 : 22} densities={[1, 2]} loading={size === 'lg' ? 'eager' : 'lazy'} />
+    <Image src={logo.src} alt={decorative ? '' : logo.alt} width={dims!.w} height={dims!.h} densities={[1, 2]} loading={size === 'lg' ? 'eager' : 'lazy'} style={`width:${dims!.w}px;height:${dims!.h}px`} />
   </span>
 ) : (
   <span class:list={['plate', 'nameplate', size]} aria-hidden="true">{label}</span>
 )}
 <style>
-  /* a print-white plate in every palette and mode: logos are designed for light backgrounds */
+  /* a print-white plate in every palette and mode: logos are designed for light backgrounds.
+     All plates of a size are identical, with or without a logo, so a row or list of makers lines up. */
   .plate { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; background: #fbfaf6; border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); border-radius: 12px; flex: none; overflow: hidden; }
-  .plate.lg { min-width: 120px; height: 84px; padding: 14px 18px; }
-  .plate.sm { min-width: 56px; height: 34px; padding: 5px 8px; border-radius: 8px; }
-  /* Fit the logo inside the plate's content box whatever its shape: wide wordmarks are capped by width,
-     tall or square marks by height, and the aspect ratio always holds. Pixel caps, not percentages,
-     because a percentage height does not resolve reliably inside the plate. */
-  .plate :global(img) { display: block; flex: none; width: auto; height: auto; max-width: 220px; max-height: 56px; }
-  .plate.sm :global(img) { max-width: min(96px, 100%); max-height: 24px; }
-  .nameplate { color: #1d1b17; font: 400 22px/1 var(--font-display); letter-spacing: .02em; white-space: nowrap; }
-  .nameplate.sm { padding-block: 3px; font-size: 12px; line-height: 1.05; letter-spacing: .02em; white-space: normal; text-align: center; overflow-wrap: anywhere; }
+  .plate.lg { width: 272px; height: 104px; padding: 16px 20px; }
+  .plate.sm { width: 104px; height: 44px; padding: 7px 8px; border-radius: 8px; }
+  /* the logo's size is set per logo above; this only keeps it from ever spilling out of a narrow plate */
+  .plate :global(img) { display: block; flex: none; max-width: 100%; max-height: 100%; object-fit: contain; }
+  .nameplate { color: #1d1b17; font: 400 24px/1.1 var(--font-display); letter-spacing: .02em; text-align: center; overflow-wrap: anywhere; }
+  .nameplate.sm { font-size: 12.5px; line-height: 1.05; letter-spacing: .02em; }
 </style>
