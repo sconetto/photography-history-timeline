@@ -122,7 +122,7 @@ shantytown:
   note: "The New York Daily Graphic printed a photograph of shacks in Manhattan as a halftone, using a coarse screen. It took another two decades before halftones were common in newspapers."
   entry: halftone
   image:
-    src: ../assets/img/shantytown.jpg
+    src: ../assets/img/shantytown.png
     alt: "Wooden shacks on a rocky slope with apartment blocks behind, printed as a coarse halftone in a newspaper."
     credit: "The Daily Graphic, New York, 4 March 1880"
     license: Public domain
