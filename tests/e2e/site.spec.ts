@@ -1,5 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { readdirSync } from 'node:fs';
+
+const MAKER_IDS = readdirSync('src/content/makers').filter((f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
 
 const errorsOn = (page: Page) => {
   const errors: string[] = [];
@@ -129,7 +132,7 @@ const PALETTES = ['kodachrome', 'print', 'cyanotype', 'platinum'];
 for (const pal of PALETTES) for (const mode of ['day', 'night']) {
   test(`no serious axe violations: ${pal} ${mode}`, async ({ page }) => {
     await page.addInitScript(([p, m]) => { localStorage.setItem('ptt-palette', p); localStorage.setItem('ptt-theme', m); }, [pal, mode]);
-    for (const path of ['/', '/entries/daguerreotype/', '/pt-br/entries/daguerreotype/']) {
+    for (const path of ['/', '/entries/daguerreotype/', '/pt-br/entries/daguerreotype/', '/makers/canon/', '/makers/kodak/', '/makers/zeiss/']) {
       await page.goto(path);
       const { violations } = await new AxeBuilder({ page }).analyze();
       const serious = violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
@@ -162,7 +165,7 @@ test.describe('touch', () => {
   });
 
   test('no horizontal page scroll at 375px', async ({ page }) => {
-    for (const path of ['/', '/entries/daguerreotype/', '/formats/']) {
+    for (const path of ['/', '/entries/daguerreotype/', '/formats/', '/makers/canon/', '/makers/kodak/', '/makers/hasselblad/', '/pt-br/makers/kmz/']) {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBeLessThanOrEqual(375);
     }
@@ -613,5 +616,63 @@ test.describe('portuguese site on a phone', () => {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBeLessThanOrEqual(375);
     }
+  });
+});
+
+test.describe('maker stories', () => {
+  const SECTIONS = {
+    en: ['Beginnings', 'Growth and turning points', 'What it made', /^(Today|Legacy)$/],
+    'pt-br': ['Origens', 'Crescimento e viradas', 'O que fabricou', /^(Hoje|Legado)$/],
+  } as const;
+  for (const [lang, heads] of Object.entries(SECTIONS)) {
+    test(`every maker page has a logo or name plate, the four sections and 3+ highlights (${lang})`, async ({ page }) => {
+      expect(MAKER_IDS.length).toBeGreaterThanOrEqual(35);
+      for (const id of MAKER_IDS) {
+        await page.goto(`${lang === 'en' ? '' : '/pt-br'}/makers/${id}/`);
+        await expect(page.locator('.plate').first(), id).toBeVisible();
+        const h2s = (await page.locator('main h2').allTextContents()).map((t) => t.trim());
+        for (const h of heads) expect(h2s.some((t) => (typeof h === 'string' ? t === h : h.test(t))), `${id}: ${h}`).toBe(true);
+        expect(await page.locator('.hl').count(), id).toBeGreaterThanOrEqual(3);
+      }
+    });
+  }
+
+  test('highlight cards link to their entries and stay in Portuguese', async ({ page }) => {
+    await page.goto('/pt-br/makers/canon/');
+    const hrefs = await page.locator('.hl .go a').evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const h of hrefs) expect(h).toMatch(/^\/pt-br\/entries\/[a-z0-9-]+\/$/);
+    await page.locator('.hl .go a').first().click();
+    await expect(page).toHaveURL(/\/pt-br\/entries\//);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+  });
+
+  test('highlight photos carry a credit, a free licence and a Commons source', async ({ page }) => {
+    for (const path of ['/makers/kodak/', '/makers/hasselblad/', '/pt-br/makers/kmz/']) {
+      await page.goto(path);
+      const caps = await page.locator('.hl figure.pic:has(img) figcaption').evaluateAll((fs) => fs.map((f) => ({
+        text: f.textContent ?? '', href: f.querySelector('a')?.getAttribute('href') ?? '',
+      })));
+      expect(caps.length, path).toBeGreaterThan(0);
+      for (const c of caps) {
+        expect(c.text, path).toMatch(/Public domain|Domínio público|CC0/i);
+        expect(c.href, path).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+      }
+    }
+  });
+
+  test('search for a highlight name finds its maker', async ({ page }) => {
+    await page.goto('/search/');
+    await page.locator('#search input').fill('Canon F-1');
+    await expect(page.locator('.pagefind-ui__result-link[href="/makers/canon/"]')).toBeVisible({ timeout: 15000 });
+  });
+
+  test('About and Sources carry the trademark note', async ({ page }) => {
+    await page.goto('/about/');
+    await expect(page.locator('main')).toContainText('trademarks of their owners');
+    await page.goto('/sources/');
+    await expect(page.locator('main')).toContainText('Logos are trademarks of their owners');
+    await page.goto('/pt-br/sources/');
+    await expect(page.locator('main')).toContainText('marcas registradas de seus donos');
   });
 });
