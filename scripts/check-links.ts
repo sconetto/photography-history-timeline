@@ -44,8 +44,11 @@ for (const f of files(ROOT)) {
 
 type Result = { url: string; ok: boolean; note: string; manual?: boolean };
 
-/** fetch with retries on 429/503, honouring Retry-After (capped), with a timeout per attempt. */
-async function get(url: string, tries = 4): Promise<Response> {
+/**
+ * fetch with retries on 429/503, honouring Retry-After (capped), with a timeout per attempt. A timeout is retried
+ * once, since slow shop sites (e.g. harmantechnology.com, ~12 s through its store redirects) sometimes time out.
+ */
+async function get(url: string, tries = 4, timeouts = 1): Promise<Response> {
   for (let i = 0; ; i++) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), TIMEOUT);
@@ -59,7 +62,10 @@ async function get(url: string, tries = 4): Promise<Response> {
       }
       return res;
     } catch (e) {
-      if (ctrl.signal.aborted) throw new Error('timeout');
+      if (ctrl.signal.aborted) {
+        if (timeouts-- > 0) continue;
+        throw new Error('timeout');
+      }
       throw e;
     } finally {
       clearTimeout(timer);

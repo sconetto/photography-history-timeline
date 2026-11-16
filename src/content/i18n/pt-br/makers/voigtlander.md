@@ -3,7 +3,6 @@ fate: "Sua fábrica de câmeras fechou em 1971, e a Rollei assumiu a fábrica e 
 linkNotes:
   zeiss: "A Fundação Carl Zeiss assumiu o controle"
   rollei: "A Rollei assumiu o controle total da fábrica e do nome"
-wiki: "Voigtländer"
 logoAlt: "O logotipo histórico da Voigtländer: o nome em letra cursiva branca sobre uma faixa azul-escura"
 highlights:
   petzval-lens:
