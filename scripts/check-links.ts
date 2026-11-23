@@ -118,6 +118,13 @@ async function check(url: string): Promise<Result> {
       await res.body?.cancel();
       return { url, ok: true, manual: true, note: 'bot challenge (Cloudflare); verify by hand' };
     }
+    // A whole site down for planned maintenance (still 503 after the retries) says nothing about this link.
+    if (res.status === 503) {
+      const body = (await res.text()).slice(0, 20_000);
+      if (/down for maintenance|temporarily (down|unavailable)/i.test(body)) {
+        return { url, ok: true, manual: true, note: 'site down for maintenance (HTTP 503); verify later' };
+      }
+    }
     if (!res.ok) return { url, ok: false, note: `HTTP ${res.status}` };
     let note = `${res.status}`;
     if (/archive\.org|gutenberg\.org/.test(url) && (res.headers.get('content-type') ?? '').includes('html')) {
