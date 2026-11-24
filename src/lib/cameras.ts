@@ -154,6 +154,15 @@ const MODELS: Record<string, Model> = {
     + r(0, 4, 108, 24, CHROME, 6) + win(44, 8, 18, 13, 2)
     + r(0, 28, 108, 38, GREY_LEATHER) + r(0, 66, 108, 6, CHROME, 3)
     + lens(53, 46, [[16, CHROME], [13, '#1a1a1a'], [9.5, DARK]], 7) },
+  // Ricoh: 127 × 78 × 52 mm. Silver magnesium top plate with chamfered ends, a black finder hump in the middle,
+  // the lens right of centre in a wide black disc, a ribbed grip at the left and the flash window top right.
+  'pentax-17': { w: 127, h: 76, view: 'front', svg:
+    knurl(13, 1, 13, 5, BLACK2) + r(28, 0, 9, 6, BLACK, 1.5) + knurl(97, 1, 12, 5, BLACK2)
+    + p('M0,10 L4,6 H123 L127,10 V22 H0Z', ALU) + lugs(18, 127)
+    + p('M54,6 L56,0 H80 L82,6 V20 H54Z', BLACK) + win(62, 3, 11, 12, 1)
+    + r(96, 9, 17, 8, CHROME, 1) + r(97.5, 10.5, 14, 5, '#efe9d8', 0.5) + c(52, 17, 1, CHROME2) + c(85, 17, 1, CHROME2)
+    + r(0, 22, 127, 49, LEATHER) + knurl(0.5, 23, 22, 47, BLACK2) + r(0, 71, 127, 5, ALU, 2)
+    + lens(69, 44.5, [[26, '#161616'], [22, '#2b2b2b'], [20, '#1b1b1b'], [12, DARK]], 9) },
   instamatic: { w: 120, h: 82, view: 'front', svg:
     r(90, 0, 22, 13, CHROME, 2) + r(93, 2, 16, 9, '#dcdcd6', 1) + r(20, 8, 10, 5, CHROME, 1)
     + r(0, 12, 120, 70, CHROME, 8) + r(8, 20, 104, 54, LEATHER, 6) + win(14, 26, 16, 11, 2)

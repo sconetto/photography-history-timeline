@@ -48,6 +48,13 @@ highlights:
     kind: camera
     cameraType: compact
     note: "The GR1's idea in digital form: a 28mm-equivalent lens, a small sensor and a slim body. Ricoh kept improving it with firmware updates long after release, and its successors moved to larger APS-C sensors in 2013."
+  - id: pentax-17
+    name: Pentax 17
+    year: 2024
+    kind: camera
+    cameraType: compact
+    entry: pentax-17
+    note: "A new half-frame film camera with a lever wind and zone focus, made under the Pentax name. Its angle of view was chosen with the Auto Half in mind. Pre-orders in Japan outran supply within days of its announcement."
   - id: theta
     name: RICOH THETA
     year: 2013
@@ -84,4 +91,4 @@ In 2005 the GR DIGITAL carried the idea into digital photography, with a 28mm-eq
 
 On 1 October 2011 Ricoh took over [[m:pentax|Pentax]]'s camera business from [[m:hoya|Hoya]] and set up Pentax Ricoh Imaging, renamed Ricoh Imaging in August 2013. It combined the Pentax digital [[g:slr|SLRs]] and lenses with Ricoh's own cameras. The GR of 2013 put an APS-C sensor, the size used in many interchangeable-lens cameras, into a pocket-sized body, and Ricoh dropped "DIGITAL" from the name. The GR III of 2019 added a 24-megapixel sensor and stabilisation, and the GR IV followed in 2025. Ricoh calls the GR the "ultimate snapshooter", and the series turns 30 in October 2026.
 
-Ricoh also built new kinds of camera. The RICOH THETA, announced in September 2013, used two back-to-back fisheye lenses to capture a complete sphere in one shot, and Ricoh calls it the first mass-produced device to do so. Under Ricoh Imaging, Pentax launched the Pentax 17 in 2024, a new film camera for the [[film-revival|film revival]]. Ricoh's main business today is office printing and document services, but through Pentax and the GR it still makes cameras for both film and digital photography.
+Ricoh also built new kinds of camera. The RICOH THETA, announced in September 2013, used two back-to-back fisheye lenses to capture a complete sphere in one shot, and Ricoh calls it the first mass-produced device to do so. Under Ricoh Imaging, Pentax launched the [[pentax-17|Pentax 17]] in 2024, a new film camera for the [[film-revival|film revival]]. Ricoh's main business today is office printing and document services, but through Pentax and the GR it still makes cameras for both film and digital photography.
